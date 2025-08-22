@@ -273,3 +273,12 @@
 .applications-table-container::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.clickable-row:hover {
+  background-color: #f1f5f9 !important;
+}

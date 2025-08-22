@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "./Header.css";
 
-const Header = ({ user, currentService }) => {
+const Header = ({ user, currentService, onLogout }) => {
   return (
     <header className="header">
       <div className="container">
@@ -22,6 +22,9 @@ const Header = ({ user, currentService }) => {
             <Link to="/dashboard" className="nav-link">
               대시보드
             </Link>
+            <Link to="/consultation" className="nav-link">
+              상담
+            </Link>
             <Link to="/notice" className="nav-link">
               공지사항
             </Link>
@@ -37,7 +40,9 @@ const Header = ({ user, currentService }) => {
             {user && (
               <div className="user-info">
                 <span className="user-name">{user.name}</span>
-                <button className="btn btn-secondary">로그아웃</button>
+                <button className="btn btn-secondary" onClick={onLogout}>
+                  로그아웃
+                </button>
               </div>
             )}
           </div>

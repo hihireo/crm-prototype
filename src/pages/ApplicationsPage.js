@@ -1,7 +1,10 @@
 import React, { useState } from "react";
+import CustomerInfoModal from "../components/CustomerInfoModal";
 import "./ApplicationsPage.css";
 
 const ApplicationsPage = () => {
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [applications] = useState([
     {
       id: 1,
@@ -130,6 +133,19 @@ const ApplicationsPage = () => {
     }));
   };
 
+  const handleRowClick = (app) => {
+    setSelectedCustomer({
+      name: app.applicantName,
+      phone: app.contact,
+      age: "",
+      workplace: app.team,
+      ssn: "",
+      memo: app.memo,
+      // 추가 정보들을 앱 데이터에서 매핑
+    });
+    setIsCustomerModalOpen(true);
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case "완료":
@@ -246,8 +262,12 @@ const ApplicationsPage = () => {
             </thead>
             <tbody>
               {filteredApplications.map((app) => (
-                <tr key={app.id}>
-                  <td>
+                <tr
+                  key={app.id}
+                  className="clickable-row"
+                  onClick={() => handleRowClick(app)}
+                >
+                  <td onClick={(e) => e.stopPropagation()}>
                     <input
                       type="checkbox"
                       checked={checkedItems.has(app.id)}
@@ -305,6 +325,13 @@ const ApplicationsPage = () => {
           </div>
         </div>
       </div>
+
+      {/* 고객 정보 모달 */}
+      <CustomerInfoModal
+        isOpen={isCustomerModalOpen}
+        onClose={() => setIsCustomerModalOpen(false)}
+        customerData={selectedCustomer}
+      />
     </div>
   );
 };

@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route, Link, useLocation } from "react-router-dom";
 import MembersPage from "./settings/MembersPage";
 import TeamsPage from "./settings/TeamsPage";
+import ChannelSettingsPage from "./settings/ChannelSettingsPage";
 import "./SettingsPage.css";
 
 const SettingsPage = ({ service }) => {
@@ -9,6 +10,12 @@ const SettingsPage = ({ service }) => {
 
   const settingsMenus = [
     { id: "general", name: "일반", path: "/settings/general", icon: "⚙️" },
+    {
+      id: "channels",
+      name: "상담채널",
+      path: "/settings/channels",
+      icon: "💬",
+    },
     { id: "members", name: "멤버", path: "/settings/members", icon: "👥" },
     { id: "teams", name: "팀 관리", path: "/settings/teams", icon: "🏢" },
     {
@@ -56,6 +63,10 @@ const SettingsPage = ({ service }) => {
               <Route
                 path="/general"
                 element={<GeneralSettings service={service} />}
+              />
+              <Route
+                path="/channels"
+                element={<ChannelSettingsPage service={service} />}
               />
               <Route
                 path="/members"
