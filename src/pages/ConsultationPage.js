@@ -6,6 +6,8 @@ const ConsultationPage = ({ user, service }) => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [newMessage, setNewMessage] = useState("");
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [aiMessage, setAiMessage] = useState("");
+  const [aiChatHistory, setAiChatHistory] = useState([]);
 
   // 메신저별 채팅 목록
   const [conversations, setConversations] = useState([
@@ -148,6 +150,7 @@ const ConsultationPage = ({ user, service }) => {
         type: "text",
       };
 
+      // conversations 상태 업데이트
       setConversations((prev) =>
         prev.map((conv) =>
           conv.id === selectedChat.id
@@ -155,12 +158,48 @@ const ConsultationPage = ({ user, service }) => {
                 ...conv,
                 messages: [...conv.messages, newMsg],
                 lastMessage: newMessage,
+                timestamp: new Date().toLocaleString(),
               }
             : conv
         )
       );
 
+      // selectedChat 상태도 동시에 업데이트하여 메인 채팅 화면에 실시간 반영
+      setSelectedChat((prev) => ({
+        ...prev,
+        messages: [...prev.messages, newMsg],
+        lastMessage: newMessage,
+        timestamp: new Date().toLocaleString(),
+      }));
+
       setNewMessage("");
+    }
+  };
+
+  const handleSendAiMessage = () => {
+    if (aiMessage.trim()) {
+      const userMsg = {
+        id: aiChatHistory.length + 1,
+        sender: "user",
+        content: aiMessage,
+        timestamp: new Date().toLocaleString(),
+      };
+
+      // 사용자 메시지 추가
+      setAiChatHistory((prev) => [...prev, userMsg]);
+
+      // AI 응답 시뮬레이션 (실제로는 API 호출)
+      setTimeout(() => {
+        const aiResponse = {
+          id: aiChatHistory.length + 2,
+          sender: "ai",
+          content: `"${aiMessage}"에 대한 AI 응답입니다. 이 부분에서 실제 AI API와 연동하여 답변을 받을 수 있습니다.`,
+          timestamp: new Date().toLocaleString(),
+        };
+        setAiChatHistory((prev) => [...prev, aiResponse]);
+      }, 1000);
+
+      setAiMessage("");
     }
   };
 
@@ -195,6 +234,7 @@ const ConsultationPage = ({ user, service }) => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const getStatusColor = (status) => {
     switch (status) {
       case "New Lead":
@@ -263,7 +303,23 @@ const ConsultationPage = ({ user, service }) => {
                 className={`chat-item ${
                   selectedChat?.id === conversation.id ? "active" : ""
                 }`}
-                onClick={() => setSelectedChat(conversation)}
+                onClick={() => {
+                  // 채팅방 선택시 해당 채팅방의 읽지 않은 메시지 카운트를 0으로 설정
+                  const updatedConversation = {
+                    ...conversation,
+                    unreadCount: 0,
+                  };
+                  setSelectedChat(updatedConversation);
+
+                  // conversations 상태에서도 해당 채팅방의 unreadCount를 0으로 업데이트
+                  setConversations((prev) =>
+                    prev.map((conv) =>
+                      conv.id === conversation.id
+                        ? { ...conv, unreadCount: 0 }
+                        : conv
+                    )
+                  );
+                }}
               >
                 <div className="chat-avatar-section">
                   <div className="chat-avatar">{conversation.avatar}</div>
@@ -287,8 +343,6 @@ const ConsultationPage = ({ user, service }) => {
                     <span className="last-message">
                       {conversation.lastMessage}
                     </span>
-                  </div>
-                  <div className="chat-status">
                     {conversation.unreadCount > 0 && (
                       <span className="unread-count">
                         {conversation.unreadCount}
@@ -386,12 +440,13 @@ const ConsultationPage = ({ user, service }) => {
         {/* 고객 정보 사이드바 */}
         {selectedChat && (
           <div className="customer-sidebar">
+            {/* 고객 정보 영역 - 축소됨 */}
             <div className="customer-profile">
-              <div className="profile-header">
-                <div className="consultation-profile-avatar">
+              <div className="profile-header-compact">
+                <div className="consultation-profile-avatar-small">
                   {selectedChat.avatar}
                 </div>
-                <div className="profile-title-with-icon">
+                <div className="profile-info-compact">
                   <h4>{selectedChat.customerName}</h4>
                   <span className="platform-badge-sidebar">
                     {getPlatformIcon(selectedChat.platform)}
@@ -399,24 +454,70 @@ const ConsultationPage = ({ user, service }) => {
                 </div>
               </div>
 
-              <div className="profile-fields">
-                <div className="field-group">
-                  <label>고객 ID</label>
+              <div className="profile-fields-compact">
+                <div className="field-group-compact">
+                  <label>ID</label>
                   <span>{selectedChat.customerId}</span>
                 </div>
-                <div className="field-group">
-                  <label>첫 접촉</label>
-                  <span>{selectedChat.timestamp}</span>
-                </div>
-                <div className="field-group">
+                <div className="field-group-compact">
                   <label>담당자</label>
                   <span>{user.name}</span>
                 </div>
               </div>
 
-              <div className="profile-actions">
-                <button className="btn btn-secondary">노트 추가</button>
-                <button className="btn btn-primary">상담 완료</button>
+              <div className="profile-actions-compact">
+                {/* <button className="btn btn-secondary btn-small">노트</button> */}
+                <button className="btn btn-primary btn-small">상담 완료</button>
+              </div>
+            </div>
+
+            {/* AI 채팅 영역 */}
+            <div className="ai-chat-section">
+              <div className="ai-chat-header">
+                <h5>🤖 AI 상담 도우미</h5>
+                <span className="ai-status">온라인</span>
+              </div>
+
+              <div className="ai-chat-messages">
+                {aiChatHistory.length === 0 ? (
+                  <div className="ai-welcome">
+                    <p>상담에 도움이 필요하시면 언제든 AI에게 질문하세요.</p>
+                  </div>
+                ) : (
+                  aiChatHistory.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`ai-message ${
+                        message.sender === "user" ? "user" : "ai"
+                      }`}
+                    >
+                      <div className="ai-message-content">
+                        <p>{message.content}</p>
+                        <span className="ai-message-time">
+                          {message.timestamp}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="ai-chat-input">
+                <input
+                  type="text"
+                  className="ai-input"
+                  placeholder="AI에게 질문하기..."
+                  value={aiMessage}
+                  onChange={(e) => setAiMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSendAiMessage()}
+                />
+                <button
+                  className="ai-send-button"
+                  onClick={handleSendAiMessage}
+                  disabled={!aiMessage.trim()}
+                >
+                  📤
+                </button>
               </div>
             </div>
           </div>
