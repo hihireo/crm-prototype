@@ -141,10 +141,10 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
                   <label>소유 유무</label>
                   <div className="checkbox-group">
                     <label>
-                      <input type="checkbox" /> 차용차
+                      <input type="checkbox" /> 자동차
                     </label>
                     <label>
-                      <input type="checkbox" /> 전
+                      <input type="checkbox" /> 자가
                     </label>
                     <label>
                       <input type="checkbox" /> 신용카드
