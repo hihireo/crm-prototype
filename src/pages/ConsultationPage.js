@@ -24,7 +24,7 @@ const ConsultationPage = ({ user, service }) => {
         {
           id: 1,
           sender: "customer",
-          content: "hey 안녕하세요",
+          content: "안녕하세요",
           timestamp: "Aug 20, 4:20:00 PM",
           type: "text",
         },
