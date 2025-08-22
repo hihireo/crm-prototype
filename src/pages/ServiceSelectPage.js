@@ -1,0 +1,145 @@
+import React, { useState } from "react";
+import "./ServiceSelectPage.css";
+
+const ServiceSelectPage = ({ onServiceSelect }) => {
+  const [services, setServices] = useState([
+    {
+      id: 1,
+      name: "거래소 텔레마케팅 관리",
+      members: 12,
+      assignedCustomers: 23,
+      todaySchedules: 5,
+    },
+    {
+      id: 2,
+      name: "대출 컨설팅 영업 관리",
+      members: 8,
+      assignedCustomers: 15,
+      todaySchedules: 3,
+    },
+  ]);
+
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newServiceName, setNewServiceName] = useState("");
+  const [newServiceDesc, setNewServiceDesc] = useState("");
+
+  const handleCreateService = (e) => {
+    e.preventDefault();
+    if (newServiceName) {
+      const newService = {
+        id: services.length + 1,
+        name: newServiceName,
+        members: 1,
+        assignedCustomers: 0,
+        todaySchedules: 0,
+      };
+      setServices([...services, newService]);
+      setNewServiceName("");
+      setNewServiceDesc("");
+      setShowCreateForm(false);
+    }
+  };
+
+  const handleDeleteService = (serviceId) => {
+    if (window.confirm("정말로 이 서비스를 삭제하시겠습니까?")) {
+      setServices(services.filter((service) => service.id !== serviceId));
+    }
+  };
+
+  return (
+    <div className="service-select-page">
+      <div className="container">
+        <div className="page-header">
+          <h1>서비스 선택</h1>
+          <p>관리할 서비스를 선택하거나 새로운 서비스를 생성하세요</p>
+        </div>
+
+        <div className="services-grid">
+          {services.map((service) => (
+            <div
+              key={service.id}
+              className="service-card clickable"
+              onClick={() => onServiceSelect(service.name)}
+            >
+              <button
+                className="delete-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteService(service.id);
+                }}
+                title="서비스 삭제"
+              >
+                🗑️
+              </button>
+              <div className="service-info">
+                <div className="service-header">
+                  <h3>{service.name}</h3>
+                  <span className="team-info">멤버 {service.members}명</span>
+                </div>
+
+                <div className="personal-stats">
+                  <div className="personal-stat-item">
+                    <span className="personal-stat-label">
+                      나에게 할당된 고객
+                    </span>
+                    <span className="personal-stat-value">
+                      {service.assignedCustomers}건
+                    </span>
+                  </div>
+                  <div className="personal-stat-item">
+                    <span className="personal-stat-label">오늘 예약 일정</span>
+                    <span className="personal-stat-value">
+                      {service.todaySchedules}건
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          <div className="service-card create-card">
+            {!showCreateForm ? (
+              <button
+                className="create-service-btn"
+                onClick={() => setShowCreateForm(true)}
+              >
+                <div className="create-icon">+</div>
+                <h3>새 서비스 생성</h3>
+                <p>새로운 고객관리 서비스를 만들어보세요</p>
+              </button>
+            ) : (
+              <form className="create-form" onSubmit={handleCreateService}>
+                <div className="form-group">
+                  <label className="label">서비스 이름</label>
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="서비스 이름을 입력하세요"
+                    value={newServiceName}
+                    onChange={(e) => setNewServiceName(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="form-actions">
+                  <button type="submit" className="btn btn-primary">
+                    생성
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowCreateForm(false)}
+                  >
+                    취소
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ServiceSelectPage;
