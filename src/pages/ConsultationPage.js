@@ -255,221 +255,253 @@ const ConsultationPage = ({ user, service }) => {
   );
 
   return (
-    <div className="consultation-page">
-      <div className="consultation-layout">
-        {/* 채팅 목록 사이드바 */}
-        <div className="chat-sidebar">
-          <div className="sidebar-header">
-            <h2>상담 채팅</h2>
-            <div className="chat-stats">
-              <span>총 {conversations.length}건</span>
-              <span>
-                미읽음{" "}
-                {conversations.reduce((sum, conv) => sum + conv.unreadCount, 0)}
-                건
-              </span>
+    <div
+      className="consultation-page"
+      onClick={(e) => {
+        // 컨테이너 바깥 영역 클릭 시 채팅방 선택 해제
+        if (e.target === e.currentTarget) {
+          setSelectedChat(null);
+        }
+      }}
+    >
+      <div className="consultation-container">
+        <div
+          className="consultation-layout"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* 채팅 목록 사이드바 */}
+          <div className="chat-sidebar">
+            <div className="sidebar-header">
+              <h2>상담 채팅</h2>
+              <div className="chat-stats">
+                <span>총 {conversations.length}건</span>
+                <span>
+                  미읽음{" "}
+                  {conversations.reduce(
+                    (sum, conv) => sum + conv.unreadCount,
+                    0
+                  )}
+                  건
+                </span>
+              </div>
+            </div>
+
+            <div className="platform-filters">
+              <button className="platform-filter active">전체</button>
+              <button className="platform-filter">
+                <img
+                  src="/images/platforms/telegram_logo.png"
+                  alt="Telegram"
+                  className="filter-icon"
+                />
+              </button>
+              <button className="platform-filter">
+                <img
+                  src="/images/platforms/Instagram_logo.png"
+                  alt="Instagram"
+                  className="filter-icon"
+                />
+              </button>
+              <button className="platform-filter">
+                <img
+                  src="/images/platforms/line_logo.png"
+                  alt="Line"
+                  className="filter-icon"
+                />
+              </button>
+            </div>
+
+            <div className="chat-list">
+              {filteredConversations.map((conversation) => (
+                <div
+                  key={conversation.id}
+                  className={`chat-item ${
+                    selectedChat?.id === conversation.id ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    // 채팅방 선택시 해당 채팅방의 읽지 않은 메시지 카운트를 0으로 설정
+                    const updatedConversation = {
+                      ...conversation,
+                      unreadCount: 0,
+                    };
+                    setSelectedChat(updatedConversation);
+
+                    // conversations 상태에서도 해당 채팅방의 unreadCount를 0으로 업데이트
+                    setConversations((prev) =>
+                      prev.map((conv) =>
+                        conv.id === conversation.id
+                          ? { ...conv, unreadCount: 0 }
+                          : conv
+                      )
+                    );
+                  }}
+                >
+                  <div className="chat-avatar-section">
+                    <div className="chat-avatar">{conversation.avatar}</div>
+                  </div>
+
+                  <div className="chat-info">
+                    <div className="chat-header">
+                      <div className="customer-name-with-icon">
+                        <span className="customer-name">
+                          {conversation.customerName}
+                        </span>
+                        <span className="platform-badge">
+                          {getPlatformIcon(conversation.platform)}
+                        </span>
+                      </div>
+                      <span className="chat-time">
+                        {conversation.timestamp.split(" ").slice(-2).join(" ")}
+                      </span>
+                    </div>
+                    <div className="chat-preview">
+                      <span className="last-message">
+                        {conversation.lastMessage}
+                      </span>
+                      {conversation.unreadCount > 0 && (
+                        <span className="unread-count">
+                          {conversation.unreadCount}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="platform-filters">
-            <button className="platform-filter active">전체</button>
-            <button className="platform-filter">
-              <img
-                src="/images/platforms/telegram_logo.png"
-                alt="Telegram"
-                className="filter-icon"
-              />
-            </button>
-            <button className="platform-filter">
-              <img
-                src="/images/platforms/Instagram_logo.png"
-                alt="Instagram"
-                className="filter-icon"
-              />
-            </button>
-            <button className="platform-filter">
-              <img
-                src="/images/platforms/line_logo.png"
-                alt="Line"
-                className="filter-icon"
-              />
-            </button>
-          </div>
-
-          <div className="chat-list">
-            {filteredConversations.map((conversation) => (
-              <div
-                key={conversation.id}
-                className={`chat-item ${
-                  selectedChat?.id === conversation.id ? "active" : ""
-                }`}
-                onClick={() => {
-                  // 채팅방 선택시 해당 채팅방의 읽지 않은 메시지 카운트를 0으로 설정
-                  const updatedConversation = {
-                    ...conversation,
-                    unreadCount: 0,
-                  };
-                  setSelectedChat(updatedConversation);
-
-                  // conversations 상태에서도 해당 채팅방의 unreadCount를 0으로 업데이트
-                  setConversations((prev) =>
-                    prev.map((conv) =>
-                      conv.id === conversation.id
-                        ? { ...conv, unreadCount: 0 }
-                        : conv
-                    )
-                  );
-                }}
-              >
-                <div className="chat-avatar-section">
-                  <div className="chat-avatar">{conversation.avatar}</div>
+          {/* 채팅 메인 영역 */}
+          <div className="chat-main">
+            {selectedChat ? (
+              <>
+                {/* 채팅 헤더 */}
+                <div className="chat-header-section">
+                  <div className="customer-info">
+                    <div className="customer-avatar">{selectedChat.avatar}</div>
+                    <div className="customer-details">
+                      <div className="customer-title-with-icon">
+                        <h3>{selectedChat.customerName}</h3>
+                        <span className="platform-badge-header">
+                          {getPlatformIcon(selectedChat.platform)}
+                        </span>
+                      </div>
+                      <p>ID: {selectedChat.customerId}</p>
+                    </div>
+                  </div>
+                  <div className="chat-actions">
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => setIsCustomerModalOpen(true)}
+                    >
+                      고객 정보
+                    </button>
+                    <button className="btn btn-primary">배정하기</button>
+                  </div>
                 </div>
 
-                <div className="chat-info">
-                  <div className="chat-header">
-                    <div className="customer-name-with-icon">
-                      <span className="customer-name">
-                        {conversation.customerName}
-                      </span>
-                      <span className="platform-badge">
-                        {getPlatformIcon(conversation.platform)}
-                      </span>
+                {/* 메시지 영역 */}
+                <div className="messages-container">
+                  {selectedChat.messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`message ${
+                        message.sender === "agent" ? "sent" : "received"
+                      }`}
+                    >
+                      <div className="message-content">
+                        <p>{message.content}</p>
+                        <span className="message-time">
+                          {message.timestamp}
+                        </span>
+                      </div>
                     </div>
-                    <span className="chat-time">
-                      {conversation.timestamp.split(" ").slice(-2).join(" ")}
-                    </span>
+                  ))}
+                </div>
+
+                {/* 메시지 입력 영역 */}
+                <div className="message-input-section">
+                  <div className="input-tools">
+                    <button className="tool-btn">📎</button>
+                    <button className="tool-btn">😊</button>
+                    <button className="tool-btn">🖼️</button>
                   </div>
-                  <div className="chat-preview">
-                    <span className="last-message">
-                      {conversation.lastMessage}
-                    </span>
-                    {conversation.unreadCount > 0 && (
-                      <span className="unread-count">
-                        {conversation.unreadCount}
-                      </span>
-                    )}
+                  <div className="message-input-area">
+                    <input
+                      type="text"
+                      className="message-input"
+                      placeholder="메시지를 입력하세요..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={(e) =>
+                        e.key === "Enter" && handleSendMessage()
+                      }
+                    />
+                    <button
+                      className="send-button"
+                      onClick={handleSendMessage}
+                      disabled={!newMessage.trim()}
+                    >
+                      전송
+                    </button>
                   </div>
+                </div>
+              </>
+            ) : (
+              <div className="no-chat-selected">
+                <div className="empty-state">
+                  <h3>채팅을 선택하세요</h3>
+                  <p>왼쪽 목록에서 상담할 고객을 선택하세요</p>
                 </div>
               </div>
-            ))}
+            )}
           </div>
-        </div>
 
-        {/* 채팅 메인 영역 */}
-        <div className="chat-main">
-          {selectedChat ? (
-            <>
-              {/* 채팅 헤더 */}
-              <div className="chat-header-section">
-                <div className="customer-info">
-                  <div className="customer-avatar">{selectedChat.avatar}</div>
-                  <div className="customer-details">
-                    <div className="customer-title-with-icon">
-                      <h3>{selectedChat.customerName}</h3>
-                      <span className="platform-badge-header">
+          {/* 고객 정보 사이드바 */}
+          <div className="customer-sidebar">
+            {selectedChat ? (
+              <>
+                {/* 고객 정보 영역 - 축소됨 */}
+                <div className="customer-profile">
+                  <div className="profile-header-compact">
+                    <div className="consultation-profile-avatar-small">
+                      {selectedChat.avatar}
+                    </div>
+                    <div className="profile-info-compact">
+                      <h4>{selectedChat.customerName}</h4>
+                      <span className="platform-badge-sidebar">
                         {getPlatformIcon(selectedChat.platform)}
                       </span>
                     </div>
-                    <p>ID: {selectedChat.customerId}</p>
                   </div>
-                </div>
-                <div className="chat-actions">
-                  <button
-                    className="btn btn-secondary"
-                    onClick={() => setIsCustomerModalOpen(true)}
-                  >
-                    고객 정보
-                  </button>
-                  <button className="btn btn-primary">배정하기</button>
-                </div>
-              </div>
 
-              {/* 메시지 영역 */}
-              <div className="messages-container">
-                {selectedChat.messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`message ${
-                      message.sender === "agent" ? "sent" : "received"
-                    }`}
-                  >
-                    <div className="message-content">
-                      <p>{message.content}</p>
-                      <span className="message-time">{message.timestamp}</span>
+                  <div className="profile-fields-compact">
+                    <div className="field-group-compact">
+                      <label>ID</label>
+                      <span>{selectedChat.customerId}</span>
+                    </div>
+                    <div className="field-group-compact">
+                      <label>담당자</label>
+                      <span>{user.name}</span>
                     </div>
                   </div>
-                ))}
-              </div>
 
-              {/* 메시지 입력 영역 */}
-              <div className="message-input-section">
-                <div className="input-tools">
-                  <button className="tool-btn">📎</button>
-                  <button className="tool-btn">😊</button>
-                  <button className="tool-btn">🖼️</button>
+                  <div className="profile-actions-compact">
+                    {/* <button className="btn btn-secondary btn-small">노트</button> */}
+                    <button className="btn btn-primary btn-small">
+                      상담 완료
+                    </button>
+                  </div>
                 </div>
-                <div className="message-input-area">
-                  <input
-                    type="text"
-                    className="message-input"
-                    placeholder="메시지를 입력하세요..."
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                  />
-                  <button
-                    className="send-button"
-                    onClick={handleSendMessage}
-                    disabled={!newMessage.trim()}
-                  >
-                    전송
-                  </button>
+              </>
+            ) : (
+              /* 기본 화면 - 채팅방이 선택되지 않았을 때 */
+              <div className="customer-profile">
+                <div className="empty-customer-illustration">
+                  <div className="empty-icon">💬</div>
+                  <h4>상담 대기중</h4>
                 </div>
               </div>
-            </>
-          ) : (
-            <div className="no-chat-selected">
-              <div className="empty-state">
-                <h3>채팅을 선택하세요</h3>
-                <p>왼쪽 목록에서 상담할 고객을 선택하세요</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 고객 정보 사이드바 */}
-        {selectedChat && (
-          <div className="customer-sidebar">
-            {/* 고객 정보 영역 - 축소됨 */}
-            <div className="customer-profile">
-              <div className="profile-header-compact">
-                <div className="consultation-profile-avatar-small">
-                  {selectedChat.avatar}
-                </div>
-                <div className="profile-info-compact">
-                  <h4>{selectedChat.customerName}</h4>
-                  <span className="platform-badge-sidebar">
-                    {getPlatformIcon(selectedChat.platform)}
-                  </span>
-                </div>
-              </div>
-
-              <div className="profile-fields-compact">
-                <div className="field-group-compact">
-                  <label>ID</label>
-                  <span>{selectedChat.customerId}</span>
-                </div>
-                <div className="field-group-compact">
-                  <label>담당자</label>
-                  <span>{user.name}</span>
-                </div>
-              </div>
-
-              <div className="profile-actions-compact">
-                {/* <button className="btn btn-secondary btn-small">노트</button> */}
-                <button className="btn btn-primary btn-small">상담 완료</button>
-              </div>
-            </div>
+            )}
 
             {/* AI 채팅 영역 */}
             <div className="ai-chat-section">
@@ -506,22 +538,29 @@ const ConsultationPage = ({ user, service }) => {
                 <input
                   type="text"
                   className="ai-input"
-                  placeholder="AI에게 질문하기..."
+                  placeholder={
+                    selectedChat
+                      ? "AI에게 질문하기..."
+                      : "먼저 채팅방을 선택하세요"
+                  }
                   value={aiMessage}
                   onChange={(e) => setAiMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && handleSendAiMessage()}
+                  onKeyPress={(e) =>
+                    e.key === "Enter" && selectedChat && handleSendAiMessage()
+                  }
+                  disabled={!selectedChat}
                 />
                 <button
                   className="ai-send-button"
                   onClick={handleSendAiMessage}
-                  disabled={!aiMessage.trim()}
+                  disabled={!selectedChat || !aiMessage.trim()}
                 >
                   📤
                 </button>
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
 
       {/* 고객 정보 모달 */}
