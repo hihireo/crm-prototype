@@ -29,8 +29,8 @@ const ChannelSettingsPage = ({ service }) => {
       description: "라인 공식 계정 연동",
       icon: "/images/platforms/line_logo.png",
       category: "Business Messaging",
-      isPopular: false,
-      isConnected: true,
+      isPopular: true,
+      isConnected: false,
       isBeta: false,
     },
   ]);
