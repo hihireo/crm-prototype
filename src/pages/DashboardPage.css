@@ -166,13 +166,34 @@
   white-space: nowrap;
 }
 
+.dashboard-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .count-badge {
-  background: #3b82f6;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 6px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.dashboard-view-all-btn {
+  background: none;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dashboard-view-all-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #475569;
 }
 
 /* Stats Section */
@@ -282,7 +303,6 @@
 
 .ranking-item:hover {
   background: #f1f5f9;
-  transform: translateX(4px);
 }
 
 .ranking-item.my-rank {
@@ -378,7 +398,6 @@
 .customer-item:hover {
   background: #f1f5f9;
   border-left-color: #3b82f6;
-  transform: translateX(4px);
 }
 
 .customer-main {
@@ -389,89 +408,54 @@
   gap: 16px;
 }
 
+.customer-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.customer-phone {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 400;
+}
+
 .customer-info h4 {
   font-size: 14px;
   font-weight: 600;
   color: #1e293b;
-  margin: 0 0 4px 0;
+  margin: 0;
   white-space: nowrap;
 }
 
-.customer-info .phone {
-  font-size: 12px;
-  color: #64748b;
-  margin: 0 0 8px 0;
-  font-family: "Monaco", "Consolas", monospace;
-  white-space: nowrap;
+.source-badge {
+  background: #e0f2fe;
+  color: #0891b2;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .customer-info .service {
-  font-size: 11px;
-  color: #3b82f6;
-  background: #eff6ff;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: 500;
-  white-space: nowrap;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 400;
 }
 
 .customer-meta {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
+  align-items: center;
+  justify-content: flex-end;
 }
 
-.priority {
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.priority.high {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.priority.normal {
-  background: #f3f4f6;
-  color: #6b7280;
-}
-
-.source {
-  font-size: 10px;
-  color: #9ca3af;
+.assigned-time {
+  font-size: 12px;
+  color: #64748b;
   font-weight: 500;
-  white-space: nowrap;
-}
-
-.time {
-  font-size: 10px;
-  color: #9ca3af;
-  white-space: nowrap;
-}
-
-.status-badge {
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-  margin-left: 12px;
-}
-
-.status-badge.new {
-  background: #fef3c7;
-  color: #d97706;
-}
-
-.status-badge.contacted {
-  background: #d1fae5;
-  color: #059669;
 }
 
 /* Calendar Card */
@@ -770,7 +754,7 @@
   font-weight: 500;
   flex: 1;
   min-width: 0;
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .more-events {
@@ -1048,9 +1032,18 @@
   }
 
   .customer-meta {
+    justify-content: flex-start;
+  }
+
+  .header-left {
+    flex-direction: column;
     align-items: flex-start;
-    flex-direction: row;
-    gap: 8px;
+    gap: 4px;
+  }
+
+  .dashboard-view-all-btn {
+    margin-top: 8px;
+    align-self: flex-end;
   }
 
   .card {
@@ -1125,8 +1118,7 @@
   }
 
   .customer-meta {
-    flex-direction: column;
-    gap: 4px;
+    justify-content: flex-start;
   }
 
   .calendar-day {
@@ -1156,4 +1148,162 @@
     font-size: 6px;
     height: 8px;
   }
+
+  .dashboard-recent-notices {
+    margin-top: 16px;
+  }
+
+  .dashboard-notices-header {
+    margin-bottom: 12px;
+  }
+
+  .dashboard-notices-header h3 {
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+
+  .dashboard-notices-more-btn {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+
+  .dashboard-notice-item {
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+
+  .dashboard-notice-title-row {
+    margin-bottom: 4px;
+  }
+
+  .dashboard-notice-title {
+    font-size: 13px;
+    margin-bottom: 0;
+  }
+
+  .dashboard-notice-badge {
+    font-size: 9px;
+    padding: 1px 4px;
+  }
+
+  .dashboard-notice-meta {
+    font-size: 10px;
+    gap: 8px;
+  }
+}
+
+/* 최근 공지사항 섹션 */
+.dashboard-recent-notices {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 24px;
+}
+
+.dashboard-notices-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.dashboard-notices-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.dashboard-notices-more-btn {
+  background: none;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dashboard-notices-more-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+.dashboard-notices-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.dashboard-notice-item {
+  display: flex;
+  padding: 16px 0;
+  border-bottom: 1px solid #f8fafc;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dashboard-notice-item:last-child {
+  border-bottom: none;
+}
+
+.dashboard-notice-item:hover {
+  background: #f8fafc;
+  margin: 0 -24px;
+  padding: 16px 24px;
+  border-radius: 8px;
+}
+
+.dashboard-notice-content {
+  flex: 1;
+}
+
+.dashboard-notice-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.dashboard-notice-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.dashboard-notice-badge {
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dashboard-notice-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 6px;
+}
+
+.dashboard-notice-author {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.dashboard-notice-date {
+  color: #94a3b8;
 }

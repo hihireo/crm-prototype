@@ -49,12 +49,43 @@ const DashboardPage = ({ user, service }) => {
     },
   ];
 
+  // 최근 공지사항 데이터 (NoticePage와 동일, 최신 3개만)
+  const recentNotices = [
+    {
+      id: 1,
+      title: "시스템 점검 안내",
+      author: "관리자",
+      date: "2024-01-10",
+      important: true,
+    },
+    {
+      id: 2,
+      title: "신규 기능 업데이트 안내",
+      author: "개발팀",
+      date: "2024-01-08",
+      important: false,
+    },
+    {
+      id: 3,
+      title: "1월 팀 미팅 일정",
+      author: "인사팀",
+      date: "2024-01-05",
+      important: false,
+    },
+  ];
+
+  // 공지사항 클릭 핸들러
+  const handleNoticeClick = (noticeId) => {
+    // 공지사항 페이지로 이동하면서 해당 공지사항 ID를 전달
+    window.location.href = `/notice?id=${noticeId}`;
+  };
+
   const newAssignedCustomers = [
     {
       id: 1,
       name: "홍길동",
       phone: "010-1234-5678",
-      source: "네이버 광고",
+      source: "네이버",
       assignedAt: "10분 전",
       status: "신규",
       priority: "높음",
@@ -64,7 +95,7 @@ const DashboardPage = ({ user, service }) => {
       id: 2,
       name: "김철수",
       phone: "010-2345-6789",
-      source: "구글 광고",
+      source: "구글",
       assignedAt: "23분 전",
       status: "연락시도",
       priority: "보통",
@@ -74,7 +105,7 @@ const DashboardPage = ({ user, service }) => {
       id: 3,
       name: "이영희",
       phone: "010-3456-7890",
-      source: "페이스북 광고",
+      source: "페이스북",
       assignedAt: "45분 전",
       status: "신규",
       priority: "높음",
@@ -325,37 +356,36 @@ const DashboardPage = ({ user, service }) => {
           {/* 새로 할당된 고객 목록 */}
           <div className="card customers-card">
             <div className="card-header">
-              <h3>📋 새로 할당된 고객</h3>
-              <span className="count-badge">{newAssignedCustomers.length}</span>
+              <div className="dashboard-header-left">
+                <h3>📋 새로 할당된 고객</h3>
+                <span className="count-badge">
+                  ({newAssignedCustomers.length})
+                </span>
+              </div>
+              <button
+                className="dashboard-view-all-btn"
+                onClick={() => (window.location.href = "/applications")}
+              >
+                전체 보기
+              </button>
             </div>
             <div className="customers-list">
               {newAssignedCustomers.map((customer) => (
                 <div key={customer.id} className="customer-item">
                   <div className="customer-main">
                     <div className="customer-info">
-                      <h4>{customer.name}</h4>
-                      <p className="phone">{customer.phone}</p>
-                      <span className="service">{customer.service}</span>
+                      <div className="customer-name-row">
+                        <h4>{customer.name}</h4>
+                        <span className="customer-phone">{customer.phone}</span>
+                        <span className="source-badge">{customer.source}</span>
+                      </div>
+                      {/* <span className="service">{customer.service}</span> */}
                     </div>
                     <div className="customer-meta">
-                      <span
-                        className={`priority ${
-                          customer.priority === "높음" ? "high" : "normal"
-                        }`}
-                      >
-                        {customer.priority === "높음" ? "🔥" : "📋"}
-                        {customer.priority}
+                      <span className="assigned-time">
+                        {customer.assignedAt}
                       </span>
-                      <span className="source">{customer.source}</span>
-                      <span className="time">{customer.assignedAt}</span>
                     </div>
-                  </div>
-                  <div
-                    className={`status-badge ${
-                      customer.status === "신규" ? "new" : "contacted"
-                    }`}
-                  >
-                    {customer.status}
                   </div>
                 </div>
               ))}
@@ -516,6 +546,43 @@ const DashboardPage = ({ user, service }) => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* 최근 공지사항 섹션 */}
+        <div className="dashboard-recent-notices">
+          <div className="dashboard-notices-header">
+            <h3>최근 공지사항</h3>
+            <button
+              className="dashboard-notices-more-btn"
+              onClick={() => (window.location.href = "/notice")}
+            >
+              더보기
+            </button>
+          </div>
+          <div className="dashboard-notices-list">
+            {recentNotices.map((notice) => (
+              <div
+                key={notice.id}
+                className="dashboard-notice-item"
+                onClick={() => handleNoticeClick(notice.id)}
+              >
+                <div className="dashboard-notice-content">
+                  <div className="dashboard-notice-title-row">
+                    <h4 className="dashboard-notice-title">{notice.title}</h4>
+                    {notice.important && (
+                      <span className="dashboard-notice-badge">중요</span>
+                    )}
+                  </div>
+                  <div className="dashboard-notice-meta">
+                    <span className="dashboard-notice-author">
+                      {notice.author}
+                    </span>
+                    <span className="dashboard-notice-date">{notice.date}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

@@ -12,6 +12,7 @@ import ServiceSelectPage from "./pages/ServiceSelectPage";
 import DashboardPage from "./pages/DashboardPage";
 import ConsultationPage from "./pages/ConsultationPage";
 import NoticePage from "./pages/NoticePage";
+import NotificationPage from "./pages/NotificationPage";
 import ApplicationsPage from "./pages/ApplicationsPage";
 import SettingsPage from "./pages/SettingsPage";
 
@@ -105,6 +106,16 @@ function AppContent() {
                 <Navigate to="/login" replace />
               ) : (
                 <NoticePage />
+              )
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              !user || !currentService ? (
+                <Navigate to="/login" replace />
+              ) : (
+                <NotificationPage user={user} />
               )
             }
           />

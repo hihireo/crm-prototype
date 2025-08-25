@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./NoticePage.css";
 
 const NoticePage = () => {
@@ -12,6 +12,16 @@ const NoticePage = () => {
       date: "2024-01-10",
       important: true,
       views: 156,
+    },
+    {
+      id: 4,
+      title: "보안 정책 업데이트",
+      content:
+        "고객 정보 보호를 위한 새로운 보안 정책이 적용됩니다. 모든 직원은 반드시 숙지하시기 바랍니다.",
+      author: "보안팀",
+      date: "2024-01-03",
+      important: true,
+      views: 234,
     },
     {
       id: 2,
@@ -33,16 +43,7 @@ const NoticePage = () => {
       important: false,
       views: 67,
     },
-    {
-      id: 4,
-      title: "보안 정책 업데이트",
-      content:
-        "고객 정보 보호를 위한 새로운 보안 정책이 적용됩니다. 모든 직원은 반드시 숙지하시기 바랍니다.",
-      author: "보안팀",
-      date: "2024-01-03",
-      important: true,
-      views: 234,
-    },
+
     {
       id: 5,
       title: "휴가 신청 안내",
@@ -56,6 +57,22 @@ const NoticePage = () => {
   ]);
 
   const [selectedNotice, setSelectedNotice] = useState(null);
+  const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
+
+  // URL 파라미터에서 공지사항 ID 확인하여 자동으로 열기
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const noticeId = urlParams.get("id");
+
+    if (noticeId) {
+      const notice = notices.find((n) => n.id === parseInt(noticeId));
+      if (notice) {
+        setSelectedNotice(notice);
+        // URL에서 파라미터 제거 (선택사항)
+        window.history.replaceState({}, "", "/notice");
+      }
+    }
+  }, [notices]);
 
   const handleNoticeClick = (notice) => {
     setSelectedNotice(notice);
@@ -63,6 +80,16 @@ const NoticePage = () => {
 
   const handleBackToList = () => {
     setSelectedNotice(null);
+  };
+
+  const handleSaveNotice = () => {
+    // 실제로는 서버에 저장하는 로직
+    alert("공지사항이 저장되었습니다.");
+    setSelectedNotice(null);
+  };
+
+  const handlePermissionDenied = () => {
+    setIsPermissionModalOpen(true);
   };
 
   const formatDate = (dateString) => {
@@ -73,6 +100,65 @@ const NoticePage = () => {
       day: "numeric",
     });
   };
+
+  // 글쓰기 페이지
+  if (selectedNotice === "write") {
+    return (
+      <div className="notice-page">
+        <div className="container">
+          <div className="notice-write">
+            <div className="notice-header">
+              <button
+                className="btn btn-secondary back-btn"
+                onClick={handleBackToList}
+              >
+                ← 목록으로
+              </button>
+              <h1>공지사항 작성</h1>
+            </div>
+
+            <div className="write-form">
+              <div className="form-group">
+                <label htmlFor="title">제목</label>
+                <input
+                  type="text"
+                  id="title"
+                  className="form-input"
+                  placeholder="제목을 입력하세요"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="content">내용</label>
+                <textarea
+                  id="content"
+                  className="form-textarea"
+                  rows="12"
+                  placeholder="내용을 입력하세요"
+                ></textarea>
+              </div>
+
+              <div className="form-bottom">
+                <div className="checkbox-wrapper">
+                  <input
+                    type="checkbox"
+                    id="important"
+                    className="checkbox-input"
+                  />
+                  <label htmlFor="important" className="checkbox-label">
+                    이 공지사항을 중요 공지로 설정
+                  </label>
+                </div>
+                <button className="btn btn-primary" onClick={handleSaveNotice}>
+                  저장
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (selectedNotice) {
     return (
@@ -100,7 +186,7 @@ const NoticePage = () => {
                   <span className="date">
                     {formatDate(selectedNotice.date)}
                   </span>
-                  <span className="views">조회수: {selectedNotice.views}</span>
+                  {/* <span className="views">조회수: {selectedNotice.views}</span> */}
                 </div>
               </div>
             </div>
@@ -119,15 +205,37 @@ const NoticePage = () => {
       <div className="container">
         <div className="page-header">
           <h1>공지사항</h1>
-          <p>시스템 관련 공지사항과 중요한 안내사항을 확인하세요</p>
+          <p>공지사항과 중요한 안내사항을 확인하세요</p>
         </div>
 
         <div className="notice-board">
           <div className="board-header">
-            <div className="board-stats">
-              <span>전체 {notices.length}개</span>
+            <div className="search-section">
+              <div className="search-input-wrapper">
+                <input
+                  type="text"
+                  className="search-input"
+                  placeholder="검색..."
+                  // value={searchTerm}
+                  // onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <button className="search-btn">🔍</button>
+              </div>
             </div>
-            <button className="btn btn-primary">글쓰기</button>
+            <div className="header-buttons">
+              <button
+                className="btn btn-secondary"
+                onClick={handlePermissionDenied}
+              >
+                글쓰기 권한없음 버튼
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={() => setSelectedNotice("write")}
+              >
+                글쓰기
+              </button>
+            </div>
           </div>
 
           <div className="notice-list">
@@ -135,7 +243,6 @@ const NoticePage = () => {
               <div className="col-title">제목</div>
               <div className="col-author">작성자</div>
               <div className="col-date">작성일</div>
-              <div className="col-views">조회수</div>
             </div>
 
             {notices.map((notice) => (
@@ -146,13 +253,12 @@ const NoticePage = () => {
               >
                 <div className="col-title">
                   {notice.important && (
-                    <span className="important-icon">📌</span>
+                    <span className="important-badge">중요</span>
                   )}
                   <span className="title">{notice.title}</span>
                 </div>
                 <div className="col-author">{notice.author}</div>
                 <div className="col-date">{formatDate(notice.date)}</div>
-                <div className="col-views">{notice.views}</div>
               </div>
             ))}
           </div>
@@ -167,6 +273,39 @@ const NoticePage = () => {
             <button className="btn btn-secondary">다음</button>
           </div>
         </div>
+
+        {/* 권한 없음 모달 */}
+        {isPermissionModalOpen && (
+          <div
+            className="modal-overlay"
+            onClick={() => setIsPermissionModalOpen(false)}
+          >
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>권한 없음</h3>
+                <button
+                  className="modal-close-btn"
+                  onClick={() => setIsPermissionModalOpen(false)}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="modal-body">
+                <div className="permission-icon">🚫</div>
+                <p>공지사항을 작성할 권한이 없습니다.</p>
+                <p>관리자에게 문의하세요.</p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  className="btn btn-primary"
+                  onClick={() => setIsPermissionModalOpen(false)}
+                >
+                  확인
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

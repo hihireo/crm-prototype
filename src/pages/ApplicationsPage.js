@@ -177,7 +177,7 @@ const ApplicationsPage = () => {
       <div className="container">
         <div className="page-header">
           <h1>신청현황</h1>
-          <p>고객 신청 데이터를 확인하고 관리하세요</p>
+          <p>고객 데이터를 확인하고 관리하세요</p>
         </div>
 
         <div className="applications-controls">

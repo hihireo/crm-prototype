@@ -16,44 +16,82 @@
 .header-left {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 32px;
+  flex: 1;
 }
 
 .logo {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 38px;
+  font-weight: 800;
   color: #1e293b;
   text-decoration: none;
 }
 
-.service-info {
+.header-service-info {
   display: flex;
   align-items: center;
+  margin-left: -20px;
+  padding-top: 3px;
 }
 
 .service-name {
-  background: #f1f5f9;
+  background: #eff6ff;
   color: #475569;
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 12px;
-  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  /* border: 1px solid #bfdbfe; */
 }
 
 .nav {
   display: flex;
-  gap: 24px;
+  padding-top: 3px;
+  gap: 32px;
 }
 
 .nav-link {
   color: #64748b;
   text-decoration: none;
   font-weight: 500;
+  font-size: 15px;
   transition: color 0.2s;
+  padding: 8px 0;
 }
 
 .nav-link:hover {
   color: #3b82f6;
+}
+
+.nav-link.active {
+  color: #3b82f6;
+  position: relative;
+}
+
+.nav-link.active::after {
+  content: "";
+  position: absolute;
+  bottom: -12px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #3b82f6;
+}
+
+/* 상담 메뉴 레드닷 */
+.consultation-link {
+  position: relative;
+}
+
+.consultation-red-dot {
+  position: absolute;
+  top: 2px;
+  right: -8px;
+  width: 6px;
+  height: 6px;
+  background: #ef4444;
+  border-radius: 50%;
+  display: block;
 }
 
 .header-right {
@@ -61,15 +99,249 @@
   align-items: center;
 }
 
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* 알림 */
+.notification-wrapper {
+  position: relative;
+}
+
+.notification-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+  position: relative;
+}
+
+.notification-btn:hover {
+  background: #f1f5f9;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+}
+
+.notification-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99;
+}
+
+.notification-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 320px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e2e8f0;
+  z-index: 101;
+  margin-top: 8px;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.notification-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.notification-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notification-count {
+  font-size: 12px;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.header-mark-all-btn {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.header-mark-all-btn:hover {
+  background: #f1f5f9;
+}
+
+.notification-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  display: flex;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f8fafc;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  position: relative;
+}
+
+.notification-item:hover {
+  background: #f8fafc;
+}
+
+.notification-item.unread {
+  background: #fefce8;
+}
+
+.notification-item.unread:hover {
+  background: #fef3c7;
+}
+
+.notification-content {
+  flex: 1;
+  min-width: 0;
+  padding-right: 16px;
+}
+
+.notification-content h5 {
+  margin: 0 0 2px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.notification-content p {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+.notification-desc {
+  font-size: 12px;
+  color: #4a4a4a;
+}
+
+.notification-time {
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.notification-dot {
+  width: 6px;
+  height: 6px;
+  background: #3b82f6;
+  border-radius: 50%;
+  position: absolute;
+  top: 14px;
+  right: 16px;
+}
+
+.notification-footer {
+  padding: 12px 20px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.view-all-btn {
+  width: 100%;
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.view-all-btn:hover {
+  background: #f1f5f9;
+}
+
+/* 사용자 정보 */
 .user-info {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
 .user-name {
   font-weight: 500;
   color: #374151;
+  font-size: 15px;
+}
+
+.logout-btn {
+  font-size: 13px;
+  padding: 6px 12px;
+}
+
+@media (max-width: 1024px) {
+  .nav {
+    gap: 24px;
+  }
+
+  .nav-link {
+    font-size: 14px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -78,14 +350,46 @@
   }
 
   .header-left {
-    gap: 12px;
+    gap: 16px;
   }
 
-  .user-info {
-    gap: 8px;
+  .logo {
+    font-size: 20px;
+  }
+
+  .service-name {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  .user-section {
+    gap: 12px;
   }
 
   .user-name {
     display: none;
+  }
+
+  .notification-dropdown {
+    width: 280px;
+    right: -40px;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+  }
+
+  .logout-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .consultation-red-dot {
+    top: 1px;
+    right: -6px;
+    width: 5px;
+    height: 5px;
   }
 }
