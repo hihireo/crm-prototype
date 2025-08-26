@@ -314,6 +314,15 @@
   background: #2563eb;
 }
 
+.btn-assign {
+  background: #059669;
+  color: white;
+}
+
+.btn-assign:hover {
+  background: #047857;
+}
+
 /* 반응형 */
 @media (max-width: 1024px) {
   .customer-info-grid {

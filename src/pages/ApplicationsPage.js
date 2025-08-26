@@ -1,10 +1,20 @@
 import React, { useState } from "react";
 import CustomerInfoModal from "../components/CustomerInfoModal";
+import CustomerAssignmentModal from "../components/CustomerAssignmentModal";
 import "./ApplicationsPage.css";
 
 const ApplicationsPage = () => {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
+
+  // 현재 사용자 정보 (실제로는 props나 context에서 받아올 데이터)
+  const currentUser = {
+    name: "김관리자",
+    role: "관리자", // "관리자" 또는 "팀장"
+    team: "전체",
+  };
+
   const [applications] = useState([
     {
       id: 1,
@@ -146,6 +156,25 @@ const ApplicationsPage = () => {
     setIsCustomerModalOpen(true);
   };
 
+  const handleBulkAssignment = () => {
+    if (checkedItems.size === 0) {
+      alert("배정할 고객을 선택해주세요.");
+      return;
+    }
+    setIsAssignmentModalOpen(true);
+  };
+
+  const getSelectedCustomers = () => {
+    return applications
+      .filter((app) => checkedItems.has(app.id))
+      .map((app) => ({
+        id: app.id,
+        name: app.applicantName,
+        phone: app.contact,
+        applicationNumber: app.number,
+      }));
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case "완료":
@@ -227,7 +256,9 @@ const ApplicationsPage = () => {
           </div>
 
           <div className="action-section">
-            <button className="btn btn-primary">일괄 배정</button>
+            <button className="btn btn-primary" onClick={handleBulkAssignment}>
+              일괄 배정
+            </button>
             <button className="btn btn-secondary">엑셀 다운로드</button>
           </div>
         </div>
@@ -331,6 +362,14 @@ const ApplicationsPage = () => {
         isOpen={isCustomerModalOpen}
         onClose={() => setIsCustomerModalOpen(false)}
         customerData={selectedCustomer}
+      />
+
+      {/* 고객 배정 모달 */}
+      <CustomerAssignmentModal
+        isOpen={isAssignmentModalOpen}
+        onClose={() => setIsAssignmentModalOpen(false)}
+        selectedCustomers={getSelectedCustomers()}
+        currentUser={currentUser}
       />
     </div>
   );

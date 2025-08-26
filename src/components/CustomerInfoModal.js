@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./CustomerInfoModal.css";
+import CustomerAssignmentModal from "./CustomerAssignmentModal";
 
 const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
   const [memos, setMemos] = useState(
@@ -39,8 +40,32 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
 
   const [newMemo, setNewMemo] = useState("");
   const [newConsultation, setNewConsultation] = useState("");
+  const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
+
+  // 현재 사용자 정보 (실제로는 props나 context에서 받아올 데이터)
+  const currentUser = {
+    name: "김관리자",
+    role: "관리자",
+    team: "전체",
+  };
 
   if (!isOpen || !customerData) return null;
+
+  const handleAssignmentClick = () => {
+    setIsAssignmentModalOpen(true);
+  };
+
+  const getSelectedCustomers = () => {
+    return [
+      {
+        id: customerData.id,
+        name: customerData.name,
+        phone: customerData.phone,
+        applicationNumber:
+          customerData.applicationNumber || `APP-${customerData.id}`,
+      },
+    ];
+  };
 
   const handleAddMemo = () => {
     if (newMemo.trim()) {
@@ -303,9 +328,20 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
           <button className="btn btn-secondary" onClick={onClose}>
             닫기
           </button>
+          <button className="btn btn-assign" onClick={handleAssignmentClick}>
+            배정하기
+          </button>
           <button className="btn btn-primary">저장</button>
         </div>
       </div>
+
+      {/* Customer Assignment Modal */}
+      <CustomerAssignmentModal
+        isOpen={isAssignmentModalOpen}
+        onClose={() => setIsAssignmentModalOpen(false)}
+        selectedCustomers={getSelectedCustomers()}
+        currentUser={currentUser}
+      />
     </div>
   );
 };
