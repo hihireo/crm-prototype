@@ -259,6 +259,7 @@ const ApplicationsPage = () => {
             <button className="btn btn-primary" onClick={handleBulkAssignment}>
               일괄 배정
             </button>
+            <button className="btn btn-secondary">엑셀 업로드</button>
             <button className="btn btn-secondary">엑셀 다운로드</button>
           </div>
         </div>
