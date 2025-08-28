@@ -36,18 +36,47 @@ const DashboardPage = ({ user, service }) => {
   };
 
   const salesRanking = [
-    { rank: 1, name: "김영업", sales: 156, change: "+12", avatar: "김" },
-    { rank: 2, name: "이마케팅", sales: 143, change: "+8", avatar: "이" },
-    { rank: 3, name: "박세일즈", sales: 138, change: "+15", avatar: "박" },
-    { rank: 4, name: "최고객", sales: 125, change: "+3", avatar: "최" },
     {
-      rank: 5,
+      rank: 1,
+      name: "김영업",
+      sales: 15600000,
+      change: "+1200000",
+      avatar: "김",
+    },
+    {
+      rank: 2,
+      name: "이마케팅",
+      sales: 14300000,
+      change: "+800000",
+      avatar: "이",
+    },
+    {
+      rank: 3,
+      name: "박세일즈",
+      sales: 13800000,
+      change: "+1500000",
+      avatar: "박",
+    },
+    {
+      rank: 4,
+      name: "최고객",
+      sales: 12500000,
+      change: "+300000",
+      avatar: "최",
+    },
+    {
+      rank: 26,
       name: user.name,
-      sales: 98,
-      change: "+7",
+      sales: 9800000,
+      change: "+700000",
       avatar: user.name.charAt(0),
     },
   ];
+
+  // 4행만 표시하기 위해 필터링 (1,2,3등과 내 랭킹)
+  const displayRanking = salesRanking
+    .filter((item) => item.rank <= 3 || item.name === user.name)
+    .slice(0, 4);
 
   // 최근 공지사항 데이터 (NoticePage와 동일, 최신 3개만)
   const recentNotices = [
@@ -124,10 +153,12 @@ const DashboardPage = ({ user, service }) => {
   ];
 
   // 달력 및 알림 데이터 (8월 텔레마케팅 샘플)
-  const calendarEvents = {
+  const [calendarEvents, setCalendarEvents] = useState({
     "2025-08-05": [
       { time: "09:00", title: "월 콜리스트 검토", type: "task" },
       { time: "14:00", title: "김영희 전화상담", type: "call" },
+      { time: "16:30", title: "팀 미팅", type: "meeting" },
+      { time: "18:00", title: "보고서 작성", type: "task" },
     ],
     "2025-08-12": [
       {
@@ -135,20 +166,26 @@ const DashboardPage = ({ user, service }) => {
         title: "박지율 전화 한번 다시 주기로 했음",
         type: "appointment",
       },
+      { time: "14:30", title: "신규 고객 상담", type: "consultation" },
+      { time: "16:00", title: "계약서 검토", type: "task" },
     ],
     "2025-08-23": [
       {
         time: "10:00",
-        title: "박채영 텔레방 들어왔는지 확인 필요",
+        title:
+          "박채영 확인 필요 박채영 확인 필요 박채영 확인 필요 박채영 확인 필요 박채영 확인 필요 박채영 확인 필요 박채영 확인 필요 박채영 확인 필요 박채영 확인 필요",
         type: "callback",
       },
       { time: "15:30", title: "전략 회의", type: "meeting" },
+      { time: "17:00", title: "월말 정산", type: "task" },
+      { time: "19:00", title: "교육 참석", type: "training" },
+      { time: "20:00", title: "네트워킹", type: "meeting" },
     ],
     "2025-08-26": [
       { time: "13:00", title: "이종호 대표 상담", type: "call" },
       { time: "17:00", title: "다음달 계획", type: "planning" },
     ],
-  };
+  });
 
   const formatCalendarDate = (date) => {
     const year = date.getFullYear();
@@ -163,6 +200,7 @@ const DashboardPage = ({ user, service }) => {
   };
 
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date());
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
 
   const handleDateClick = (date) => {
     setSelectedCalendarDate(date);
@@ -170,7 +208,13 @@ const DashboardPage = ({ user, service }) => {
 
   const getSelectedDateEvents = () => {
     if (!selectedCalendarDate) return [];
-    return getEventsForDate(selectedCalendarDate);
+    const events = getEventsForDate(selectedCalendarDate);
+    // 시간순으로 오름차순 정렬
+    return events.sort((a, b) => {
+      const timeA = a.time.replace(":", "");
+      const timeB = b.time.replace(":", "");
+      return timeA.localeCompare(timeB);
+    });
   };
 
   // 달력 날짜 생성
@@ -229,6 +273,21 @@ const DashboardPage = ({ user, service }) => {
     return `${hours.toString().padStart(2, "0")}:${minutes
       .toString()
       .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+  // 일정 추가 함수
+  const addScheduleEvent = (eventData) => {
+    const dateKey = formatCalendarDate(selectedCalendarDate);
+    const newEvent = {
+      time: eventData.time,
+      title: eventData.title,
+      type: "task", // 기본값으로 task 설정
+    };
+
+    setCalendarEvents((prev) => ({
+      ...prev,
+      [dateKey]: [...(prev[dateKey] || []), newEvent],
+    }));
   };
 
   return (
@@ -325,9 +384,10 @@ const DashboardPage = ({ user, service }) => {
           <div className="card ranking-card">
             <div className="card-header">
               <h3>🏆 이번 달 판매 랭킹</h3>
+              <button className="dashboard-view-all-btn">전체 보기</button>
             </div>
             <div className="ranking-list">
-              {salesRanking.map((item) => (
+              {displayRanking.map((item) => (
                 <div
                   key={item.rank}
                   className={`ranking-item ${
@@ -345,9 +405,11 @@ const DashboardPage = ({ user, service }) => {
                   <div className="user-avatar">{item.avatar}</div>
                   <div className="user-info">
                     <div className="name">{item.name}</div>
-                    <div className="sales">{item.sales}건</div>
+                    <div className="sales">₩{formatCurrency(item.sales)}</div>
                   </div>
-                  <span className="change positive">{item.change}</span>
+                  <span className="change positive">
+                    +{formatCurrency(parseInt(item.change.replace("+", "")))}
+                  </span>
                 </div>
               ))}
             </div>
@@ -463,7 +525,7 @@ const DashboardPage = ({ user, service }) => {
                                   className={`calendar-event ${event.type}`}
                                   title={`${event.time} - ${event.title}`}
                                 >
-                                  <span className="event-dot"></span>
+                                  {/* <span className="event-dot"></span> */}
                                   <span className="event-text">
                                     {event.title}
                                   </span>
@@ -471,7 +533,7 @@ const DashboardPage = ({ user, service }) => {
                               ))}
                             {dayData.events.length > 2 && (
                               <div className="more-events">
-                                +{dayData.events.length - 2}개 더
+                                그 외 {dayData.events.length - 2}건
                               </div>
                             )}
                           </div>
@@ -484,19 +546,29 @@ const DashboardPage = ({ user, service }) => {
 
               <div className="selected-date-panel">
                 <div className="panel-header">
-                  <h4>
-                    {selectedCalendarDate
-                      ? selectedCalendarDate.toLocaleDateString("ko-KR", {
-                          month: "long",
-                          day: "numeric",
-                          weekday: "short",
-                        })
-                      : "날짜를 선택하세요"}
-                  </h4>
+                  <div className="calendar-schedule-header-left">
+                    <h4>
+                      {selectedCalendarDate
+                        ? selectedCalendarDate.toLocaleDateString("ko-KR", {
+                            month: "long",
+                            day: "numeric",
+                            weekday: "short",
+                          })
+                        : "날짜를 선택하세요"}
+                    </h4>
+                    {selectedCalendarDate && (
+                      <span className="events-count">
+                        {getSelectedDateEvents().length}개 일정
+                      </span>
+                    )}
+                  </div>
                   {selectedCalendarDate && (
-                    <span className="events-count">
-                      {getSelectedDateEvents().length}개 일정
-                    </span>
+                    <button
+                      className="calendar-schedule-add-btn"
+                      onClick={() => setShowScheduleModal(true)}
+                    >
+                      + 일정 추가
+                    </button>
                   )}
                 </div>
 
@@ -512,23 +584,6 @@ const DashboardPage = ({ user, service }) => {
                             <div className="event-time-badge">{event.time}</div>
                             <div className="event-details">
                               <div className="event-title">{event.title}</div>
-                              <div className="event-type-label">
-                                {event.type === "call" && "📞 전화상담"}
-                                {event.type === "callback" && "🔄 콜백"}
-                                {event.type === "calling" && "📢 콜링"}
-                                {event.type === "appointment" && "📅 예약"}
-                                {event.type === "training" && "🎓 교육"}
-                                {event.type === "analysis" && "📊 분석"}
-                                {event.type === "task" && "⚙️ 업무"}
-                                {event.type === "follow-up" && "🔍 후속"}
-                                {event.type === "consultation" && "💼 컵테이션"}
-                                {event.type === "report" && "📊 보고"}
-                                {event.type === "meeting" && "👥 회의"}
-                                {event.type === "survey" && "📋 조사"}
-                                {event.type === "preparation" && "📝 준비"}
-                                {event.type === "planning" && "🎯 계획"}
-                                {event.type === "closing" && "🏁 마감"}
-                              </div>
                             </div>
                           </div>
                         ))}
@@ -584,6 +639,117 @@ const DashboardPage = ({ user, service }) => {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* 일정 추가 모달 */}
+      {showScheduleModal && (
+        <ScheduleModal
+          selectedDate={selectedCalendarDate}
+          onClose={() => setShowScheduleModal(false)}
+          onAddSchedule={addScheduleEvent}
+        />
+      )}
+    </div>
+  );
+};
+
+// 일정 추가 모달 컴포넌트
+const ScheduleModal = ({ selectedDate, onClose, onAddSchedule }) => {
+  const [scheduleData, setScheduleData] = useState({
+    time: "",
+    title: "",
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (scheduleData.time && scheduleData.title) {
+      onAddSchedule(scheduleData);
+      onClose();
+      setScheduleData({ time: "", title: "" });
+    }
+  };
+
+  return (
+    <div className="calendar-schedule-modal-overlay" onClick={onClose}>
+      <div
+        className="calendar-schedule-modal-content"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="calendar-schedule-modal-header">
+          <h3>일정 추가</h3>
+          <button className="calendar-schedule-modal-close" onClick={onClose}>
+            ×
+          </button>
+        </div>
+
+        <div className="calendar-schedule-modal-body">
+          <div className="calendar-schedule-modal-date-info">
+            {selectedDate.toLocaleDateString("ko-KR", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              weekday: "long",
+            })}
+          </div>
+
+          <form onSubmit={handleSubmit}>
+            <div className="calendar-schedule-modal-field">
+              <label>시간</label>
+              <select
+                value={scheduleData.time}
+                onChange={(e) =>
+                  setScheduleData((prev) => ({ ...prev, time: e.target.value }))
+                }
+                required
+                className="calendar-schedule-modal-select"
+              >
+                <option value="">시간을 선택하세요</option>
+                {Array.from({ length: 144 }, (_, i) => {
+                  const hours = Math.floor(i / 6);
+                  const minutes = (i % 6) * 10;
+                  const timeString = `${hours
+                    .toString()
+                    .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+                  return (
+                    <option key={timeString} value={timeString}>
+                      {timeString}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+
+            <div className="calendar-schedule-modal-field">
+              <label>일정 제목</label>
+              <input
+                type="text"
+                value={scheduleData.title}
+                onChange={(e) =>
+                  setScheduleData((prev) => ({
+                    ...prev,
+                    title: e.target.value,
+                  }))
+                }
+                placeholder="일정 제목을 입력하세요"
+                required
+                className="calendar-schedule-modal-input"
+              />
+            </div>
+
+            <div className="calendar-schedule-modal-actions">
+              <button
+                type="button"
+                onClick={onClose}
+                className="calendar-schedule-modal-cancel"
+              >
+                취소
+              </button>
+              <button type="submit" className="calendar-schedule-modal-submit">
+                추가
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

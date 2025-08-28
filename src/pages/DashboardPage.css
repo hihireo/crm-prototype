@@ -289,6 +289,8 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  max-height: 250px; /* 4행 정도의 높이로 제한 */
+  overflow: hidden;
 }
 
 .ranking-item {
@@ -758,13 +760,13 @@
 }
 
 .more-events {
-  font-size: 7px;
+  font-size: 9px;
   color: #64748b;
   text-align: center;
-  margin-top: 1px;
+  margin-top: 4px;
   font-weight: 500;
   padding: 1px 2px;
-  background: #f1f5f9;
+  /* background: #f1f5f9; */
   border-radius: 2px;
   height: 10px;
   display: flex;
@@ -791,6 +793,30 @@
   margin-bottom: 16px;
   padding-bottom: 12px;
   border-bottom: 1px solid #e2e8f0;
+}
+
+.calendar-schedule-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calendar-schedule-add-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.calendar-schedule-add-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
 }
 
 .panel-header h4 {
@@ -1306,4 +1332,174 @@
 
 .dashboard-notice-date {
   color: #94a3b8;
+}
+
+/* Calendar Schedule Modal Styles - 고유 prefix 사용 */
+.calendar-schedule-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.calendar-schedule-modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 480px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: calendar-schedule-modal-appear 0.2s ease-out;
+}
+
+@keyframes calendar-schedule-modal-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.calendar-schedule-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.calendar-schedule-modal-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.calendar-schedule-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.calendar-schedule-modal-close:hover {
+  background: #e2e8f0;
+  color: #374151;
+}
+
+.calendar-schedule-modal-body {
+  padding: 24px;
+}
+
+.calendar-schedule-modal-date-info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e40af;
+  text-align: center;
+}
+
+.calendar-schedule-modal-field {
+  margin-bottom: 16px;
+}
+
+.calendar-schedule-modal-field label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.calendar-schedule-modal-input,
+.calendar-schedule-modal-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #374151;
+  background: white;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.calendar-schedule-modal-input:focus,
+.calendar-schedule-modal-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.calendar-schedule-modal-input::placeholder {
+  color: #9ca3af;
+}
+
+.calendar-schedule-modal-select {
+  cursor: pointer;
+}
+
+.calendar-schedule-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.calendar-schedule-modal-cancel,
+.calendar-schedule-modal-submit {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.calendar-schedule-modal-cancel {
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.calendar-schedule-modal-cancel:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+.calendar-schedule-modal-submit {
+  background: #3b82f6;
+  color: white;
+}
+
+.calendar-schedule-modal-submit:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
