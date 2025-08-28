@@ -657,16 +657,33 @@ const DashboardPage = ({ user, service }) => {
 // 일정 추가 모달 컴포넌트
 const ScheduleModal = ({ selectedDate, onClose, onAddSchedule }) => {
   const [scheduleData, setScheduleData] = useState({
-    time: "",
+    ampm: "오전",
+    hour: "",
+    minute: "",
     title: "",
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (scheduleData.time && scheduleData.title) {
-      onAddSchedule(scheduleData);
+    if (scheduleData.hour && scheduleData.minute && scheduleData.title) {
+      // 24시간 형식으로 변환
+      let hour24 = parseInt(scheduleData.hour);
+      if (scheduleData.ampm === "오후" && hour24 !== 12) {
+        hour24 += 12;
+      } else if (scheduleData.ampm === "오전" && hour24 === 12) {
+        hour24 = 0;
+      }
+
+      const timeString = `${hour24
+        .toString()
+        .padStart(2, "0")}:${scheduleData.minute.toString().padStart(2, "0")}`;
+
+      onAddSchedule({
+        time: timeString,
+        title: scheduleData.title,
+      });
       onClose();
-      setScheduleData({ time: "", title: "" });
+      setScheduleData({ ampm: "오전", hour: "", minute: "", title: "" });
     }
   };
 
@@ -696,32 +713,63 @@ const ScheduleModal = ({ selectedDate, onClose, onAddSchedule }) => {
           <form onSubmit={handleSubmit}>
             <div className="calendar-schedule-modal-field">
               <label>시간</label>
-              <select
-                value={scheduleData.time}
-                onChange={(e) =>
-                  setScheduleData((prev) => ({ ...prev, time: e.target.value }))
-                }
-                required
-                className="calendar-schedule-modal-select"
-              >
-                <option value="">시간을 선택하세요</option>
-                {Array.from({ length: 144 }, (_, i) => {
-                  const hours = Math.floor(i / 6);
-                  const minutes = (i % 6) * 10;
-                  const timeString = `${hours
-                    .toString()
-                    .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-                  return (
-                    <option key={timeString} value={timeString}>
-                      {timeString}
+              <div className="calendar-schedule-modal-time-picker">
+                <select
+                  value={scheduleData.ampm}
+                  onChange={(e) =>
+                    setScheduleData((prev) => ({
+                      ...prev,
+                      ampm: e.target.value,
+                    }))
+                  }
+                  className="calendar-schedule-modal-select calendar-schedule-modal-ampm"
+                >
+                  <option value="오전">오전</option>
+                  <option value="오후">오후</option>
+                </select>
+
+                <select
+                  value={scheduleData.hour}
+                  onChange={(e) =>
+                    setScheduleData((prev) => ({
+                      ...prev,
+                      hour: e.target.value,
+                    }))
+                  }
+                  required
+                  className="calendar-schedule-modal-select calendar-schedule-modal-hour"
+                >
+                  <option value="">시</option>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <option key={i + 1} value={i + 1}>
+                      {i + 1}시
                     </option>
-                  );
-                })}
-              </select>
+                  ))}
+                </select>
+
+                <select
+                  value={scheduleData.minute}
+                  onChange={(e) =>
+                    setScheduleData((prev) => ({
+                      ...prev,
+                      minute: e.target.value,
+                    }))
+                  }
+                  required
+                  className="calendar-schedule-modal-select calendar-schedule-modal-minute"
+                >
+                  <option value="">분</option>
+                  {Array.from({ length: 6 }, (_, i) => (
+                    <option key={i * 10} value={i * 10}>
+                      {i * 10}분
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="calendar-schedule-modal-field">
-              <label>일정 제목</label>
+              <label>내용</label>
               <input
                 type="text"
                 value={scheduleData.title}
@@ -731,7 +779,7 @@ const ScheduleModal = ({ selectedDate, onClose, onAddSchedule }) => {
                     title: e.target.value,
                   }))
                 }
-                placeholder="일정 제목을 입력하세요"
+                placeholder="내용을 입력하세요"
                 required
                 className="calendar-schedule-modal-input"
               />

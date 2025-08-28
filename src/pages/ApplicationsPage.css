@@ -20,6 +20,7 @@
   font-size: 16px;
 }
 
+/* 기존 controls는 유지하되 사용하지 않음 */
 .applications-controls {
   display: flex;
   justify-content: space-between;
@@ -31,32 +32,153 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.filter-section {
-  display: flex;
-  gap: 20px;
-  align-items: center;
+/* 새로운 필터 컨테이너 */
+.ap-filter-container {
+  margin-bottom: 16px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.filter-group {
+/* 새로운 액션 컨테이너 */
+.ap-action-container {
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ap-action-section {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* 새로운 필터 스타일 - ap- prefix 사용 */
+.ap-filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.ap-filter-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ap-filter-group {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.filter-group label {
+.ap-filter-group label {
   font-size: 14px;
   font-weight: 500;
   color: #374151;
   white-space: nowrap;
+  min-width: 60px;
 }
 
-.filter-group select {
+.ap-filter-input {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  min-width: 120px;
+  transition: border-color 0.2s;
+}
+
+.ap-filter-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.ap-filter-select {
   padding: 8px 12px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 14px;
   background: white;
   cursor: pointer;
+  min-width: 120px;
+  transition: all 0.2s;
+}
+
+.ap-filter-select:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+  border-color: #e5e7eb;
+}
+
+.ap-date-group {
+  align-items: center;
+}
+
+.ap-filter-date {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  min-width: 140px;
+}
+
+.ap-date-separator {
+  font-weight: 500;
+  color: #6b7280;
+  margin: 0 8px;
+}
+
+/* 필터 액션 버튼 */
+.ap-filter-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.ap-filter-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.ap-filter-apply {
+  background: #3b82f6;
+  color: white;
+}
+
+.ap-filter-apply:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.ap-filter-reset {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.ap-filter-reset:hover {
+  background: #e5e7eb;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .action-section {
@@ -68,8 +190,15 @@
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  overflow: visible; /* 툴팁이 잘리지 않도록 변경 */
   margin-bottom: 20px;
+  position: relative;
+}
+
+/* 테이블 내부 스크롤을 위한 래퍼 */
+.ap-table-scroll-wrapper {
+  overflow: auto;
+  border-radius: 12px;
 }
 
 .applications-table {
@@ -221,15 +350,53 @@
     align-items: stretch;
   }
 
-  .filter-section {
-    flex-wrap: wrap;
+  .ap-filter-container,
+  .ap-action-container {
+    padding: 16px;
+  }
+
+  .ap-filter-section {
     gap: 12px;
   }
 
-  .filter-group {
+  .ap-filter-row {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .ap-filter-group {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
+  }
+
+  .ap-filter-input,
+  .ap-filter-select,
+  .ap-filter-date {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .ap-date-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .ap-date-separator {
+    display: none;
+  }
+
+  .ap-filter-actions {
+    justify-content: center;
+    margin-top: 16px;
+    padding-top: 12px;
+  }
+
+  .ap-action-section {
+    justify-content: center;
+    flex-wrap: wrap;
   }
 
   .action-section {
@@ -243,6 +410,7 @@
 
   .applications-table {
     font-size: 12px;
+    min-width: 1000px;
   }
 
   .applications-table th,
@@ -250,28 +418,34 @@
     padding: 8px 6px;
   }
 
-  .memo-cell {
-    max-width: 80px;
+  .ap-consultation-tooltip {
+    min-width: 250px;
+    max-width: 300px;
   }
 }
 
 /* 스크롤바 스타일링 */
-.applications-table-container::-webkit-scrollbar {
+.ap-table-scroll-wrapper::-webkit-scrollbar {
   height: 8px;
+  width: 8px;
 }
 
-.applications-table-container::-webkit-scrollbar-track {
+.ap-table-scroll-wrapper::-webkit-scrollbar-track {
   background: #f1f5f9;
   border-radius: 4px;
 }
 
-.applications-table-container::-webkit-scrollbar-thumb {
+.ap-table-scroll-wrapper::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 4px;
 }
 
-.applications-table-container::-webkit-scrollbar-thumb:hover {
+.ap-table-scroll-wrapper::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+.ap-table-scroll-wrapper::-webkit-scrollbar-corner {
+  background: #f1f5f9;
 }
 
 .clickable-row {
@@ -281,4 +455,78 @@
 
 .clickable-row:hover {
   background-color: #f1f5f9 !important;
+}
+
+/* 전역 툴팁 스타일 - ap- prefix 사용 */
+.ap-global-tooltip {
+  position: fixed;
+  z-index: 9999;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  padding: 12px;
+  min-width: 300px;
+  max-width: 400px;
+  pointer-events: none;
+  animation: ap-tooltip-fade-in 0.2s ease-out;
+}
+
+@keyframes ap-tooltip-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 볼드체 셀 스타일 */
+.ap-bold-cell {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.ap-tooltip-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 6px;
+}
+
+.ap-consultation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ap-consultation-item {
+  padding: 8px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+}
+
+.ap-consultation-content {
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.ap-consultation-time {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.ap-no-consultation {
+  font-size: 13px;
+  color: #9ca3af;
+  text-align: center;
+  padding: 12px;
+  font-style: italic;
 }

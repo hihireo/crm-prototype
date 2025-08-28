@@ -1461,6 +1461,28 @@
   cursor: pointer;
 }
 
+/* 시간 선택 UI 스타일 */
+.calendar-schedule-modal-time-picker {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.calendar-schedule-modal-ampm {
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.calendar-schedule-modal-hour {
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.calendar-schedule-modal-minute {
+  width: 100px;
+  flex-shrink: 0;
+}
+
 .calendar-schedule-modal-actions {
   display: flex;
   gap: 12px;
@@ -1502,4 +1524,39 @@
   background: #2563eb;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .work-status-section {
+    justify-content: center;
+  }
+
+  /* 모바일에서 시간 선택 UI 조정 */
+  .calendar-schedule-modal-time-picker {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .calendar-schedule-modal-ampm,
+  .calendar-schedule-modal-hour,
+  .calendar-schedule-modal-minute {
+    width: 100%;
+  }
 }

@@ -1,4 +1,7 @@
-.modal-overlay {
+/* Customer Info Modal CSS - 고유 prefix: cim- (Customer Info Modal) */
+
+/* 모달 오버레이 */
+.cim-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -9,355 +12,1082 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(2px);
 }
 
-.customer-modal {
+/* 모달 컨테이너 - 크기 축소 */
+.cim-customer-modal {
   background: white;
-  border-radius: 12px;
+  border-radius: 16px;
   width: 90%;
   max-width: 1200px;
   max-height: 90vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: cim-modal-appear 0.3s ease-out;
 }
 
-.modal-header {
+@keyframes cim-modal-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* 모달 헤더 */
+.cim-modal-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 24px;
+  align-items: flex-start;
+  padding: 20px 28px;
   border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
 }
 
-.modal-header h2 {
+.cim-header-left {
+  flex: 1;
+}
+
+.cim-header-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+  min-height: 40px;
+}
+
+.cim-title {
   margin: 0;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
   color: #1f2937;
 }
 
-.close-btn {
+.cim-modal-header h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* 단계적 진행 상태 UI */
+.cim-status-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: transparent;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.cim-status-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 6px 10px;
+  border-radius: 6px;
+  min-width: 70px;
+}
+
+.cim-status-step:hover {
+  background: rgba(59, 130, 246, 0.05);
+  transform: translateY(-1px);
+}
+
+.cim-step-indicator {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.3s ease;
+  background: #e5e7eb;
+  border: 2px solid #e5e7eb;
+}
+
+.cim-status-step.active .cim-step-indicator {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+}
+
+.cim-status-step.completed .cim-step-indicator {
+  background: #10b981;
+  border-color: #10b981;
+}
+
+.cim-step-number {
+  font-size: 14px;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.cim-status-step.active .cim-step-number {
+  color: white;
+}
+
+.cim-status-step.completed .cim-step-number {
+  display: none;
+}
+
+.cim-step-check {
+  font-size: 16px;
+  color: white;
+  font-weight: bold;
+  position: absolute;
+}
+
+.cim-step-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.cim-status-step.active .cim-step-label {
+  color: #3b82f6;
+}
+
+.cim-status-step.completed .cim-step-label {
+  color: #10b981;
+}
+
+.cim-step-connector {
+  position: absolute;
+  top: 16px;
+  left: calc(100% - 12px);
+  width: 24px;
+  height: 2px;
+  background: #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.cim-status-step.completed .cim-step-connector {
+  background: #10b981;
+}
+
+.cim-status-step.active .cim-step-connector {
+  background: linear-gradient(to right, #3b82f6 50%, #e5e7eb 50%);
+}
+
+.cim-close-btn {
   background: none;
   border: none;
   font-size: 28px;
   color: #6b7280;
   cursor: pointer;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
-  transition: all 0.2s;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
-.close-btn:hover {
+.cim-close-btn:hover {
   background: #f3f4f6;
   color: #374151;
 }
 
-.customer-info-modal-content {
+/* 모달 콘텐츠 */
+.cim-modal-content {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
+  padding: 28px;
 }
 
-.customer-info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
+/* 섹션 스타일 */
+.cim-section {
   margin-bottom: 32px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
 }
 
-.info-section h3 {
+.cim-section-title {
   margin: 0 0 20px 0;
   font-size: 18px;
   font-weight: 600;
   color: #1f2937;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #3b82f6;
+  padding-bottom: 10px;
+  border-bottom: 3px solid #3b82f6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.info-grid {
+.cim-section-title::before {
+  content: "";
+  width: 4px;
+  height: 18px;
+  background: #3b82f6;
+  border-radius: 2px;
+}
+
+/* 필드 그리드 */
+.cim-field-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
 }
 
-.info-field {
+.cim-field {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.info-field label {
+.cim-field.cim-full-width {
+  grid-column: 1 / -1;
+}
+
+.cim-field label {
   font-size: 14px;
-  font-weight: 500;
-  color: #374151;
-}
-
-.info-field input,
-.info-field select {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-.info-field input:focus,
-.info-field select:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.info-field span {
-  padding: 8px 12px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  font-size: 14px;
-  color: #6b7280;
-}
-
-.phone-group {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 8px;
-}
-
-.checkbox-group {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.checkbox-group label {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 14px;
-  color: #374151;
-}
-
-.checkbox-group input[type="checkbox"] {
-  width: auto;
-  margin: 0;
-}
-
-.additional-info {
-  margin-bottom: 32px;
-}
-
-.checkbox-field {
-  margin-bottom: 16px;
-}
-
-.checkbox-field label {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  font-size: 14px;
-  color: #374151;
-  line-height: 1.5;
-}
-
-.checkbox-field input[type="checkbox"] {
-  margin-top: 2px;
-}
-
-.memo-section,
-.consultation-section {
-  margin-bottom: 32px;
-}
-
-.memo-section h3,
-.consultation-section h3 {
-  margin: 0 0 16px 0;
-  font-size: 18px;
   font-weight: 600;
-  color: #1f2937;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #10b981;
+  color: #374151;
+  margin-bottom: 4px;
 }
 
-.consultation-section h3 {
-  border-bottom-color: #f59e0b;
-}
-
-.memo-input,
-.consultation-input {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.memo-input input,
-.consultation-input input {
-  flex: 1;
+/* 입력 필드 스타일 */
+.cim-input,
+.cim-select,
+.cim-textarea {
   padding: 10px 14px;
-  border: 1px solid #d1d5db;
+  border: 2px solid #e5e7eb;
   border-radius: 8px;
   font-size: 14px;
+  color: #1f2937;
+  background: #ffffff;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
-.memo-input input:focus,
-.consultation-input input:focus {
+.cim-input:focus,
+.cim-select:focus,
+.cim-textarea:focus {
   outline: none;
   border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  transform: translateY(-1px);
 }
 
-.memo-input button,
-.consultation-input button {
-  padding: 10px 20px;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
+.cim-input.cim-readonly {
+  background: #f9fafb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.cim-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* 드롭다운 화살표 중복 문제 해결 */
+.cim-select {
   cursor: pointer;
-  transition: background 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 40px;
 }
 
-.memo-input button:hover,
-.consultation-input button:hover {
-  background: #2563eb;
+/* 전화번호 필드 */
+.cim-phone-field .cim-phone-group {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 10px;
 }
 
-.memo-list,
-.consultation-list {
-  max-height: 300px;
+/* 주민등록번호 필드 - 영역 벗어나는 문제 해결 */
+.cim-ssn-field .cim-ssn-group {
+  display: grid;
+  grid-template-columns: 130px auto 130px;
+  gap: 8px;
+  align-items: center;
+  max-width: 300px;
+}
+
+.cim-ssn-separator {
+  font-size: 16px;
+  font-weight: bold;
+  color: #6b7280;
+  text-align: center;
+  width: 20px;
+}
+
+/* 메신저 계정 스타일 */
+.cim-messenger-input {
+  display: grid;
+  grid-template-columns: 110px 1fr auto;
+  gap: 8px;
+  margin-bottom: 12px;
+  align-items: end;
+}
+
+.cim-messenger-list {
+  max-height: 140px;
   overflow-y: auto;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
+  background: #f9fafb;
 }
 
-.memo-item,
-.consultation-item {
-  padding: 16px;
-  border-bottom: 1px solid #f3f4f6;
+.cim-messenger-item {
+  display: grid;
+  grid-template-columns: 90px 1fr auto;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  align-items: center;
 }
 
-.memo-item:last-child,
-.consultation-item:last-child {
+.cim-messenger-item:last-child {
   border-bottom: none;
 }
 
-.memo-header,
-.consultation-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.memo-author,
-.consultation-author {
+.cim-messenger-platform {
   font-size: 12px;
-  font-weight: 600;
   color: #3b82f6;
   background: #eff6ff;
-  padding: 3px 8px;
-  border-radius: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+  text-align: center;
 }
 
-.memo-date,
-.consultation-date {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.memo-content,
-.consultation-content {
+.cim-messenger-id {
   font-size: 14px;
   color: #374151;
-  line-height: 1.5;
+  font-weight: 500;
 }
 
-.modal-footer {
-  padding: 24px;
-  border-top: 1px solid #e5e7eb;
+/* 메신저 계정 삭제 버튼 */
+.cim-messenger-delete-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: white;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
   display: flex;
-  justify-content: flex-end;
-  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0.7;
 }
 
-.btn {
+.cim-messenger-delete-btn:hover {
+  opacity: 1;
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
+/* 서브섹션 */
+.cim-subsection {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.cim-subsection-title {
+  margin: 0 0 14px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  padding-left: 12px;
+  border-left: 4px solid #10b981;
+}
+
+/* 결제 내역 - 결제 방식 필드 추가 */
+.cim-payment-input {
+  display: grid;
+  grid-template-columns: 170px 120px 100px 1fr auto;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: end;
+}
+
+.cim-payment-list {
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.cim-payment-item {
+  display: grid;
+  grid-template-columns: 120px 110px 80px 1fr;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e5e7eb;
+  align-items: center;
+}
+
+.cim-payment-item:last-child {
+  border-bottom: none;
+}
+
+.cim-payment-date {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.cim-payment-amount {
+  font-size: 14px;
+  color: #059669;
+  font-weight: 600;
+}
+
+.cim-payment-method {
+  font-size: 12px;
+  color: #3b82f6;
+  background: #eff6ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.cim-payment-desc {
+  font-size: 14px;
+  color: #374151;
+}
+
+/* 일정 관리 - 오전/오후 + 시간/분 선택 UI */
+.cim-schedule-input {
+  display: grid;
+  grid-template-columns: 170px auto 1fr auto;
+  gap: 10px;
+  margin-bottom: 16px;
+  align-items: end;
+}
+
+.cim-time-picker-v2 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f8fafc;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s ease;
+  min-width: 160px;
+}
+
+.cim-time-picker-v2:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.cim-time-picker-v2.cim-error {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+}
+
+.cim-ampm-select {
+  width: 50px;
+  font-size: 12px;
+  padding: 4px 6px;
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  color: #374151;
+}
+
+.cim-ampm-select:focus {
+  outline: none;
+}
+
+.cim-time-select {
+  border: none;
+  background: transparent;
+  padding: 4px 6px;
+  font-size: 12px;
+  min-width: 45px;
+  box-shadow: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  font-weight: 500;
+  color: #374151;
+}
+
+.cim-time-select:focus {
+  outline: none;
+  border: none;
+  box-shadow: none;
+  transform: none;
+}
+
+.cim-time-separator {
+  font-size: 16px;
+  font-weight: bold;
+  color: #6b7280;
+  margin: 0 2px;
+}
+
+.cim-schedule-list {
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.cim-schedule-item {
+  display: grid;
+  grid-template-columns: 180px 1fr auto;
+  gap: 14px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e5e7eb;
+  align-items: center;
+}
+
+.cim-schedule-item:last-child {
+  border-bottom: none;
+}
+
+.cim-schedule-datetime {
+  font-size: 12px;
+  color: #3b82f6;
+  font-weight: 600;
+  background: #eff6ff;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.cim-schedule-content {
+  font-size: 14px;
+  color: #374151;
+}
+
+/* 일정 삭제 버튼 */
+.cim-schedule-delete-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: white;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.cim-schedule-delete-btn:hover {
+  opacity: 1;
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
+/* 상담 내용 기록 */
+.cim-consultation-input {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.cim-consultation-list {
+  max-height: 280px;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.cim-consultation-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cim-consultation-item:last-child {
+  border-bottom: none;
+}
+
+.cim-consultation-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.cim-consultation-author {
+  font-size: 12px;
+  font-weight: 600;
+  color: #f59e0b;
+  background: #fef3c7;
+  padding: 4px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
+  min-width: 60px;
+}
+
+.cim-consultation-content-inline {
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.4;
+  flex: 1;
+  min-width: 200px;
+}
+
+.cim-consultation-timestamp {
+  font-size: 11px;
+  color: #6b7280;
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+/* 상담 내용 삭제 버튼 */
+.cim-consultation-delete-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: white;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+  margin-left: 8px;
+}
+
+.cim-consultation-delete-btn:hover {
+  opacity: 1;
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
+/* 버튼 스타일 */
+.cim-btn {
   padding: 10px 20px;
   border: none;
   border-radius: 8px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.btn-secondary {
-  background: #f3f4f6;
-  color: #374151;
+.cim-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.btn-secondary:hover {
-  background: #e5e7eb;
-}
-
-.btn-primary {
+.cim-btn-primary {
   background: #3b82f6;
   color: white;
 }
 
-.btn-primary:hover {
+.cim-btn-primary:hover {
   background: #2563eb;
 }
 
-.btn-assign {
+.cim-btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.cim-btn-secondary:hover {
+  background: #e5e7eb;
+}
+
+.cim-btn-assign {
   background: #059669;
   color: white;
 }
 
-.btn-assign:hover {
+.cim-btn-assign:hover {
   background: #047857;
 }
 
-/* 반응형 */
-@media (max-width: 1024px) {
-  .customer-info-grid {
-    grid-template-columns: 1fr;
-    gap: 24px;
+/* 버튼 사이즈 버전 */
+.cim-btn-sm {
+  padding: 8px 16px;
+  font-size: 12px;
+}
+
+.cim-btn-xs {
+  padding: 4px 8px;
+  font-size: 10px;
+}
+
+.cim-btn-danger {
+  background: #ef4444;
+  color: white;
+}
+
+.cim-btn-danger:hover {
+  background: #dc2626;
+}
+
+/* 모달 푸터 */
+.cim-modal-footer {
+  padding: 20px 28px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background: #f8fafc;
+}
+
+/* 스크롤바 스타일 */
+.cim-payment-list::-webkit-scrollbar,
+.cim-schedule-list::-webkit-scrollbar,
+.cim-consultation-list::-webkit-scrollbar,
+.cim-messenger-list::-webkit-scrollbar,
+.cim-modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cim-payment-list::-webkit-scrollbar-track,
+.cim-schedule-list::-webkit-scrollbar-track,
+.cim-consultation-list::-webkit-scrollbar-track,
+.cim-messenger-list::-webkit-scrollbar-track,
+.cim-modal-content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.cim-payment-list::-webkit-scrollbar-thumb,
+.cim-schedule-list::-webkit-scrollbar-thumb,
+.cim-consultation-list::-webkit-scrollbar-thumb,
+.cim-messenger-list::-webkit-scrollbar-thumb,
+.cim-modal-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.cim-payment-list::-webkit-scrollbar-thumb:hover,
+.cim-schedule-list::-webkit-scrollbar-thumb:hover,
+.cim-consultation-list::-webkit-scrollbar-thumb:hover,
+.cim-messenger-list::-webkit-scrollbar-thumb:hover,
+.cim-modal-content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .cim-field-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   }
 
-  .info-grid {
-    grid-template-columns: 1fr;
+  .cim-payment-input {
+    grid-template-columns: 160px 110px 90px 1fr auto;
+  }
+
+  .cim-schedule-input {
+    grid-template-columns: 160px auto 1fr auto;
+  }
+
+  .cim-messenger-input {
+    grid-template-columns: 100px 1fr auto;
+  }
+
+  .cim-header-content {
+    gap: 14px;
+  }
+
+  .cim-status-stepper {
+    padding: 6px 10px;
+  }
+
+  .cim-status-step {
+    min-width: 70px;
+    padding: 6px 8px;
+  }
+
+  .cim-step-indicator {
+    width: 28px;
+    height: 28px;
+  }
+
+  .cim-step-number {
+    font-size: 12px;
+  }
+
+  .cim-step-label {
+    font-size: 10px;
+  }
+
+  .cim-time-picker-v2 {
+    min-width: 140px;
   }
 }
 
 @media (max-width: 768px) {
-  .customer-modal {
+  .cim-customer-modal {
     width: 95%;
     max-height: 95vh;
   }
 
-  .modal-header,
-  .customer-info-modal-content,
-  .modal-footer {
-    padding: 16px;
+  .cim-modal-header,
+  .cim-modal-content,
+  .cim-modal-footer {
+    padding: 16px 20px;
   }
 
-  .phone-group {
+  .cim-field-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
 
-  .checkbox-group {
+  .cim-phone-field .cim-phone-group {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .cim-ssn-field .cim-ssn-group {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    max-width: none;
+  }
+
+  .cim-ssn-separator {
+    display: none;
+  }
+
+  .cim-payment-input {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .cim-payment-item {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    text-align: left;
+  }
+
+  .cim-schedule-input {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .cim-schedule-item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .cim-consultation-input {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .cim-messenger-input {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .cim-messenger-item {
+    grid-template-columns: auto 1fr auto;
+    gap: 8px;
+  }
+
+  .cim-header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .cim-status-stepper {
+    width: 100%;
+  }
+
+  .cim-status-step {
+    min-width: auto;
+    flex: 1;
+  }
+
+  .cim-modal-footer {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .cim-time-picker-v2 {
+    justify-content: center;
+    min-width: auto;
+  }
+
+  .cim-date-input {
+    min-width: auto;
+  }
+
+  .cim-consultation-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .cim-consultation-content-inline {
+    min-width: auto;
+  }
+
+  .cim-consultation-timestamp {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .cim-customer-modal {
+    width: 98%;
+    max-height: 98vh;
+  }
+
+  .cim-modal-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .cim-close-btn {
+    align-self: flex-end;
+    margin-top: -36px;
+  }
+
+  .cim-header-content {
+    width: 100%;
+  }
+
+  .cim-status-stepper {
+    width: 100%;
     flex-direction: column;
     gap: 8px;
   }
 
-  .memo-input,
-  .consultation-input {
-    flex-direction: column;
+  .cim-status-step {
+    flex-direction: row;
+    justify-content: flex-start;
+    width: 100%;
+    gap: 12px;
   }
+
+  .cim-step-connector {
+    display: none;
+  }
+
+  .cim-section {
+    padding: 12px;
+  }
+
+  .cim-modal-content {
+    padding: 14px;
+  }
+
+  .cim-btn {
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+
+  .cim-ssn-field .cim-ssn-group {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* 애니메이션 효과 */
+.cim-field {
+  animation: cim-field-appear 0.3s ease-out;
+}
+
+@keyframes cim-field-appear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 포커스 스타일 개선 */
+.cim-input:focus,
+.cim-select:focus,
+.cim-textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* 플레이스홀더 스타일 */
+.cim-input::placeholder,
+.cim-textarea::placeholder {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* 호버 효과 */
+.cim-section {
+  transition: all 0.2s ease;
+}
+
+.cim-section:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+/* 날짜 입력 필드 */
+.cim-date-input {
+  min-width: 170px;
+  height: 38px;
+}
+
+.cim-date-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* 유효성 검사 에러 스타일 */
+.cim-input.cim-error,
+.cim-select.cim-error,
+.cim-textarea.cim-error {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+}
+
+.cim-input.cim-error:focus,
+.cim-select.cim-error:focus,
+.cim-textarea.cim-error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
 }

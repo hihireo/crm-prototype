@@ -65,11 +65,11 @@ const Header = ({ user, currentService, onLogout }) => {
                 상담
                 <span className="consultation-red-dot"></span>
               </Link>
+              <Link to="/applications" className="nav-link">
+                고객목록
+              </Link>
               <Link to="/notice" className="nav-link">
                 공지사항
-              </Link>
-              <Link to="/applications" className="nav-link">
-                신청현황
               </Link>
               <Link to="/settings" className="nav-link">
                 설정
