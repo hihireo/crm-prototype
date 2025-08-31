@@ -15,6 +15,7 @@ import NoticePage from "./pages/NoticePage";
 import NotificationPage from "./pages/NotificationPage";
 import ApplicationsPage from "./pages/ApplicationsPage";
 import StatisticsPage from "./pages/StatisticsPage";
+import AttendancePage from "./pages/AttendancePage";
 import SettingsPage from "./pages/SettingsPage";
 
 function AppContent() {
@@ -137,6 +138,16 @@ function AppContent() {
                 <Navigate to="/login" replace />
               ) : (
                 <StatisticsPage user={user} service={currentService} />
+              )
+            }
+          />
+          <Route
+            path="/attendance"
+            element={
+              !user || !currentService ? (
+                <Navigate to="/login" replace />
+              ) : (
+                <AttendancePage user={user} service={currentService} />
               )
             }
           />

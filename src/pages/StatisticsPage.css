@@ -942,3 +942,270 @@
 .stats-table-container::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* 신청통계 테이블 헤더 및 필터 - stapp prefix */
+.stapp-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.stapp-date-filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.stapp-date-input {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  transition: border-color 0.2s;
+  min-width: 140px;
+}
+
+.stapp-date-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.stapp-date-separator {
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.stapp-reset-btn {
+  padding: 8px 16px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  color: #374151;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.stapp-reset-btn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.stapp-applicants {
+  font-size: 13px;
+  color: #6b7280;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 페이지네이션 스타일 */
+.stapp-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 16px;
+}
+
+.stapp-pagination-btn {
+  padding: 8px 16px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.stapp-pagination-btn:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.stapp-pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f9fafb;
+  color: #9ca3af;
+}
+
+.stapp-pagination-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.stapp-pagination-total {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .stapp-table-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .stapp-date-filter {
+    justify-content: center;
+  }
+
+  .stapp-date-input {
+    min-width: 120px;
+  }
+
+  .stapp-applicants {
+    max-width: 150px;
+  }
+
+  .stapp-pagination {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
+
+/* 신청 방법 컬럼 스타일 */
+.stapp-method-count {
+  text-align: center;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* 처리상태 세로 차트 - ststat prefix */
+.ststat-vertical-chart {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 300px;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.ststat-vertical-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  max-width: 80px;
+}
+
+.ststat-bar-container {
+  height: 200px;
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  justify-content: center;
+}
+
+.ststat-bar {
+  width: 40px;
+  min-height: 20px;
+  border-radius: 6px 6px 0 0;
+  position: relative;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 8px;
+}
+
+.ststat-bar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.ststat-bar-value {
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.ststat-bar-info {
+  text-align: center;
+  width: 100%;
+}
+
+.ststat-status-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 4px;
+  word-break: keep-all;
+  line-height: 1.2;
+}
+
+.ststat-status-percent {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .ststat-vertical-chart {
+    flex-wrap: wrap;
+    height: auto;
+    gap: 20px;
+    padding: 20px 16px;
+  }
+
+  .ststat-vertical-item {
+    max-width: 60px;
+  }
+
+  .ststat-bar-container {
+    height: 150px;
+  }
+
+  .ststat-bar {
+    width: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .ststat-vertical-chart {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 16px;
+    height: auto;
+    padding: 16px;
+  }
+
+  .ststat-vertical-item {
+    max-width: none;
+  }
+
+  .ststat-bar-container {
+    height: 120px;
+  }
+
+  .ststat-status-name {
+    font-size: 11px;
+  }
+
+  .ststat-status-percent {
+    font-size: 10px;
+  }
+}

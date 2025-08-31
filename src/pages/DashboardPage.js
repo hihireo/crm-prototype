@@ -8,6 +8,47 @@ const DashboardPage = ({ user, service }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [rankingViewType, setRankingViewType] = useState("team");
 
+  // 비즈니스 명언 데이터
+  const businessQuotes = [
+    {
+      text: "시장이 당신을 부자로 만들어 주지 않는다. 당신의 행동이 부자로 만든다.",
+      author: "워렌 버핏",
+    },
+    {
+      text: "리스크를 감수하지 않는 것이 가장 큰 리스크다.",
+      author: "마크 저커버그",
+    },
+    {
+      text: "기회는 준비된 마음이 우연과 만날 때 생긴다.",
+      author: "루이 파스퇴르",
+    },
+    {
+      text: "투자에서 가장 중요한 것은 시간이다.",
+      author: "존 템플턴",
+    },
+    {
+      text: "영업은 거절을 받아들이는 것에서 시작된다.",
+      author: "브라이언 트레이시",
+    },
+    {
+      text: "돈이 모든 것은 아니지만, 모든 것을 가능하게 한다.",
+      author: "로버트 기요사키",
+    },
+    {
+      text: "성공하는 투자자는 감정이 아닌 논리로 판단한다.",
+      author: "피터 린치",
+    },
+  ];
+
+  // 오늘의 비즈니스 명언 선택 (날짜 기반)
+  const getTodayQuote = () => {
+    const today = new Date();
+    const dayOfYear = Math.floor(
+      (today - new Date(today.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24)
+    );
+    return businessQuotes[dayOfYear % businessQuotes.length];
+  };
+
   // 시간 업데이트
   useEffect(() => {
     const timer = setInterval(() => {
@@ -338,6 +379,12 @@ const DashboardPage = ({ user, service }) => {
             <p className="current-time">
               {currentTime.toLocaleString("ko-KR")}
             </p>
+            <div className="dqot-header-quote">
+              <span className="dqot-header-text">"{getTodayQuote().text}"</span>
+              <span className="dqot-header-author">
+                — {getTodayQuote().author}
+              </span>
+            </div>
           </div>
 
           <div className="work-status-section">
@@ -371,7 +418,7 @@ const DashboardPage = ({ user, service }) => {
         {/* 메인 대시보드 그리드 */}
         <div className="dashboard-grid">
           {/* 통계 카드들 */}
-          <div className="stats-section">
+          <div className="dashboard-stats-section">
             <div className="stats-grid">
               <div className="stat-card new-assigned">
                 <div className="stat-icon">👥</div>

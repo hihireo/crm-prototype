@@ -21,21 +21,71 @@ const StatisticsPage = ({ user, service }) => {
       setActiveTab(tabParam);
     }
   }, []);
-  const [selectedPeriod, setSelectedPeriod] = useState("week");
+  const [selectedPeriod, setSelectedPeriod] = useState("day");
   const [assignmentViewType, setAssignmentViewType] = useState("team");
   const [paymentViewType, setPaymentViewType] = useState("team");
   const [rankingViewType, setRankingViewType] = useState("team");
 
-  // 샘플 데이터
+  // 신청통계 날짜 필터 및 페이지네이션 상태
+  const [applicationDateFilter, setApplicationDateFilter] = useState({
+    startDate: "",
+    endDate: "",
+  });
+  const [applicationCurrentPage, setApplicationCurrentPage] = useState(1);
+  const [applicationItemsPerPage] = useState(10);
+
+  // 최근 신청 현황 데이터
   const applicationStats = {
-    week: [
-      { date: "2024-01-01", count: 12 },
-      { date: "2024-01-02", count: 8 },
-      { date: "2024-01-03", count: 15 },
-      { date: "2024-01-04", count: 22 },
-      { date: "2024-01-05", count: 18 },
-      { date: "2024-01-06", count: 25 },
-      { date: "2024-01-07", count: 20 },
+    day: [
+      {
+        date: "2024-01-15",
+        count: 8,
+        directInput: 3,
+        excelUpload: 2,
+        api: 3,
+      },
+      {
+        date: "2024-01-16",
+        count: 12,
+        directInput: 5,
+        excelUpload: 4,
+        api: 3,
+      },
+      {
+        date: "2024-01-17",
+        count: 15,
+        directInput: 7,
+        excelUpload: 3,
+        api: 5,
+      },
+      {
+        date: "2024-01-18",
+        count: 22,
+        directInput: 10,
+        excelUpload: 6,
+        api: 6,
+      },
+      {
+        date: "2024-01-19",
+        count: 18,
+        directInput: 8,
+        excelUpload: 5,
+        api: 5,
+      },
+      {
+        date: "2024-01-20",
+        count: 25,
+        directInput: 12,
+        excelUpload: 7,
+        api: 6,
+      },
+      {
+        date: "2024-01-21",
+        count: 20,
+        directInput: 9,
+        excelUpload: 6,
+        api: 5,
+      },
     ],
     month: [
       { date: "2024-01", count: 180 },
@@ -52,6 +102,7 @@ const StatisticsPage = ({ user, service }) => {
       { team: "A팀", assigned: 45 },
       { team: "B팀", assigned: 38 },
       { team: "C팀", assigned: 42 },
+      { team: "배정되지않음", assigned: 15 },
     ],
     byMember: [
       { name: "김영업", team: "A팀", assigned: 25 },
@@ -59,6 +110,7 @@ const StatisticsPage = ({ user, service }) => {
       { name: "박세일즈", team: "B팀", assigned: 22 },
       { name: "최고객", team: "B팀", assigned: 16 },
       { name: "정상담", team: "C팀", assigned: 42 },
+      { name: "배정되지않음", team: "-", assigned: 15 },
     ],
   };
 
@@ -148,6 +200,42 @@ const StatisticsPage = ({ user, service }) => {
     return Math.max(...data.map((item) => item[key]));
   };
 
+  // 날짜 필터링 함수
+  const getFilteredApplicationData = () => {
+    let filteredData = applicationStats[selectedPeriod];
+
+    if (applicationDateFilter.startDate || applicationDateFilter.endDate) {
+      filteredData = filteredData.filter((item) => {
+        const itemDate = new Date(item.date);
+        const startDate = applicationDateFilter.startDate
+          ? new Date(applicationDateFilter.startDate)
+          : null;
+        const endDate = applicationDateFilter.endDate
+          ? new Date(applicationDateFilter.endDate)
+          : null;
+
+        if (startDate && itemDate < startDate) return false;
+        if (endDate && itemDate > endDate) return false;
+        return true;
+      });
+    }
+
+    return filteredData;
+  };
+
+  // 페이지네이션 함수
+  const getPaginatedApplicationData = () => {
+    const filteredData = getFilteredApplicationData();
+    const startIndex = (applicationCurrentPage - 1) * applicationItemsPerPage;
+    const endIndex = startIndex + applicationItemsPerPage;
+    return filteredData.slice(startIndex, endIndex);
+  };
+
+  const getTotalApplicationPages = () => {
+    const filteredData = getFilteredApplicationData();
+    return Math.ceil(filteredData.length / applicationItemsPerPage);
+  };
+
   const tabs = [
     { id: "applications", name: "신청통계", icon: "📈" },
     { id: "assignments", name: "배정통계", icon: "👥" },
@@ -191,11 +279,11 @@ const StatisticsPage = ({ user, service }) => {
                 <div className="stats-period-selector">
                   <button
                     className={`stats-period-btn ${
-                      selectedPeriod === "week" ? "active" : ""
+                      selectedPeriod === "day" ? "active" : ""
                     }`}
-                    onClick={() => setSelectedPeriod("week")}
+                    onClick={() => setSelectedPeriod("day")}
                   >
-                    주간
+                    일간
                   </button>
                   <button
                     className={`stats-period-btn ${
@@ -231,16 +319,16 @@ const StatisticsPage = ({ user, service }) => {
                       fill="none"
                       stroke="#3b82f6"
                       strokeWidth="4"
-                      points={applicationStats[selectedPeriod]
+                      points={getFilteredApplicationData()
                         .map((item, index) => {
                           const maxCount = getMaxValue(
-                            applicationStats[selectedPeriod],
+                            getFilteredApplicationData(),
                             "count"
                           );
                           const x =
                             80 +
                             (index * 840) /
-                              (applicationStats[selectedPeriod].length - 1);
+                              (getFilteredApplicationData().length - 1);
                           const y = 250 - (item.count / maxCount) * 180;
                           return `${x},${y}`;
                         })
@@ -248,15 +336,15 @@ const StatisticsPage = ({ user, service }) => {
                     />
 
                     {/* 데이터 포인트 */}
-                    {applicationStats[selectedPeriod].map((item, index) => {
+                    {getFilteredApplicationData().map((item, index) => {
                       const maxCount = getMaxValue(
-                        applicationStats[selectedPeriod],
+                        getFilteredApplicationData(),
                         "count"
                       );
                       const x =
                         80 +
                         (index * 840) /
-                          (applicationStats[selectedPeriod].length - 1);
+                          (getFilteredApplicationData().length - 1);
                       const y = 250 - (item.count / maxCount) * 180;
                       return (
                         <g key={index}>
@@ -284,11 +372,11 @@ const StatisticsPage = ({ user, service }) => {
                     })}
 
                     {/* X축 라벨 */}
-                    {applicationStats[selectedPeriod].map((item, index) => {
+                    {getFilteredApplicationData().map((item, index) => {
                       const x =
                         80 +
                         (index * 840) /
-                          (applicationStats[selectedPeriod].length - 1);
+                          (getFilteredApplicationData().length - 1);
                       return (
                         <text
                           key={index}
@@ -299,7 +387,7 @@ const StatisticsPage = ({ user, service }) => {
                           fill="#64748b"
                           fontSize="13"
                         >
-                          {selectedPeriod === "week"
+                          {selectedPeriod === "day"
                             ? formatDate(item.date)
                             : item.date}
                         </text>
@@ -311,48 +399,114 @@ const StatisticsPage = ({ user, service }) => {
 
               {/* 표 영역 */}
               <div className="stats-table-container">
-                <h3>상세 데이터</h3>
+                <div className="stapp-table-header">
+                  <h3>상세 데이터</h3>
+                  <div className="stapp-date-filter">
+                    <input
+                      type="date"
+                      value={applicationDateFilter.startDate}
+                      onChange={(e) =>
+                        setApplicationDateFilter({
+                          ...applicationDateFilter,
+                          startDate: e.target.value,
+                        })
+                      }
+                      className="stapp-date-input"
+                    />
+                    <span className="stapp-date-separator">~</span>
+                    <input
+                      type="date"
+                      value={applicationDateFilter.endDate}
+                      onChange={(e) =>
+                        setApplicationDateFilter({
+                          ...applicationDateFilter,
+                          endDate: e.target.value,
+                        })
+                      }
+                      className="stapp-date-input"
+                    />
+                    <button
+                      onClick={() => {
+                        setApplicationDateFilter({
+                          startDate: "",
+                          endDate: "",
+                        });
+                        setApplicationCurrentPage(1);
+                      }}
+                      className="stapp-reset-btn"
+                    >
+                      초기화
+                    </button>
+                  </div>
+                </div>
+
                 <table className="stats-table">
                   <thead>
                     <tr>
-                      <th>{selectedPeriod === "week" ? "날짜" : "월"}</th>
+                      <th>{selectedPeriod === "day" ? "날짜" : "월"}</th>
                       <th>신청 건수</th>
-                      <th>전일 대비</th>
+                      <th>직접 입력</th>
+                      <th>엑셀 업로드</th>
+                      <th>API</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {applicationStats[selectedPeriod].map((item, index) => {
-                      const prevCount =
-                        index > 0
-                          ? applicationStats[selectedPeriod][index - 1].count
-                          : item.count;
-                      const change = item.count - prevCount;
-                      const changePercent =
-                        prevCount > 0
-                          ? ((change / prevCount) * 100).toFixed(1)
-                          : 0;
-
-                      return (
-                        <tr key={index}>
-                          <td>
-                            {selectedPeriod === "week"
-                              ? formatDate(item.date)
-                              : item.date}
-                          </td>
-                          <td className="stats-count">{item.count}건</td>
-                          <td
-                            className={`stats-change ${
-                              change >= 0 ? "positive" : "negative"
-                            }`}
-                          >
-                            {change >= 0 ? "+" : ""}
-                            {change}건 ({changePercent}%)
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {getPaginatedApplicationData().map((item, index) => (
+                      <tr key={index}>
+                        <td>
+                          {selectedPeriod === "day"
+                            ? formatDate(item.date)
+                            : item.date}
+                        </td>
+                        <td className="stats-count">{item.count}건</td>
+                        <td className="stapp-method-count">
+                          {item.directInput || 0}
+                        </td>
+                        <td className="stapp-method-count">
+                          {item.excelUpload || 0}
+                        </td>
+                        <td className="stapp-method-count">{item.api || 0}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
+
+                {/* 페이지네이션 */}
+                {getTotalApplicationPages() > 1 && (
+                  <div className="stapp-pagination">
+                    <button
+                      onClick={() =>
+                        setApplicationCurrentPage((prev) =>
+                          Math.max(prev - 1, 1)
+                        )
+                      }
+                      disabled={applicationCurrentPage === 1}
+                      className="stapp-pagination-btn"
+                    >
+                      이전
+                    </button>
+                    <div className="stapp-pagination-info">
+                      {applicationCurrentPage} / {getTotalApplicationPages()}{" "}
+                      페이지
+                      <span className="stapp-pagination-total">
+                        (총 {getFilteredApplicationData().length}건)
+                      </span>
+                    </div>
+                    <button
+                      onClick={() =>
+                        setApplicationCurrentPage((prev) =>
+                          Math.min(prev + 1, getTotalApplicationPages())
+                        )
+                      }
+                      disabled={
+                        applicationCurrentPage === getTotalApplicationPages()
+                      }
+                      className="stapp-pagination-btn"
+                    >
+                      다음
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -417,9 +571,6 @@ const StatisticsPage = ({ user, service }) => {
                                     style={{ width: `${barWidth}%` }}
                                   ></div>
                                 </div>
-                                <span className="stats-assignment-label">
-                                  배정 {team.assigned}건
-                                </span>
                               </div>
                             </div>
                           </div>
@@ -465,10 +616,10 @@ const StatisticsPage = ({ user, service }) => {
               <div className="stats-content-single">
                 <div className="stats-chart-container stats-full-width">
                   <h3>상태별 분포</h3>
-                  <div className="stats-status-bar-chart">
+                  <div className="ststat-vertical-chart">
                     {statusStats.map((status, index) => {
                       const maxCount = getMaxValue(statusStats, "count");
-                      const width = (status.count / maxCount) * 100;
+                      const height = (status.count / maxCount) * 100;
                       const total = statusStats.reduce(
                         (sum, s) => sum + s.count,
                         0
@@ -478,29 +629,26 @@ const StatisticsPage = ({ user, service }) => {
                       );
 
                       return (
-                        <div key={index} className="stats-status-bar-item">
-                          <div className="stats-status-bar-header">
-                            <span className="stats-status-name">
-                              {status.status}
-                            </span>
-                            <div className="stats-status-values">
-                              <span className="stats-status-count">
-                                {status.count}건
-                              </span>
-                              <span className="stats-status-percent">
-                                ({percentage}%)
-                              </span>
+                        <div key={index} className="ststat-vertical-item">
+                          <div className="ststat-bar-container">
+                            <div
+                              className="ststat-bar"
+                              style={{
+                                height: `${height}%`,
+                                backgroundColor: status.color,
+                              }}
+                            >
+                              <div className="ststat-bar-value">
+                                {status.count}
+                              </div>
                             </div>
                           </div>
-                          <div className="stats-status-bar-wrapper">
-                            <div className="stats-status-bar">
-                              <div
-                                className="stats-status-bar-fill"
-                                style={{
-                                  width: `${width}%`,
-                                  backgroundColor: status.color,
-                                }}
-                              ></div>
+                          <div className="ststat-bar-info">
+                            <div className="ststat-status-name">
+                              {status.status}
+                            </div>
+                            <div className="ststat-status-percent">
+                              {percentage}%
                             </div>
                           </div>
                         </div>

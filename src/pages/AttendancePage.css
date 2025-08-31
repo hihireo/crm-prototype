@@ -1,0 +1,441 @@
+/* 근퇴 페이지 스타일 - attn prefix */
+.attn-page {
+  padding: 24px;
+  min-height: calc(100vh - 64px);
+  background: #f8fafc;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* 헤더 섹션 */
+.attn-header {
+  margin-bottom: 32px;
+  padding: 32px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  text-align: center;
+}
+
+.attn-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.attn-header p {
+  color: #64748b;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* 날짜 선택 영역 */
+.attn-date-section {
+  margin-bottom: 32px;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.attn-date-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.attn-date-arrow {
+  width: 48px;
+  height: 48px;
+  border: 2px solid #e2e8f0;
+  background: #ffffff;
+  border-radius: 12px;
+  color: #64748b;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.attn-date-arrow:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: #f0f9ff;
+}
+
+.attn-date-display {
+  position: relative;
+}
+
+.attn-date-btn {
+  padding: 16px 32px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 280px;
+  text-align: center;
+}
+
+.attn-date-btn:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* 달력 드롭다운 */
+.attn-calendar-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 8px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 320px;
+  padding: 20px;
+}
+
+.attn-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.attn-calendar-nav {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 8px;
+  color: #64748b;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.attn-calendar-nav:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: #f0f9ff;
+}
+
+.attn-calendar-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.attn-calendar-grid {
+  width: 100%;
+}
+
+.attn-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.attn-calendar-weekday {
+  padding: 8px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.attn-calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.attn-calendar-day {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.attn-calendar-day:hover {
+  background: #f0f9ff;
+  color: #3b82f6;
+}
+
+.attn-calendar-day.other-month {
+  color: #cbd5e1;
+}
+
+.attn-calendar-day.today {
+  background: #3b82f6;
+  color: white;
+  font-weight: 700;
+}
+
+.attn-calendar-day.selected {
+  background: #1e40af;
+  color: white;
+  font-weight: 700;
+}
+
+.attn-calendar-day.today.selected {
+  background: #1e40af;
+}
+
+/* 테이블 섹션 */
+.attn-table-section {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  padding: 32px;
+}
+
+.attn-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.attn-table-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.attn-summary {
+  display: flex;
+  gap: 24px;
+}
+
+.attn-summary-item {
+  padding: 8px 16px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+}
+
+/* 테이블 스타일 */
+.attn-table-container {
+  overflow-x: auto;
+}
+
+.attn-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.attn-table th {
+  background: #f8fafc;
+  padding: 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.attn-table td {
+  padding: 16px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+  color: #374151;
+}
+
+.attn-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.attn-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.attn-name {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.attn-team {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.attn-position {
+  color: #64748b;
+}
+
+.attn-time {
+  font-family: "Courier New", monospace;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.attn-hours {
+  font-weight: 500;
+  color: #374151;
+}
+
+.attn-no-data {
+  text-align: center;
+  color: #64748b;
+  font-style: italic;
+  padding: 40px !important;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .attn-date-selector {
+    gap: 16px;
+  }
+
+  .attn-date-btn {
+    min-width: 240px;
+    padding: 14px 24px;
+    font-size: 16px;
+  }
+
+  .attn-calendar-dropdown {
+    min-width: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .attn-page {
+    padding: 16px;
+  }
+
+  .attn-header {
+    padding: 24px 20px;
+  }
+
+  .attn-header h1 {
+    font-size: 28px;
+  }
+
+  .attn-header p {
+    font-size: 14px;
+  }
+
+  .attn-date-section {
+    padding: 20px;
+  }
+
+  .attn-date-selector {
+    gap: 12px;
+  }
+
+  .attn-date-arrow {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+
+  .attn-date-btn {
+    min-width: 200px;
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+
+  .attn-calendar-dropdown {
+    min-width: 260px;
+    padding: 16px;
+  }
+
+  .attn-table-section {
+    padding: 20px;
+  }
+
+  .attn-table-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .attn-summary {
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .attn-summary-item {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .attn-table th,
+  .attn-table td {
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+
+  .attn-table th:nth-child(3),
+  .attn-table td:nth-child(3) {
+    display: none; /* 직급 컬럼 숨김 */
+  }
+}
+
+@media (max-width: 480px) {
+  .attn-date-btn {
+    min-width: 180px;
+    font-size: 14px;
+  }
+
+  .attn-calendar-dropdown {
+    min-width: 240px;
+    left: 0;
+    transform: none;
+  }
+
+  .attn-table th,
+  .attn-table td {
+    padding: 10px 6px;
+    font-size: 12px;
+  }
+
+  .attn-table th:nth-child(2),
+  .attn-table td:nth-child(2) {
+    display: none; /* 팀 컬럼도 숨김 */
+  }
+}

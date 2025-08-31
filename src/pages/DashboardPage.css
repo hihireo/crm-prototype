@@ -197,9 +197,15 @@
 }
 
 /* Stats Section */
-.stats-section {
+.dashboard-stats-section {
   grid-column: 1 / -1;
   margin-bottom: 8px;
+  position: relative;
+  padding: 32px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
 }
 
 .stats-grid {
@@ -1617,5 +1623,50 @@
   .calendar-schedule-modal-hour,
   .calendar-schedule-modal-minute {
     width: 100%;
+  }
+}
+
+/* 헤더 명언 스타일 - dqot prefix */
+.dqot-header-quote {
+  margin-top: 12px;
+  padding: 8px 0;
+  border-top: 1px solid #f1f5f9;
+}
+
+.dqot-header-text {
+  display: block;
+  font-size: 13px;
+  color: #64748b;
+  font-style: italic;
+  line-height: 1.4;
+  margin-bottom: 4px;
+  max-width: 400px;
+}
+
+.dqot-header-author {
+  display: block;
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .dqot-header-quote {
+    text-align: center;
+    margin-top: 16px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .dqot-header-text {
+    font-size: 12px;
+    max-width: none;
+  }
+
+  .dqot-header-author {
+    font-size: 10px;
   }
 }
