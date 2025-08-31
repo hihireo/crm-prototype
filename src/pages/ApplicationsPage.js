@@ -17,6 +17,31 @@ const ApplicationsPage = () => {
     team: "전체",
   };
 
+  // 드롭다운 옵션들
+  const applicationPathOptions = [
+    "검색광고",
+    "디스플레이광고",
+    "소셜광고",
+    "DA광고",
+    "블로그광고",
+  ];
+
+  const mediaCompanyOptions = [
+    "네이버",
+    "구글",
+    "페이스북",
+    "카카오",
+    "인스타그램",
+  ];
+
+  const siteNameOptions = [
+    "부동산전문",
+    "교육컨설팅",
+    "펜션예약",
+    "헬스케어",
+    "인테리어",
+  ];
+
   const [applications] = useState([
     {
       id: 1,
@@ -177,9 +202,11 @@ const ApplicationsPage = () => {
   });
   const [filters, setFilters] = useState({
     name: "",
-    applicationPath: "",
-    mediaCompany: "",
-    siteName: "",
+    phone: "",
+    consultationContent: "",
+    applicationPath: "all",
+    mediaCompany: "all",
+    siteName: "all",
     team: "all",
     manager: "all",
     consultationCategories: [],
@@ -191,9 +218,11 @@ const ApplicationsPage = () => {
 
   const [appliedFilters, setAppliedFilters] = useState({
     name: "",
-    applicationPath: "",
-    mediaCompany: "",
-    siteName: "",
+    phone: "",
+    consultationContent: "",
+    applicationPath: "all",
+    mediaCompany: "all",
+    siteName: "all",
     team: "all",
     manager: "all",
     consultationCategories: [],
@@ -253,9 +282,11 @@ const ApplicationsPage = () => {
   const handleFilterReset = () => {
     const resetFilters = {
       name: "",
-      applicationPath: "",
-      mediaCompany: "",
-      siteName: "",
+      phone: "",
+      consultationContent: "",
+      applicationPath: "all",
+      mediaCompany: "all",
+      siteName: "all",
       team: "all",
       manager: "all",
       consultationCategories: [],
@@ -306,7 +337,7 @@ const ApplicationsPage = () => {
 
   // 드롭다운 외부 클릭 감지
   const handleDropdownClickOutside = useCallback((e) => {
-    if (!e.target.closest(".ap-category-dropdown-container")) {
+    if (!e.target.closest(".apcl-category-dropdown-container")) {
       setIsDropdownOpen(false);
     }
   }, []);
@@ -437,28 +468,38 @@ const ApplicationsPage = () => {
     )
       return false;
     if (
-      appliedFilters.applicationPath &&
-      !app.applicationPath
-        .toLowerCase()
-        .includes(appliedFilters.applicationPath.toLowerCase())
+      appliedFilters.phone &&
+      !app.contact.toLowerCase().includes(appliedFilters.phone.toLowerCase())
     )
       return false;
+
+    // 상담 내용 검색 필터
     if (
-      appliedFilters.mediaCompany &&
-      !app.mediaCompany
-        .toLowerCase()
-        .includes(appliedFilters.mediaCompany.toLowerCase())
-    )
-      return false;
-    if (
-      appliedFilters.siteName &&
-      !app.siteName
-        .toLowerCase()
-        .includes(appliedFilters.siteName.toLowerCase())
+      appliedFilters.consultationContent &&
+      !app.consultations?.some((consultation) =>
+        consultation.content
+          .toLowerCase()
+          .includes(appliedFilters.consultationContent.toLowerCase())
+      )
     )
       return false;
 
     // 드롭다운 선택 필터
+    if (
+      appliedFilters.applicationPath !== "all" &&
+      app.applicationPath !== appliedFilters.applicationPath
+    )
+      return false;
+    if (
+      appliedFilters.mediaCompany !== "all" &&
+      app.mediaCompany !== appliedFilters.mediaCompany
+    )
+      return false;
+    if (
+      appliedFilters.siteName !== "all" &&
+      app.siteName !== appliedFilters.siteName
+    )
+      return false;
     if (appliedFilters.team !== "all" && app.team !== appliedFilters.team)
       return false;
     if (
@@ -511,66 +552,56 @@ const ApplicationsPage = () => {
         </div>
 
         {/* 필터 영역 */}
-        <div className="ap-filter-container">
-          <div className="ap-filter-section">
-            {/* 문자열 검색 필터 */}
-            <div className="ap-filter-row">
-              <div className="ap-filter-group">
+        <div className="apcl-filter-container">
+          <div className="apcl-filter-section">
+            {/* 첫 번째 행: 이름, 핸드폰번호 */}
+            <div className="apcl-filter-row">
+              <div className="apcl-filter-group">
                 <label>이름:</label>
                 <input
                   type="text"
                   value={filters.name}
                   onChange={(e) => handleFilterChange("name", e.target.value)}
                   placeholder="이름 검색"
-                  className="ap-filter-input"
+                  className="apcl-filter-input"
                 />
               </div>
-              <div className="ap-filter-group">
-                <label>신청경로:</label>
+              <div className="apcl-filter-group">
+                <label>핸드폰번호:</label>
                 <input
                   type="text"
-                  value={filters.applicationPath}
-                  onChange={(e) =>
-                    handleFilterChange("applicationPath", e.target.value)
-                  }
-                  placeholder="신청경로 검색"
-                  className="ap-filter-input"
-                />
-              </div>
-              <div className="ap-filter-group">
-                <label>매체사:</label>
-                <input
-                  type="text"
-                  value={filters.mediaCompany}
-                  onChange={(e) =>
-                    handleFilterChange("mediaCompany", e.target.value)
-                  }
-                  placeholder="매체사 검색"
-                  className="ap-filter-input"
-                />
-              </div>
-              <div className="ap-filter-group">
-                <label>사이트:</label>
-                <input
-                  type="text"
-                  value={filters.siteName}
-                  onChange={(e) =>
-                    handleFilterChange("siteName", e.target.value)
-                  }
-                  placeholder="사이트 검색"
-                  className="ap-filter-input"
+                  value={filters.phone}
+                  onChange={(e) => handleFilterChange("phone", e.target.value)}
+                  placeholder="핸드폰번호 검색"
+                  className="apcl-filter-input"
                 />
               </div>
             </div>
 
-            {/* 드롭다운 필터 */}
-            <div className="ap-filter-row">
-              <div className="ap-filter-group">
+            {/* 두 번째 행: 상담 내용 검색 (단독) */}
+            <div className="apcl-filter-row">
+              <div className="apcl-filter-group apcl-consultation-content-group">
+                <label>상담 내용:</label>
+                <input
+                  type="text"
+                  value={filters.consultationContent}
+                  onChange={(e) =>
+                    handleFilterChange("consultationContent", e.target.value)
+                  }
+                  placeholder="상담 내용 검색"
+                  className="apcl-filter-input apcl-consultation-content-input"
+                />
+              </div>
+            </div>
+
+            {/* 네 번째 행: 담당팀, 담당자 */}
+            <div className="apcl-filter-row">
+              <div className="apcl-filter-group">
                 <label>담당팀:</label>
                 <select
                   value={filters.team}
                   onChange={(e) => handleFilterChange("team", e.target.value)}
-                  className="ap-filter-select"
+                  className="apcl-filter-select"
                 >
                   <option value="all">전체</option>
                   <option value="영업1팀">영업1팀</option>
@@ -578,14 +609,14 @@ const ApplicationsPage = () => {
                   <option value="영업3팀">영업3팀</option>
                 </select>
               </div>
-              <div className="ap-filter-group">
+              <div className="apcl-filter-group">
                 <label>담당자:</label>
                 <select
                   value={filters.manager}
                   onChange={(e) =>
                     handleFilterChange("manager", e.target.value)
                   }
-                  className="ap-filter-select"
+                  className="apcl-filter-select"
                   disabled={filters.team === "all"}
                 >
                   <option value="all">전체</option>
@@ -607,28 +638,79 @@ const ApplicationsPage = () => {
                   )}
                 </select>
               </div>
+              <div className="apcl-filter-group">
+                <label>신청경로:</label>
+                <select
+                  value={filters.applicationPath}
+                  onChange={(e) =>
+                    handleFilterChange("applicationPath", e.target.value)
+                  }
+                  className="apcl-filter-select"
+                >
+                  <option value="all">전체</option>
+                  {applicationPathOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="apcl-filter-group">
+                <label>매체사:</label>
+                <select
+                  value={filters.mediaCompany}
+                  onChange={(e) =>
+                    handleFilterChange("mediaCompany", e.target.value)
+                  }
+                  className="apcl-filter-select"
+                >
+                  <option value="all">전체</option>
+                  {mediaCompanyOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="apcl-filter-group">
+                <label>사이트:</label>
+                <select
+                  value={filters.siteName}
+                  onChange={(e) =>
+                    handleFilterChange("siteName", e.target.value)
+                  }
+                  className="apcl-filter-select"
+                >
+                  <option value="all">전체</option>
+                  {siteNameOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* 상담 카테고리 필터 - 별도 행 */}
-            <div className="ap-filter-row">
-              <div className="ap-filter-group ap-consultation-category-group">
+            <div className="apcl-filter-row">
+              <div className="apcl-filter-group apcl-consultation-category-group">
                 <label>상담 카테고리:</label>
-                <div className="ap-category-filter-container">
-                  <div className="ap-category-dropdown-container">
+                <div className="apcl-category-filter-container">
+                  <div className="apcl-category-dropdown-container">
                     {/* 드롭다운 버튼 */}
                     <button
                       type="button"
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="ap-dropdown-trigger"
+                      className="apcl-dropdown-trigger"
                     >
-                      <span className="ap-dropdown-text">
+                      <span className="apcl-dropdown-text">
                         {filters.consultationCategories.length === 0
                           ? "카테고리 선택"
                           : `${filters.consultationCategories.length}개 선택됨`}
                       </span>
                       <svg
-                        className={`ap-dropdown-icon ${
-                          isDropdownOpen ? "ap-dropdown-icon-open" : ""
+                        className={`apcl-dropdown-icon ${
+                          isDropdownOpen ? "apcl-dropdown-icon-open" : ""
                         }`}
                         viewBox="0 0 20 20"
                         fill="currentColor"
@@ -643,13 +725,13 @@ const ApplicationsPage = () => {
 
                     {/* 드롭다운 메뉴 */}
                     {isDropdownOpen && (
-                      <div className="ap-dropdown-menu">
+                      <div className="apcl-dropdown-menu">
                         {/* 카테고리 옵션들 */}
-                        <div className="ap-dropdown-options">
+                        <div className="apcl-dropdown-options">
                           {consultationCategories.map((category) => (
                             <label
                               key={category}
-                              className="ap-dropdown-option"
+                              className="apcl-dropdown-option"
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -662,9 +744,9 @@ const ApplicationsPage = () => {
                                   category
                                 )}
                                 onChange={() => {}} // 빈 함수로 설정하여 label onClick으로만 처리
-                                className="ap-checkbox"
+                                className="apcl-checkbox"
                               />
-                              <span className="ap-checkbox-label">
+                              <span className="apcl-checkbox-label">
                                 {category}
                               </span>
                             </label>
@@ -672,7 +754,7 @@ const ApplicationsPage = () => {
                         </div>
 
                         {/* 드롭다운 하단 액션 */}
-                        <div className="ap-dropdown-actions">
+                        <div className="apcl-dropdown-actions">
                           <button
                             type="button"
                             onClick={() => {
@@ -681,14 +763,14 @@ const ApplicationsPage = () => {
                                 consultationCategories: [],
                               }));
                             }}
-                            className="ap-clear-all"
+                            className="apcl-clear-all"
                           >
                             전체 해제
                           </button>
                           <button
                             type="button"
                             onClick={() => setIsDropdownOpen(false)}
-                            className="ap-dropdown-close"
+                            className="apcl-dropdown-close"
                           >
                             완료
                           </button>
@@ -699,14 +781,14 @@ const ApplicationsPage = () => {
 
                   {/* 선택된 카테고리 태그들 - 드롭다운 오른쪽 */}
                   {filters.consultationCategories.length > 0 && (
-                    <div className="ap-selected-tags">
+                    <div className="apcl-selected-tags">
                       {filters.consultationCategories.map((category) => (
-                        <span key={category} className="ap-category-tag">
+                        <span key={category} className="apcl-category-tag">
                           {category}
                           <button
                             type="button"
                             onClick={() => handleRemoveCategory(category)}
-                            className="ap-tag-remove"
+                            className="apcl-tag-remove"
                             aria-label={`${category} 제거`}
                           >
                             ×
@@ -720,8 +802,8 @@ const ApplicationsPage = () => {
             </div>
 
             {/* 날짜 범위 필터 */}
-            <div className="ap-filter-row">
-              <div className="ap-filter-group ap-date-group">
+            <div className="apcl-filter-row">
+              <div className="apcl-filter-group apcl-date-group">
                 <label>신청시간:</label>
                 <input
                   type="date"
@@ -729,19 +811,19 @@ const ApplicationsPage = () => {
                   onChange={(e) =>
                     handleFilterChange("applicationStartDate", e.target.value)
                   }
-                  className="ap-filter-date"
+                  className="apcl-filter-date"
                 />
-                <span className="ap-date-separator">~</span>
+                <span className="apcl-date-separator">~</span>
                 <input
                   type="date"
                   value={filters.applicationEndDate}
                   onChange={(e) =>
                     handleFilterChange("applicationEndDate", e.target.value)
                   }
-                  className="ap-filter-date"
+                  className="apcl-filter-date"
                 />
               </div>
-              <div className="ap-filter-group ap-date-group">
+              <div className="apcl-filter-group apcl-date-group">
                 <label>배정시간:</label>
                 <input
                   type="date"
@@ -749,30 +831,30 @@ const ApplicationsPage = () => {
                   onChange={(e) =>
                     handleFilterChange("assignmentStartDate", e.target.value)
                   }
-                  className="ap-filter-date"
+                  className="apcl-filter-date"
                 />
-                <span className="ap-date-separator">~</span>
+                <span className="apcl-date-separator">~</span>
                 <input
                   type="date"
                   value={filters.assignmentEndDate}
                   onChange={(e) =>
                     handleFilterChange("assignmentEndDate", e.target.value)
                   }
-                  className="ap-filter-date"
+                  className="apcl-filter-date"
                 />
               </div>
             </div>
 
             {/* 필터 버튼 */}
-            <div className="ap-filter-actions">
+            <div className="apcl-filter-actions">
               <button
-                className="ap-filter-btn ap-filter-apply"
+                className="apcl-filter-btn apcl-filter-apply"
                 onClick={handleFilterApply}
               >
                 필터 적용
               </button>
               <button
-                className="ap-filter-btn ap-filter-reset"
+                className="apcl-filter-btn apcl-filter-reset"
                 onClick={handleFilterReset}
               >
                 초기화

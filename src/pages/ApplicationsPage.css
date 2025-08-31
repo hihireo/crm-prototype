@@ -32,7 +32,16 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* 새로운 필터 컨테이너 */
+/* 새로운 필터 컨테이너 - apcl prefix로 변경 */
+.apcl-filter-container {
+  margin-bottom: 16px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 기존 ap-filter-container는 호환성을 위해 유지 */
 .ap-filter-container {
   margin-bottom: 16px;
   padding: 20px;
@@ -56,7 +65,109 @@
   justify-content: flex-end;
 }
 
-/* 새로운 필터 스타일 - ap- prefix 사용 */
+/* 새로운 필터 스타일 - apcl- prefix 사용 */
+.apcl-filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.apcl-filter-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* 두 번째 행 우측 정렬 */
+.apcl-filter-row-right {
+  justify-content: flex-end;
+  margin-left: auto;
+  max-width: 400px;
+}
+
+/* 상담 내용 검색 그룹 스타일 */
+.apcl-consultation-content-group {
+  flex: 1;
+  max-width: 600px;
+}
+
+/* 상담 내용 입력 필드 - 더 긴 길이 */
+.apcl-consultation-content-input {
+  min-width: 300px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.apcl-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.apcl-filter-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+  min-width: 60px;
+}
+
+.apcl-filter-input {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  min-width: 120px;
+  transition: border-color 0.2s;
+}
+
+.apcl-filter-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.apcl-filter-select {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  min-width: 120px;
+  transition: all 0.2s;
+}
+
+.apcl-filter-select:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+  border-color: #e5e7eb;
+}
+
+.apcl-date-group {
+  align-items: center;
+}
+
+.apcl-filter-date {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  min-width: 140px;
+}
+
+.apcl-date-separator {
+  font-weight: 500;
+  color: #6b7280;
+  margin: 0 8px;
+}
+
+/* 기존 ap- prefix 스타일 유지 (호환성) */
 .ap-filter-section {
   display: flex;
   flex-direction: column;
@@ -138,7 +249,50 @@
   margin: 0 8px;
 }
 
-/* 필터 액션 버튼 */
+/* 필터 액션 버튼 - apcl prefix */
+.apcl-filter-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.apcl-filter-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.apcl-filter-apply {
+  background: #3b82f6;
+  color: white;
+}
+
+.apcl-filter-apply:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.apcl-filter-reset {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.apcl-filter-reset:hover {
+  background: #e5e7eb;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 기존 ap- prefix 필터 액션 버튼 (호환성) */
 .ap-filter-actions {
   display: flex;
   gap: 12px;
@@ -181,7 +335,29 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* 현대적 드롭다운 멀티셀렉트 UI - ap- prefix 사용 */
+/* 현대적 드롭다운 멀티셀렉트 UI - apcl- prefix 사용 */
+.apcl-consultation-category-group {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: auto;
+}
+
+.apcl-category-filter-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.apcl-category-dropdown-container {
+  position: relative;
+  width: 200px; /* 다른 필터와 비슷한 크기 */
+  flex-shrink: 0;
+}
+
+/* 기존 ap- prefix 드롭다운 (호환성) */
 .ap-consultation-category-group {
   flex-direction: row;
   align-items: center;
@@ -203,7 +379,63 @@
   flex-shrink: 0;
 }
 
-/* 선택된 카테고리 태그들 - 드롭다운 오른쪽 배치 */
+/* 선택된 카테고리 태그들 - apcl prefix */
+.apcl-selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
+  min-height: 20px; /* 태그가 없을 때도 높이 유지 */
+}
+
+.apcl-category-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  animation: apcl-tag-appear 0.2s ease-out;
+}
+
+@keyframes apcl-tag-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.apcl-tag-remove {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.apcl-tag-remove:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+/* 기존 ap- prefix 태그 (호환성) */
 .ap-selected-tags {
   display: flex;
   flex-wrap: wrap;
@@ -259,7 +491,50 @@
   transform: scale(1.1);
 }
 
-/* 드롭다운 트리거 버튼 */
+/* 드롭다운 트리거 버튼 - apcl prefix */
+.apcl-dropdown-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px; /* 다른 필터 요소들과 동일한 패딩 */
+  background: white;
+  border: 1px solid #d1d5db; /* 다른 필터 요소들과 동일한 보더 */
+  border-radius: 6px; /* 다른 필터 요소들과 동일한 라운딩 */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  color: #374151;
+  height: 38px; /* 명시적 높이 설정 */
+}
+
+.apcl-dropdown-trigger:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.apcl-dropdown-trigger:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.apcl-dropdown-text {
+  font-weight: 500;
+}
+
+.apcl-dropdown-icon {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s ease;
+  color: #6b7280;
+}
+
+.apcl-dropdown-icon-open {
+  transform: rotate(180deg);
+}
+
+/* 기존 ap- prefix 드롭다운 트리거 (호환성) */
 .ap-dropdown-trigger {
   width: 100%;
   display: flex;
@@ -302,7 +577,33 @@
   transform: rotate(180deg);
 }
 
-/* 드롭다운 메뉴 */
+/* 드롭다운 메뉴 - apcl prefix */
+.apcl-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  margin-top: 4px;
+  animation: apcl-dropdown-appear 0.2s ease-out;
+}
+
+@keyframes apcl-dropdown-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 기존 ap- prefix 드롭다운 메뉴 (호환성) */
 .ap-dropdown-menu {
   position: absolute;
   top: 100%;
@@ -351,7 +652,93 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* 드롭다운 옵션들 */
+/* 드롭다운 옵션들 - apcl prefix */
+.apcl-dropdown-options {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.apcl-dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.apcl-dropdown-option:hover {
+  background: #f8fafc;
+}
+
+.apcl-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+.apcl-checkbox-label {
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+}
+
+.apcl-no-results {
+  padding: 12px;
+  text-align: center;
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 14px;
+}
+
+/* 드롭다운 액션 버튼들 - apcl prefix */
+.apcl-dropdown-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-top: 1px solid #f3f4f6;
+  background: #f9fafb;
+}
+
+.apcl-clear-all {
+  padding: 6px 12px;
+  background: none;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  color: #6b7280;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.apcl-clear-all:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.apcl-dropdown-close {
+  padding: 6px 12px;
+  background: #3b82f6;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.apcl-dropdown-close:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* 기존 ap- prefix 드롭다운 옵션들 (호환성) */
 .ap-dropdown-options {
   max-height: 200px;
   overflow-y: auto;
@@ -606,6 +993,102 @@
     align-items: stretch;
   }
 
+  /* apcl prefix 반응형 스타일 */
+  .apcl-filter-container,
+  .ap-action-container {
+    padding: 16px;
+  }
+
+  .apcl-filter-section {
+    gap: 12px;
+  }
+
+  .apcl-filter-row {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .apcl-filter-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .apcl-consultation-category-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    min-width: auto;
+  }
+
+  .apcl-category-filter-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .apcl-category-dropdown-container {
+    width: 100%;
+    max-width: none;
+  }
+
+  .apcl-selected-tags {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .apcl-category-tag {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+
+  .apcl-dropdown-trigger {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  .apcl-dropdown-menu {
+    left: 0;
+    right: 0;
+  }
+
+  .apcl-filter-input,
+  .apcl-filter-select,
+  .apcl-filter-date {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .apcl-date-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .apcl-date-separator {
+    display: none;
+  }
+
+  .apcl-filter-actions {
+    justify-content: center;
+    margin-top: 16px;
+    padding-top: 12px;
+  }
+
+  /* 상담 내용 모바일 스타일 */
+  .apcl-consultation-content-group {
+    max-width: none;
+    width: 100%;
+  }
+
+  .apcl-consultation-content-input {
+    min-width: auto;
+    max-width: none;
+  }
+
+  /* 기존 ap- prefix 반응형 스타일 (호환성) */
   .ap-filter-container,
   .ap-action-container {
     padding: 16px;

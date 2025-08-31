@@ -1803,3 +1803,196 @@
   color: #6b7280;
   font-weight: 400;
 }
+
+/* 고객 연동 선택 모달 스타일 - cplcm prefix */
+.cplcm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.cplcm-modal-content {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: cplcm-modal-appear 0.3s ease-out;
+}
+
+@keyframes cplcm-modal-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.cplcm-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 0 24px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 24px;
+}
+
+.cplcm-modal-header h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.cplcm-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cplcm-modal-close:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.cplcm-modal-body {
+  padding: 0 24px 24px 24px;
+}
+
+.cplcm-description {
+  text-align: center;
+  color: #6b7280;
+  font-size: 16px;
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+.cplcm-choice-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.cplcm-choice-btn {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  min-height: 160px;
+}
+
+.cplcm-choice-btn:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  transform: translateY(-2px);
+}
+
+.cplcm-new-customer:hover {
+  border-color: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+.cplcm-existing-customer:hover {
+  border-color: #f59e0b;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+}
+
+.cplcm-btn-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.cplcm-btn-content h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.cplcm-btn-content p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* 클릭 가능한 셀 스타일 */
+.consult-link-clickable-cell {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  position: relative;
+}
+
+.consult-link-clickable-cell:hover {
+  background-color: #f8fafc;
+}
+
+.consult-link-clickable-cell:active {
+  background-color: #e2e8f0;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .cplcm-modal-content {
+    width: 95%;
+    margin: 20px;
+  }
+
+  .cplcm-choice-buttons {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .cplcm-choice-btn {
+    min-height: 120px;
+    padding: 20px 16px;
+  }
+
+  .cplcm-btn-icon {
+    font-size: 24px;
+  }
+
+  .cplcm-modal-header {
+    padding: 20px 20px 0 20px;
+  }
+
+  .cplcm-modal-body {
+    padding: 0 20px 20px 20px;
+  }
+
+  .cplcm-description {
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+}

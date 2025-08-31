@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import CustomerInfoModal from "../components/CustomerInfoModal";
+import CustomerRegistrationModal from "../components/CustomerRegistrationModal";
 import "./ConsultationPage.css";
 
 const ConsultationPage = ({ user, service }) => {
@@ -7,6 +8,11 @@ const ConsultationPage = ({ user, service }) => {
   const [newMessage, setNewMessage] = useState("");
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [isCustomerLinkModalOpen, setIsCustomerLinkModalOpen] = useState(false);
+  const [isCustomerLinkChoiceModalOpen, setIsCustomerLinkChoiceModalOpen] =
+    useState(false);
+  const [isCustomerRegistrationModalOpen, setIsCustomerRegistrationModalOpen] =
+    useState(false);
+  const [selectedCustomerForInfo, setSelectedCustomerForInfo] = useState(null);
   const [aiMessage, setAiMessage] = useState("");
   const [aiChatHistory, setAiChatHistory] = useState([]);
 
@@ -526,6 +532,13 @@ const ConsultationPage = ({ user, service }) => {
     }
   };
 
+  // 고객 등록 핸들러
+  const handleCustomerRegistration = (newCustomer) => {
+    console.log("새로운 고객이 등록되었습니다:", newCustomer);
+    setIsCustomerRegistrationModalOpen(false);
+    alert("고객이 성공적으로 등록되었습니다.");
+  };
+
   // 탭과 필터에 따른 대화 목록 필터링
   const getFilteredConversations = () => {
     let filtered = conversations;
@@ -776,12 +789,11 @@ const ConsultationPage = ({ user, service }) => {
                     ) : (
                       <button
                         className="btn btn-warning"
-                        onClick={() => setIsCustomerLinkModalOpen(true)}
+                        onClick={() => setIsCustomerLinkChoiceModalOpen(true)}
                       >
                         고객 연동
                       </button>
                     )}
-                    <button className="btn btn-primary">배정하기</button>
                   </div>
                 </div>
 
@@ -963,6 +975,44 @@ const ConsultationPage = ({ user, service }) => {
         onClose={() => setIsCustomerModalOpen(false)}
         customerData={selectedChat}
       />
+
+      {/* 고객 연동 선택 모달 */}
+      {isCustomerLinkChoiceModalOpen && (
+        <CustomerLinkChoiceModal
+          isOpen={isCustomerLinkChoiceModalOpen}
+          onClose={() => setIsCustomerLinkChoiceModalOpen(false)}
+          onSelectNewCustomer={() => {
+            setIsCustomerLinkChoiceModalOpen(false);
+            setIsCustomerRegistrationModalOpen(true);
+          }}
+          onSelectExistingCustomer={() => {
+            setIsCustomerLinkChoiceModalOpen(false);
+            setIsCustomerLinkModalOpen(true);
+          }}
+        />
+      )}
+
+      {/* 고객 등록 모달 */}
+      <CustomerRegistrationModal
+        isOpen={isCustomerRegistrationModalOpen}
+        onClose={() => setIsCustomerRegistrationModalOpen(false)}
+        onRegister={handleCustomerRegistration}
+      />
+
+      {/* 선택된 고객 정보 모달 */}
+      {selectedCustomerForInfo && (
+        <CustomerInfoModal
+          isOpen={!!selectedCustomerForInfo}
+          onClose={() => setSelectedCustomerForInfo(null)}
+          customerData={{
+            name: selectedCustomerForInfo.name,
+            phone: selectedCustomerForInfo.phone,
+            age: selectedCustomerForInfo.age,
+            workplace: selectedCustomerForInfo.team,
+            memo: `담당자: ${selectedCustomerForInfo.assignee}`,
+          }}
+        />
+      )}
 
       {/* 필터 모달 */}
       {isFilterModalOpen && (
@@ -1200,6 +1250,9 @@ const ConsultationPage = ({ user, service }) => {
               // 실제로는 여기서 API 호출하여 연동 처리
             }
           }}
+          onCustomerClick={(customer) => {
+            setSelectedCustomerForInfo(customer);
+          }}
         />
       )}
     </div>
@@ -1217,6 +1270,7 @@ const CustomerLinkModal = ({
   setCurrentPage,
   itemsPerPage,
   onLinkCustomer,
+  onCustomerClick,
 }) => {
   if (!isOpen) return null;
 
@@ -1289,28 +1343,61 @@ const CustomerLinkModal = ({
                 {currentCustomers.length > 0 ? (
                   currentCustomers.map((customer) => (
                     <tr key={customer.id} className="consult-link-customer-row">
-                      <td className="consult-link-customer-name">
+                      <td
+                        className="consult-link-customer-name consult-link-clickable-cell"
+                        onClick={() =>
+                          onCustomerClick && onCustomerClick(customer)
+                        }
+                      >
                         {customer.name}
                       </td>
-                      <td className="consult-link-customer-age">
+                      <td
+                        className="consult-link-customer-age consult-link-clickable-cell"
+                        onClick={() =>
+                          onCustomerClick && onCustomerClick(customer)
+                        }
+                      >
                         {customer.age}세
                       </td>
-                      <td className="consult-link-customer-phone">
+                      <td
+                        className="consult-link-customer-phone consult-link-clickable-cell"
+                        onClick={() =>
+                          onCustomerClick && onCustomerClick(customer)
+                        }
+                      >
                         {customer.phone}
                       </td>
-                      <td className="consult-link-customer-team">
+                      <td
+                        className="consult-link-customer-team consult-link-clickable-cell"
+                        onClick={() =>
+                          onCustomerClick && onCustomerClick(customer)
+                        }
+                      >
                         {customer.team}
                       </td>
-                      <td className="consult-link-customer-assignee">
+                      <td
+                        className="consult-link-customer-assignee consult-link-clickable-cell"
+                        onClick={() =>
+                          onCustomerClick && onCustomerClick(customer)
+                        }
+                      >
                         {customer.assignee}
                       </td>
-                      <td className="consult-link-customer-app-time">
+                      <td
+                        className="consult-link-customer-app-time consult-link-clickable-cell"
+                        onClick={() =>
+                          onCustomerClick && onCustomerClick(customer)
+                        }
+                      >
                         {customer.applicationTime}
                       </td>
                       <td>
                         <button
                           className="consult-link-btn"
-                          onClick={() => onLinkCustomer(customer)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onLinkCustomer(customer);
+                          }}
                         >
                           연동
                         </button>
@@ -1361,6 +1448,59 @@ const CustomerLinkModal = ({
           <button className="consult-link-cancel-btn" onClick={onClose}>
             취소
           </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 고객 연동 선택 모달 컴포넌트
+const CustomerLinkChoiceModal = ({
+  isOpen,
+  onClose,
+  onSelectNewCustomer,
+  onSelectExistingCustomer,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="cplcm-modal-overlay" onClick={onClose}>
+      <div className="cplcm-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="cplcm-modal-header">
+          <h3>고객 연동 방식 선택</h3>
+          <button className="cplcm-modal-close" onClick={onClose}>
+            ×
+          </button>
+        </div>
+
+        <div className="cplcm-modal-body">
+          <p className="cplcm-description">
+            고객 정보를 어떻게 연동하시겠습니까?
+          </p>
+
+          <div className="cplcm-choice-buttons">
+            <button
+              className="cplcm-choice-btn cplcm-new-customer"
+              onClick={onSelectNewCustomer}
+            >
+              <div className="cplcm-btn-icon">👤</div>
+              <div className="cplcm-btn-content">
+                <h4>새 고객 정보 추가</h4>
+                <p>새로운 고객 정보를 입력하여 등록합니다</p>
+              </div>
+            </button>
+
+            <button
+              className="cplcm-choice-btn cplcm-existing-customer"
+              onClick={onSelectExistingCustomer}
+            >
+              <div className="cplcm-btn-icon">🔗</div>
+              <div className="cplcm-btn-content">
+                <h4>기존 고객과 연동</h4>
+                <p>이미 등록된 고객과 채팅을 연결합니다</p>
+              </div>
+            </button>
+          </div>
         </div>
       </div>
     </div>
