@@ -6,11 +6,141 @@ const ConsultationPage = ({ user, service }) => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [newMessage, setNewMessage] = useState("");
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [isCustomerLinkModalOpen, setIsCustomerLinkModalOpen] = useState(false);
   const [aiMessage, setAiMessage] = useState("");
   const [aiChatHistory, setAiChatHistory] = useState([]);
 
   // 탭 상태 관리
   const [activeTab, setActiveTab] = useState("전체");
+
+  // 고객 연동 모달 관련 상태
+  const [customerSearchQuery, setCustomerSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // 연동 안된 고객 목록 샘플 데이터
+  const unlinkedCustomers = [
+    {
+      id: 1,
+      name: "홍길동",
+      age: 35,
+      phone: "010-1234-5678",
+      team: "A팀",
+      assignee: "김영업",
+      applicationTime: "2024-09-15 14:20",
+      assignmentTime: "2024-09-15 14:25",
+    },
+    {
+      id: 2,
+      name: "김철수",
+      age: 42,
+      phone: "010-2345-6789",
+      team: "B팀",
+      assignee: "박세일즈",
+      applicationTime: "2024-09-15 13:45",
+      assignmentTime: "2024-09-15 13:50",
+    },
+    {
+      id: 3,
+      name: "이영희",
+      age: 28,
+      phone: "010-3456-7890",
+      team: "A팀",
+      assignee: "이마케팅",
+      applicationTime: "2024-09-15 12:30",
+      assignmentTime: "2024-09-15 12:35",
+    },
+    {
+      id: 4,
+      name: "박민수",
+      age: 31,
+      phone: "010-4567-8901",
+      team: "C팀",
+      assignee: "정상담",
+      applicationTime: "2024-09-15 11:15",
+      assignmentTime: "2024-09-15 11:20",
+    },
+    {
+      id: 5,
+      name: "최수진",
+      age: 39,
+      phone: "010-5678-9012",
+      team: "B팀",
+      assignee: "최고객",
+      applicationTime: "2024-09-15 10:00",
+      assignmentTime: "2024-09-15 10:05",
+    },
+    {
+      id: 6,
+      name: "정민호",
+      age: 45,
+      phone: "010-6789-0123",
+      team: "A팀",
+      assignee: "김영업",
+      applicationTime: "2024-09-15 09:30",
+      assignmentTime: "2024-09-15 09:35",
+    },
+    {
+      id: 7,
+      name: "윤서연",
+      age: 33,
+      phone: "010-7890-1234",
+      team: "C팀",
+      assignee: "정상담",
+      applicationTime: "2024-09-15 08:45",
+      assignmentTime: "2024-09-15 08:50",
+    },
+    {
+      id: 8,
+      name: "강동원",
+      age: 37,
+      phone: "010-8901-2345",
+      team: "B팀",
+      assignee: "박세일즈",
+      applicationTime: "2024-09-14 16:20",
+      assignmentTime: "2024-09-14 16:25",
+    },
+    {
+      id: 9,
+      name: "송혜교",
+      age: 29,
+      phone: "010-9012-3456",
+      team: "A팀",
+      assignee: "이마케팅",
+      applicationTime: "2024-09-14 15:10",
+      assignmentTime: "2024-09-14 15:15",
+    },
+    {
+      id: 10,
+      name: "조인성",
+      age: 41,
+      phone: "010-0123-4567",
+      team: "C팀",
+      assignee: "정상담",
+      applicationTime: "2024-09-14 14:30",
+      assignmentTime: "2024-09-14 14:35",
+    },
+    {
+      id: 11,
+      name: "김태희",
+      age: 34,
+      phone: "010-1357-2468",
+      team: "B팀",
+      assignee: "최고객",
+      applicationTime: "2024-09-14 13:15",
+      assignmentTime: "2024-09-14 13:20",
+    },
+    {
+      id: 12,
+      name: "박보검",
+      age: 30,
+      phone: "010-2468-1357",
+      team: "A팀",
+      assignee: "김영업",
+      applicationTime: "2024-09-14 12:00",
+      assignmentTime: "2024-09-14 12:05",
+    },
+  ];
 
   // 필터 모달 상태 관리
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -63,6 +193,7 @@ const ConsultationPage = ({ user, service }) => {
       status: "New Lead",
       consultationStatus: "상담 중",
       avatar: "S",
+      isLinked: false, // 고객 연동 안됨
       messages: [
         {
           id: 1,
@@ -85,6 +216,7 @@ const ConsultationPage = ({ user, service }) => {
       status: "Hot Lead",
       consultationStatus: "상담 중",
       avatar: "김",
+      isLinked: true, // 고객 연동됨
       messages: [
         {
           id: 1,
@@ -121,6 +253,7 @@ const ConsultationPage = ({ user, service }) => {
       status: "Customer",
       consultationStatus: "상담 완료",
       avatar: "박",
+      isLinked: false, // 고객 연동 안됨
       messages: [
         {
           id: 1,
@@ -165,6 +298,7 @@ const ConsultationPage = ({ user, service }) => {
       status: "New Lead",
       consultationStatus: "상담 중",
       avatar: "이",
+      isLinked: false, // 고객 연동 안됨
       messages: [
         {
           id: 1,
@@ -632,12 +766,21 @@ const ConsultationPage = ({ user, service }) => {
                     </div>
                   </div>
                   <div className="chat-actions">
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() => setIsCustomerModalOpen(true)}
-                    >
-                      고객 정보
-                    </button>
+                    {selectedChat.isLinked ? (
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => setIsCustomerModalOpen(true)}
+                      >
+                        고객 정보
+                      </button>
+                    ) : (
+                      <button
+                        className="btn btn-warning"
+                        onClick={() => setIsCustomerLinkModalOpen(true)}
+                      >
+                        고객 연동
+                      </button>
+                    )}
                     <button className="btn btn-primary">배정하기</button>
                   </div>
                 </div>
@@ -1027,6 +1170,199 @@ const ConsultationPage = ({ user, service }) => {
           </div>
         </div>
       )}
+
+      {/* 고객 연동 모달 */}
+      {isCustomerLinkModalOpen && (
+        <CustomerLinkModal
+          isOpen={isCustomerLinkModalOpen}
+          onClose={() => {
+            setIsCustomerLinkModalOpen(false);
+            setCurrentPage(1);
+            setCustomerSearchQuery("");
+          }}
+          unlinkedCustomers={unlinkedCustomers}
+          customerSearchQuery={customerSearchQuery}
+          setCustomerSearchQuery={setCustomerSearchQuery}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          itemsPerPage={itemsPerPage}
+          onLinkCustomer={(customer) => {
+            // 고객 연동 확인 알럿
+            if (
+              window.confirm(
+                `${customer.name} 고객과 현재 채팅을 연동하시겠습니까?`
+              )
+            ) {
+              // 고객 연동 처리 로직
+              console.log("고객 연동:", customer);
+              setIsCustomerLinkModalOpen(false);
+              alert(`${customer.name} 고객이 성공적으로 연동되었습니다.`);
+              // 실제로는 여기서 API 호출하여 연동 처리
+            }
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+// 고객 연동 모달 컴포넌트
+const CustomerLinkModal = ({
+  isOpen,
+  onClose,
+  unlinkedCustomers,
+  customerSearchQuery,
+  setCustomerSearchQuery,
+  currentPage,
+  setCurrentPage,
+  itemsPerPage,
+  onLinkCustomer,
+}) => {
+  if (!isOpen) return null;
+
+  // 검색 필터링
+  const filteredCustomers = unlinkedCustomers.filter(
+    (customer) =>
+      customer.name.toLowerCase().includes(customerSearchQuery.toLowerCase()) ||
+      customer.phone.includes(customerSearchQuery) ||
+      customer.assignee
+        .toLowerCase()
+        .includes(customerSearchQuery.toLowerCase())
+  );
+
+  // 페이지네이션 계산
+  const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentCustomers = filteredCustomers.slice(startIndex, endIndex);
+
+  // 검색어가 변경될 때 페이지를 1로 리셋
+  const handleSearchChange = (e) => {
+    setCustomerSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
+  return (
+    <div className="consult-link-modal-overlay" onClick={onClose}>
+      <div
+        className="consult-link-modal-content"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="consult-link-modal-header">
+          <h3>고객 연동</h3>
+          <button className="consult-link-modal-close" onClick={onClose}>
+            ×
+          </button>
+        </div>
+
+        <div className="consult-link-modal-body">
+          <div className="consult-link-search-section">
+            <p className="consult-link-description">
+              현재 자신에게 할당된 고객 중 아직 연동이 안된 고객 목록입니다.
+            </p>
+            <div className="consult-link-search-wrapper">
+              <input
+                type="text"
+                placeholder="이름, 연락처로 검색..."
+                value={customerSearchQuery}
+                onChange={handleSearchChange}
+                className="consult-link-search-input"
+              />
+              <div className="consult-link-search-icon">🔍</div>
+            </div>
+          </div>
+
+          <div className="consult-link-table-wrapper">
+            <table className="consult-link-table">
+              <thead>
+                <tr>
+                  <th>이름</th>
+                  <th>연령</th>
+                  <th>연락처</th>
+                  <th>담당팀</th>
+                  <th>담당자</th>
+                  <th>신청시간</th>
+                  <th>연동</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentCustomers.length > 0 ? (
+                  currentCustomers.map((customer) => (
+                    <tr key={customer.id} className="consult-link-customer-row">
+                      <td className="consult-link-customer-name">
+                        {customer.name}
+                      </td>
+                      <td className="consult-link-customer-age">
+                        {customer.age}세
+                      </td>
+                      <td className="consult-link-customer-phone">
+                        {customer.phone}
+                      </td>
+                      <td className="consult-link-customer-team">
+                        {customer.team}
+                      </td>
+                      <td className="consult-link-customer-assignee">
+                        {customer.assignee}
+                      </td>
+                      <td className="consult-link-customer-app-time">
+                        {customer.applicationTime}
+                      </td>
+                      <td>
+                        <button
+                          className="consult-link-btn"
+                          onClick={() => onLinkCustomer(customer)}
+                        >
+                          연동
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="7" className="consult-link-no-results">
+                      {customerSearchQuery
+                        ? "검색 결과가 없습니다."
+                        : "연동 가능한 고객이 없습니다."}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 페이지네이션 */}
+          {filteredCustomers.length > itemsPerPage && (
+            <div className="consult-link-pagination">
+              <button
+                className="consult-link-pagination-btn"
+                onClick={() => setCurrentPage(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                이전
+              </button>
+              <div className="consult-link-pagination-info">
+                {currentPage} / {totalPages} 페이지
+                <span className="consult-link-pagination-total">
+                  (총 {filteredCustomers.length}명)
+                </span>
+              </div>
+              <button
+                className="consult-link-pagination-btn"
+                onClick={() => setCurrentPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                다음
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="consult-link-modal-footer">
+          <button className="consult-link-cancel-btn" onClick={onClose}>
+            취소
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
