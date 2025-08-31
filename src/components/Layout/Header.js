@@ -68,6 +68,9 @@ const Header = ({ user, currentService, onLogout }) => {
               <Link to="/applications" className="nav-link">
                 고객목록
               </Link>
+              <Link to="/statistics" className="nav-link">
+                통계
+              </Link>
               <Link to="/notice" className="nav-link">
                 공지사항
               </Link>

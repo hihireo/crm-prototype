@@ -6,6 +6,7 @@ const DashboardPage = ({ user, service }) => {
   const [workStartTime, setWorkStartTime] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [rankingViewType, setRankingViewType] = useState("team");
 
   // 시간 업데이트
   useEffect(() => {
@@ -35,48 +36,85 @@ const DashboardPage = ({ user, service }) => {
     totalPayment: 15650000,
   };
 
-  const salesRanking = [
-    {
-      rank: 1,
-      name: "김영업",
-      sales: 15600000,
-      change: "+1200000",
-      avatar: "김",
-    },
-    {
-      rank: 2,
-      name: "이마케팅",
-      sales: 14300000,
-      change: "+800000",
-      avatar: "이",
-    },
-    {
-      rank: 3,
-      name: "박세일즈",
-      sales: 13800000,
-      change: "+1500000",
-      avatar: "박",
-    },
-    {
-      rank: 4,
-      name: "최고객",
-      sales: 12500000,
-      change: "+300000",
-      avatar: "최",
-    },
-    {
-      rank: 26,
-      name: user.name,
-      sales: 9800000,
-      change: "+700000",
-      avatar: user.name.charAt(0),
-    },
-  ];
+  const salesRanking = {
+    team: [
+      {
+        rank: 1,
+        team: "A팀",
+        sales: 15600000,
+        change: "+1200000",
+        avatar: "A",
+      },
+      {
+        rank: 2,
+        team: "B팀",
+        sales: 14300000,
+        change: "+800000",
+        avatar: "B",
+      },
+      {
+        rank: 3,
+        team: "C팀",
+        sales: 13800000,
+        change: "+1500000",
+        avatar: "C",
+      },
+    ],
+    member: [
+      {
+        rank: 1,
+        name: "김영업",
+        team: "A팀",
+        sales: 15600000,
+        change: "+1200000",
+        avatar: "김",
+      },
+      {
+        rank: 2,
+        name: "이마케팅",
+        team: "A팀",
+        sales: 14300000,
+        change: "+800000",
+        avatar: "이",
+      },
+      {
+        rank: 3,
+        name: "박세일즈",
+        team: "B팀",
+        sales: 13800000,
+        change: "+1500000",
+        avatar: "박",
+      },
+      {
+        rank: 4,
+        name: "최고객",
+        team: "B팀",
+        sales: 12500000,
+        change: "+300000",
+        avatar: "최",
+      },
+      {
+        rank: 26,
+        name: user.name,
+        team: "C팀",
+        sales: 9800000,
+        change: "+700000",
+        avatar: user.name.charAt(0),
+      },
+    ],
+  };
 
   // 4행만 표시하기 위해 필터링 (1,2,3등과 내 랭킹)
-  const displayRanking = salesRanking
-    .filter((item) => item.rank <= 3 || item.name === user.name)
-    .slice(0, 4);
+  const getDisplayRanking = () => {
+    const currentRanking = salesRanking[rankingViewType];
+    if (rankingViewType === "team") {
+      return currentRanking.slice(0, 3);
+    } else {
+      return currentRanking
+        .filter((item) => item.rank <= 3 || item.name === user.name)
+        .slice(0, 4);
+    }
+  };
 
   // 최근 공지사항 데이터 (NoticePage와 동일, 최신 3개만)
   const recentNotices = [
@@ -152,15 +190,15 @@ const DashboardPage = ({ user, service }) => {
     },
   ];
 
-  // 달력 및 알림 데이터 (8월 텔레마케팅 샘플)
+  // 달력 및 알림 데이터 (9월 텔레마케팅 샘플)
   const [calendarEvents, setCalendarEvents] = useState({
-    "2025-08-05": [
+    "2025-09-05": [
       { time: "09:00", title: "월 콜리스트 검토", type: "task" },
       { time: "14:00", title: "김영희 전화상담", type: "call" },
       { time: "16:30", title: "팀 미팅", type: "meeting" },
       { time: "18:00", title: "보고서 작성", type: "task" },
     ],
-    "2025-08-12": [
+    "2025-09-12": [
       {
         time: "11:00",
         title: "박지율 전화 한번 다시 주기로 했음",
@@ -169,7 +207,7 @@ const DashboardPage = ({ user, service }) => {
       { time: "14:30", title: "신규 고객 상담", type: "consultation" },
       { time: "16:00", title: "계약서 검토", type: "task" },
     ],
-    "2025-08-23": [
+    "2025-09-23": [
       {
         time: "10:00",
         title:
@@ -181,7 +219,7 @@ const DashboardPage = ({ user, service }) => {
       { time: "19:00", title: "교육 참석", type: "training" },
       { time: "20:00", title: "네트워킹", type: "meeting" },
     ],
-    "2025-08-26": [
+    "2025-09-26": [
       { time: "13:00", title: "이종호 대표 상담", type: "call" },
       { time: "17:00", title: "다음달 계획", type: "planning" },
     ],
@@ -383,15 +421,50 @@ const DashboardPage = ({ user, service }) => {
           {/* 랭킹 카드 */}
           <div className="card ranking-card">
             <div className="card-header">
-              <h3>🏆 이번 달 판매 랭킹</h3>
-              <button className="dashboard-view-all-btn">전체 보기</button>
+              <div className="dashboard-ranking-header-left">
+                <h3>🏆 이번 달 판매 랭킹</h3>
+                <div className="dashboard-ranking-radio-group">
+                  <label className="dashboard-ranking-radio-label">
+                    <input
+                      type="radio"
+                      name="dashboardRankingView"
+                      value="team"
+                      checked={rankingViewType === "team"}
+                      onChange={(e) => setRankingViewType(e.target.value)}
+                      className="dashboard-ranking-radio-input"
+                    />
+                    <span className="dashboard-ranking-radio-text">팀별</span>
+                  </label>
+                  <label className="dashboard-ranking-radio-label">
+                    <input
+                      type="radio"
+                      name="dashboardRankingView"
+                      value="member"
+                      checked={rankingViewType === "member"}
+                      onChange={(e) => setRankingViewType(e.target.value)}
+                      className="dashboard-ranking-radio-input"
+                    />
+                    <span className="dashboard-ranking-radio-text">팀원별</span>
+                  </label>
+                </div>
+              </div>
+              <button
+                className="dashboard-view-all-btn"
+                onClick={() =>
+                  (window.location.href = "/statistics?tab=rankings")
+                }
+              >
+                전체 보기
+              </button>
             </div>
             <div className="ranking-list">
-              {displayRanking.map((item) => (
+              {getDisplayRanking().map((item) => (
                 <div
                   key={item.rank}
                   className={`ranking-item ${
-                    item.name === user.name ? "my-rank" : ""
+                    rankingViewType === "member" && item.name === user.name
+                      ? "my-rank"
+                      : ""
                   }`}
                 >
                   <div className="rank-position">
@@ -404,7 +477,12 @@ const DashboardPage = ({ user, service }) => {
                   </div>
                   <div className="user-avatar">{item.avatar}</div>
                   <div className="user-info">
-                    <div className="name">{item.name}</div>
+                    <div className="name">
+                      {rankingViewType === "team" ? item.team : item.name}
+                    </div>
+                    {rankingViewType === "member" && (
+                      <div className="team">{item.team}</div>
+                    )}
                     <div className="sales">₩{formatCurrency(item.sales)}</div>
                   </div>
                   <span className="change positive">
