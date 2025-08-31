@@ -181,6 +181,262 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* 현대적 드롭다운 멀티셀렉트 UI - ap- prefix 사용 */
+.ap-consultation-category-group {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: auto;
+}
+
+.ap-category-filter-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.ap-category-dropdown-container {
+  position: relative;
+  width: 200px; /* 다른 필터와 비슷한 크기 */
+  flex-shrink: 0;
+}
+
+/* 선택된 카테고리 태그들 - 드롭다운 오른쪽 배치 */
+.ap-selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
+  min-height: 20px; /* 태그가 없을 때도 높이 유지 */
+}
+
+.ap-category-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  animation: ap-tag-appear 0.2s ease-out;
+}
+
+@keyframes ap-tag-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.ap-tag-remove {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.ap-tag-remove:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+/* 드롭다운 트리거 버튼 */
+.ap-dropdown-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px; /* 다른 필터 요소들과 동일한 패딩 */
+  background: white;
+  border: 1px solid #d1d5db; /* 다른 필터 요소들과 동일한 보더 */
+  border-radius: 6px; /* 다른 필터 요소들과 동일한 라운딩 */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  color: #374151;
+  height: 38px; /* 명시적 높이 설정 */
+}
+
+.ap-dropdown-trigger:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.ap-dropdown-trigger:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.ap-dropdown-text {
+  font-weight: 500;
+}
+
+.ap-dropdown-icon {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s ease;
+  color: #6b7280;
+}
+
+.ap-dropdown-icon-open {
+  transform: rotate(180deg);
+}
+
+/* 드롭다운 메뉴 */
+.ap-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  margin-top: 4px;
+  animation: ap-dropdown-appear 0.2s ease-out;
+}
+
+@keyframes ap-dropdown-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 검색 입력 */
+.ap-dropdown-search {
+  padding: 12px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.ap-search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #f9fafb;
+  transition: all 0.2s ease;
+}
+
+.ap-search-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* 드롭다운 옵션들 */
+.ap-dropdown-options {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.ap-dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.ap-dropdown-option:hover {
+  background: #f8fafc;
+}
+
+.ap-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+.ap-checkbox-label {
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+}
+
+.ap-no-results {
+  padding: 12px;
+  text-align: center;
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 14px;
+}
+
+/* 드롭다운 액션 버튼들 */
+.ap-dropdown-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-top: 1px solid #f3f4f6;
+  background: #f9fafb;
+}
+
+.ap-clear-all {
+  padding: 6px 12px;
+  background: none;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  color: #6b7280;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ap-clear-all:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.ap-dropdown-close {
+  padding: 6px 12px;
+  background: #3b82f6;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ap-dropdown-close:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
 .action-section {
   display: flex;
   gap: 12px;
@@ -371,6 +627,45 @@
     gap: 4px;
   }
 
+  .ap-consultation-category-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    min-width: auto;
+  }
+
+  .ap-category-filter-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .ap-category-dropdown-container {
+    width: 100%;
+    max-width: none;
+  }
+
+  .ap-selected-tags {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .ap-category-tag {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+
+  .ap-dropdown-trigger {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  .ap-dropdown-menu {
+    left: 0;
+    right: 0;
+  }
+
   .ap-filter-input,
   .ap-filter-select,
   .ap-filter-date {
@@ -425,22 +720,26 @@
 }
 
 /* 스크롤바 스타일링 */
-.ap-table-scroll-wrapper::-webkit-scrollbar {
+.ap-table-scroll-wrapper::-webkit-scrollbar,
+.ap-dropdown-options::-webkit-scrollbar {
   height: 8px;
   width: 8px;
 }
 
-.ap-table-scroll-wrapper::-webkit-scrollbar-track {
+.ap-table-scroll-wrapper::-webkit-scrollbar-track,
+.ap-dropdown-options::-webkit-scrollbar-track {
   background: #f1f5f9;
   border-radius: 4px;
 }
 
-.ap-table-scroll-wrapper::-webkit-scrollbar-thumb {
+.ap-table-scroll-wrapper::-webkit-scrollbar-thumb,
+.ap-dropdown-options::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 4px;
 }
 
-.ap-table-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+.ap-table-scroll-wrapper::-webkit-scrollbar-thumb:hover,
+.ap-dropdown-options::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
 

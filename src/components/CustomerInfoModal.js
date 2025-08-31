@@ -1,12 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./CustomerInfoModal.css";
 import CustomerAssignmentModal from "./CustomerAssignmentModal";
 
 const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
-  // 고객 상태 관리
-  const [customerStatus, setCustomerStatus] = useState(
-    customerData?.status || "대기"
-  );
+  // 고객 상태 관리 (제거됨)
 
   // 고객 정보 상태
   const [customerInfo, setCustomerInfo] = useState({
@@ -35,9 +32,9 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
   const [dataInfo, setDataInfo] = useState({
     applicationTime: "2024-01-15 14:30",
     assignmentTime: "2024-01-15 15:45",
-    applicationRoute: "네이버",
-    site: "메인사이트",
-    mediaCompany: "구글광고",
+    applicationRoute: "유튜브",
+    site: "모두의주식투자채널",
+    mediaCompany: "광고회사",
     assignedTeam: "영업1팀",
     assignedPerson: "박직원",
     specialNotes: "",
@@ -99,12 +96,23 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
       {
         id: 1,
         author: "박직원",
-        content: "투자 상품에 대한 기본 설명 완료",
+        category: "부재",
+        content: "전화 받지 않음",
         timestamp: "2024-01-15 16:30:00",
+      },
+      {
+        id: 1,
+        author: "박직원",
+        category: "무료방안내",
+        content: "무료방 안내 완료",
+        timestamp: "2024-01-16 12:30:00",
       },
     ]
   );
-  const [newConsultation, setNewConsultation] = useState("");
+  const [newConsultation, setNewConsultation] = useState({
+    category: "일반",
+    content: "",
+  });
   const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
 
   // 유효성 검사 상태
@@ -120,41 +128,6 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
     role: "관리자",
     team: "전체",
   };
-
-  // 연령 계산 함수
-  const calculateAge = (ssnFirst) => {
-    if (ssnFirst.length !== 6) return "";
-
-    const year = parseInt(ssnFirst.substring(0, 2));
-    const month = parseInt(ssnFirst.substring(2, 4));
-    const day = parseInt(ssnFirst.substring(4, 6));
-
-    // 2000년대 이후 출생자인지 1900년대 출생자인지 판단
-    const fullYear = year <= 30 ? 2000 + year : 1900 + year;
-
-    const today = new Date();
-    const birthDate = new Date(fullYear, month - 1, day);
-
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
-
-    return age.toString();
-  };
-
-  // 주민등록번호 앞자리 변경 시 연령 자동 계산
-  useEffect(() => {
-    if (customerInfo.ssnFirst.length === 6) {
-      const calculatedAge = calculateAge(customerInfo.ssnFirst);
-      setCustomerInfo((prev) => ({ ...prev, age: calculatedAge }));
-    }
-  }, [customerInfo.ssnFirst]);
 
   // 숫자 포맷팅 함수
   const formatNumber = (value) => {
@@ -311,11 +284,12 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
 
   // 상담 내용 추가
   const handleAddConsultation = () => {
-    if (newConsultation.trim()) {
+    if (newConsultation.content.trim()) {
       const consultation = {
         id: Date.now(),
         author: "박직원",
-        content: newConsultation.trim(),
+        category: newConsultation.category,
+        content: newConsultation.content.trim(),
         timestamp: new Date()
           .toLocaleString("ko-KR", {
             year: "numeric",
@@ -329,7 +303,7 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
           .replace(/, /, " "),
       };
       setConsultations((prev) => [consultation, ...prev]);
-      setNewConsultation("");
+      setNewConsultation({ category: "일반", content: "" });
     }
   };
 
@@ -373,7 +347,25 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
     }
   };
 
-  const statusOptions = ["대기", "관리 중", "종료"];
+  // 상담 카테고리 옵션
+  const consultationCategories = [
+    "일반",
+    "부재",
+    "재상담",
+    "관리중",
+    "AS요청",
+    "AS확정",
+    "실패",
+    "결제완료",
+    "무료방안내",
+    "무료방입장",
+    "결제유력",
+  ];
+
+  // 상담 카테고리별 CSS 클래스 생성
+  const getCategoryClass = (category) => {
+    return `cim-category-${category}`;
+  };
 
   // 모달 닫을 때 상태 초기화
   const handleCloseModal = () => {
@@ -387,7 +379,7 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
       minute: "",
       content: "",
     });
-    setNewConsultation("");
+    setNewConsultation({ category: "일반", content: "" });
 
     // 유효성 검사 에러 초기화
     setValidationErrors({
@@ -404,726 +396,731 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
     <div className="cim-modal-overlay" onClick={handleCloseModal}>
       <div className="cim-customer-modal" onClick={(e) => e.stopPropagation()}>
         <div className="cim-modal-header">
-          <div className="cim-header-content">
-            <h2 className="cim-title">고객 정보</h2>
-            <div className="cim-status-stepper">
-              {statusOptions.map((status, index) => (
-                <div
-                  key={status}
-                  className={`cim-status-step ${
-                    customerStatus === status ? "active" : ""
-                  } ${
-                    statusOptions.indexOf(customerStatus) > index
-                      ? "completed"
-                      : ""
-                  }`}
-                  onClick={() => {
-                    if (customerStatus !== status) {
-                      const confirmMessage = `고객 상태를 "${status}"로 변경하시겠습니까?`;
-                      if (window.confirm(confirmMessage)) {
-                        setCustomerStatus(status);
-                      }
-                    }
-                  }}
-                >
-                  <div className="cim-step-indicator">
-                    <span className="cim-step-number">{index + 1}</span>
-                    {statusOptions.indexOf(customerStatus) > index && (
-                      <span className="cim-step-check">✓</span>
-                    )}
-                  </div>
-                  <span className="cim-step-label">{status}</span>
-                  {index < statusOptions.length - 1 && (
-                    <div className="cim-step-connector"></div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+          <h2 className="cim-title">고객 정보</h2>
           <button className="cim-close-btn" onClick={handleCloseModal}>
             ×
           </button>
         </div>
 
         <div className="cim-modal-content">
-          {/* 고객 정보 영역 */}
-          <div className="cim-section">
-            <h3 className="cim-section-title">고객 정보</h3>
-            <div className="cim-field-grid">
-              <div className="cim-field">
-                <label>이름</label>
-                <input
-                  type="text"
-                  value={customerInfo.name}
-                  onChange={(e) =>
-                    setCustomerInfo((prev) => ({
-                      ...prev,
-                      name: e.target.value,
-                    }))
-                  }
-                  className="cim-input"
-                />
-              </div>
+          <div className="cim-two-column-layout">
+            {/* 왼쪽 컬럼 */}
+            <div className="cim-left-column">
+              {/* 고객 정보 영역 */}
+              <div className="cim-section">
+                <h3 className="cim-section-title">기본 정보</h3>
+                <div className="cim-field-grid">
+                  <div className="cim-field">
+                    <label>이름</label>
+                    <input
+                      type="text"
+                      value={customerInfo.name}
+                      onChange={(e) =>
+                        setCustomerInfo((prev) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }))
+                      }
+                      className="cim-input"
+                    />
+                  </div>
 
-              <div className="cim-field cim-phone-field">
-                <label>연락처1</label>
-                <div className="cim-phone-group">
-                  <select
-                    value={customerInfo.phone1Type}
-                    onChange={(e) =>
-                      setCustomerInfo((prev) => ({
-                        ...prev,
-                        phone1Type: e.target.value,
-                      }))
-                    }
-                    className="cim-select"
-                  >
-                    <option value="휴대폰">휴대폰</option>
-                    <option value="집">집</option>
-                    <option value="직장">직장</option>
-                  </select>
-                  <input
-                    type="text"
-                    value={customerInfo.phone1}
-                    onChange={(e) =>
-                      setCustomerInfo((prev) => ({
-                        ...prev,
-                        phone1: e.target.value,
-                      }))
-                    }
-                    className="cim-input"
-                  />
-                </div>
-              </div>
-
-              <div className="cim-field cim-phone-field">
-                <label>연락처2</label>
-                <div className="cim-phone-group">
-                  <select
-                    value={customerInfo.phone2Type}
-                    onChange={(e) =>
-                      setCustomerInfo((prev) => ({
-                        ...prev,
-                        phone2Type: e.target.value,
-                      }))
-                    }
-                    className="cim-select"
-                  >
-                    <option value="휴대폰">휴대폰</option>
-                    <option value="집">집</option>
-                    <option value="직장">직장</option>
-                  </select>
-                  <input
-                    type="text"
-                    value={customerInfo.phone2}
-                    onChange={(e) =>
-                      setCustomerInfo((prev) => ({
-                        ...prev,
-                        phone2: e.target.value,
-                      }))
-                    }
-                    className="cim-input"
-                    placeholder="연락처를 입력하세요"
-                  />
-                </div>
-              </div>
-
-              <div className="cim-field cim-ssn-field">
-                <label>주민등록번호</label>
-                <div className="cim-ssn-group">
-                  <input
-                    type="text"
-                    value={customerInfo.ssnFirst}
-                    onChange={(e) => {
-                      const value = e.target.value
-                        .replace(/[^0-9]/g, "")
-                        .substring(0, 6);
-                      setCustomerInfo((prev) => ({ ...prev, ssnFirst: value }));
-                    }}
-                    className="cim-input"
-                    placeholder="앞 6자리"
-                    maxLength="6"
-                  />
-                  <span className="cim-ssn-separator">-</span>
-                  <input
-                    type="text"
-                    value={customerInfo.ssnSecond}
-                    onChange={(e) => {
-                      const value = e.target.value
-                        .replace(/[^0-9]/g, "")
-                        .substring(0, 7);
-                      setCustomerInfo((prev) => ({
-                        ...prev,
-                        ssnSecond: value,
-                      }));
-                    }}
-                    className="cim-input"
-                    placeholder="뒤 7자리"
-                    maxLength="7"
-                  />
-                </div>
-              </div>
-
-              <div className="cim-field">
-                <label>연령(만 나이)</label>
-                <input
-                  type="text"
-                  value={customerInfo.age ? `${customerInfo.age}세` : ""}
-                  readOnly
-                  className="cim-input cim-readonly"
-                  placeholder="주민등록번호 입력시 자동계산"
-                />
-              </div>
-
-              <div className="cim-field">
-                <label>직업</label>
-                <input
-                  type="text"
-                  value={customerInfo.job}
-                  onChange={(e) =>
-                    setCustomerInfo((prev) => ({
-                      ...prev,
-                      job: e.target.value,
-                    }))
-                  }
-                  className="cim-input"
-                  placeholder="직업을 입력하세요"
-                />
-              </div>
-
-              {/* 메신저 계정 정보 */}
-              <div className="cim-field cim-full-width">
-                <label>메신저 계정 정보</label>
-                <div className="cim-messenger-input">
-                  <select
-                    value={newMessenger.platform}
-                    onChange={(e) => {
-                      setNewMessenger((prev) => ({
-                        ...prev,
-                        platform: e.target.value,
-                      }));
-                      setValidationErrors((prev) => ({
-                        ...prev,
-                        messenger: { ...prev.messenger, platform: false },
-                      }));
-                    }}
-                    className={`cim-select ${
-                      validationErrors.messenger.platform ? "cim-error" : ""
-                    }`}
-                  >
-                    <option value="카카오톡">카카오톡</option>
-                    <option value="텔레그램">텔레그램</option>
-                    <option value="인스타그램">인스타그램</option>
-                    <option value="라인">라인</option>
-                    <option value="위챗">위챗</option>
-                  </select>
-                  <input
-                    type="text"
-                    value={newMessenger.accountId}
-                    onChange={(e) => {
-                      setNewMessenger((prev) => ({
-                        ...prev,
-                        accountId: e.target.value,
-                      }));
-                      setValidationErrors((prev) => ({
-                        ...prev,
-                        messenger: { ...prev.messenger, accountId: false },
-                      }));
-                    }}
-                    className={`cim-input ${
-                      validationErrors.messenger.accountId ? "cim-error" : ""
-                    }`}
-                    placeholder="계정 ID를 입력하세요"
-                  />
-                  <button
-                    onClick={handleAddMessenger}
-                    className="cim-btn cim-btn-primary cim-btn-sm"
-                  >
-                    추가
-                  </button>
-                </div>
-                <div className="cim-messenger-list">
-                  {messengerAccounts.map((messenger) => (
-                    <div key={messenger.id} className="cim-messenger-item">
-                      <span className="cim-messenger-platform">
-                        {messenger.platform}
-                      </span>
-                      <span className="cim-messenger-id">
-                        {messenger.accountId}
-                      </span>
-                      <button
-                        onClick={() => handleRemoveMessenger(messenger.id)}
-                        className="cim-btn-delete cim-messenger-delete-btn"
-                        title="메신저 계정 삭제"
+                  <div className="cim-field cim-phone-field">
+                    <label>연락처1</label>
+                    <div className="cim-phone-group">
+                      <select
+                        value={customerInfo.phone1Type}
+                        onChange={(e) =>
+                          setCustomerInfo((prev) => ({
+                            ...prev,
+                            phone1Type: e.target.value,
+                          }))
+                        }
+                        className="cim-select"
                       >
-                        ×
+                        <option value="휴대폰">휴대폰</option>
+                        <option value="집">집</option>
+                        <option value="직장">직장</option>
+                      </select>
+                      <input
+                        type="text"
+                        value={customerInfo.phone1}
+                        onChange={(e) =>
+                          setCustomerInfo((prev) => ({
+                            ...prev,
+                            phone1: e.target.value,
+                          }))
+                        }
+                        className="cim-input"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="cim-field cim-phone-field">
+                    <label>연락처2</label>
+                    <div className="cim-phone-group">
+                      <select
+                        value={customerInfo.phone2Type}
+                        onChange={(e) =>
+                          setCustomerInfo((prev) => ({
+                            ...prev,
+                            phone2Type: e.target.value,
+                          }))
+                        }
+                        className="cim-select"
+                      >
+                        <option value="휴대폰">휴대폰</option>
+                        <option value="집">집</option>
+                        <option value="직장">직장</option>
+                      </select>
+                      <input
+                        type="text"
+                        value={customerInfo.phone2}
+                        onChange={(e) =>
+                          setCustomerInfo((prev) => ({
+                            ...prev,
+                            phone2: e.target.value,
+                          }))
+                        }
+                        className="cim-input"
+                        placeholder="연락처를 입력하세요"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="cim-field cim-ssn-field">
+                    <label>주민등록번호</label>
+                    <div className="cim-ssn-group">
+                      <input
+                        type="text"
+                        value={customerInfo.ssnFirst}
+                        onChange={(e) => {
+                          const value = e.target.value
+                            .replace(/[^0-9]/g, "")
+                            .substring(0, 6);
+                          setCustomerInfo((prev) => ({
+                            ...prev,
+                            ssnFirst: value,
+                          }));
+                        }}
+                        className="cim-input"
+                        placeholder="앞 6자리"
+                        maxLength="6"
+                      />
+                      <span className="cim-ssn-separator">-</span>
+                      <input
+                        type="text"
+                        value={customerInfo.ssnSecond}
+                        onChange={(e) => {
+                          const value = e.target.value
+                            .replace(/[^0-9]/g, "")
+                            .substring(0, 7);
+                          setCustomerInfo((prev) => ({
+                            ...prev,
+                            ssnSecond: value,
+                          }));
+                        }}
+                        className="cim-input"
+                        placeholder="뒤 7자리"
+                        maxLength="7"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="cim-field">
+                    <label>연령</label>
+                    <input
+                      type="text"
+                      value={customerInfo.age}
+                      onChange={(e) =>
+                        setCustomerInfo((prev) => ({
+                          ...prev,
+                          age: e.target.value,
+                        }))
+                      }
+                      className="cim-input"
+                      placeholder="연령을 입력하세요"
+                    />
+                  </div>
+
+                  <div className="cim-field">
+                    <label>직업</label>
+                    <input
+                      type="text"
+                      value={customerInfo.job}
+                      onChange={(e) =>
+                        setCustomerInfo((prev) => ({
+                          ...prev,
+                          job: e.target.value,
+                        }))
+                      }
+                      className="cim-input"
+                      placeholder="직업을 입력하세요"
+                    />
+                  </div>
+
+                  {/* 메신저 계정 정보 */}
+                  <div className="cim-field cim-full-width">
+                    <label>메신저 계정 정보</label>
+                    <div className="cim-messenger-input">
+                      <select
+                        value={newMessenger.platform}
+                        onChange={(e) => {
+                          setNewMessenger((prev) => ({
+                            ...prev,
+                            platform: e.target.value,
+                          }));
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            messenger: { ...prev.messenger, platform: false },
+                          }));
+                        }}
+                        className={`cim-select ${
+                          validationErrors.messenger.platform ? "cim-error" : ""
+                        }`}
+                      >
+                        <option value="카카오톡">카카오톡</option>
+                        <option value="텔레그램">텔레그램</option>
+                        <option value="인스타그램">인스타그램</option>
+                        <option value="라인">라인</option>
+                        <option value="위챗">위챗</option>
+                      </select>
+                      <input
+                        type="text"
+                        value={newMessenger.accountId}
+                        onChange={(e) => {
+                          setNewMessenger((prev) => ({
+                            ...prev,
+                            accountId: e.target.value,
+                          }));
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            messenger: { ...prev.messenger, accountId: false },
+                          }));
+                        }}
+                        className={`cim-input ${
+                          validationErrors.messenger.accountId
+                            ? "cim-error"
+                            : ""
+                        }`}
+                        placeholder="계정 ID를 입력하세요"
+                      />
+                      <button
+                        onClick={handleAddMessenger}
+                        className="cim-btn cim-btn-primary cim-btn-sm"
+                      >
+                        추가
                       </button>
+                    </div>
+                    <div className="cim-messenger-list">
+                      {messengerAccounts.map((messenger) => (
+                        <div key={messenger.id} className="cim-messenger-item">
+                          <span className="cim-messenger-platform">
+                            {messenger.platform}
+                          </span>
+                          <span className="cim-messenger-id">
+                            {messenger.accountId}
+                          </span>
+                          <button
+                            onClick={() => handleRemoveMessenger(messenger.id)}
+                            className="cim-btn-delete cim-messenger-delete-btn"
+                            title="메신저 계정 삭제"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 데이터 정보 영역 */}
+              <div className="cim-section">
+                <h3 className="cim-section-title">데이터 정보</h3>
+                <div className="cim-field-grid">
+                  <div className="cim-field">
+                    <label>신청 경로</label>
+                    <input
+                      type="text"
+                      value={dataInfo.applicationRoute}
+                      readOnly
+                      className="cim-input cim-readonly"
+                    />
+                  </div>
+
+                  <div className="cim-field">
+                    <label>사이트</label>
+                    <input
+                      type="text"
+                      value={dataInfo.site}
+                      readOnly
+                      className="cim-input cim-readonly"
+                    />
+                  </div>
+
+                  <div className="cim-field">
+                    <label>매체사</label>
+                    <input
+                      type="text"
+                      value={dataInfo.mediaCompany}
+                      readOnly
+                      className="cim-input cim-readonly"
+                    />
+                  </div>
+
+                  <div className="cim-field">
+                    <label>신청시간</label>
+                    <input
+                      type="text"
+                      value={dataInfo.applicationTime}
+                      readOnly
+                      className="cim-input cim-readonly"
+                    />
+                  </div>
+
+                  <div className="cim-field">
+                    <label>배정시간</label>
+                    <input
+                      type="text"
+                      value={dataInfo.assignmentTime}
+                      readOnly
+                      className="cim-input cim-readonly"
+                    />
+                  </div>
+
+                  <div className="cim-field">
+                    <label>담당팀</label>
+                    <input
+                      type="text"
+                      value={dataInfo.assignedTeam}
+                      readOnly
+                      className="cim-input cim-readonly"
+                    />
+                  </div>
+
+                  <div className="cim-field">
+                    <label>담당자</label>
+                    <input
+                      type="text"
+                      value={dataInfo.assignedPerson}
+                      readOnly
+                      className="cim-input cim-readonly"
+                    />
+                  </div>
+
+                  <div className="cim-field cim-full-width">
+                    <label>특이사항</label>
+                    <textarea
+                      value={dataInfo.specialNotes}
+                      onChange={(e) =>
+                        setDataInfo((prev) => ({
+                          ...prev,
+                          specialNotes: e.target.value,
+                        }))
+                      }
+                      className="cim-textarea"
+                      placeholder="특이사항을 입력하세요"
+                      rows="3"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 영업 정보 영역 */}
+              <div className="cim-section">
+                <h3 className="cim-section-title">영업 정보</h3>
+                <div className="cim-field-grid">
+                  <div className="cim-field">
+                    <label>투자 정보</label>
+                    <input
+                      type="text"
+                      value={businessInfo.investmentInfo}
+                      onChange={(e) =>
+                        setBusinessInfo((prev) => ({
+                          ...prev,
+                          investmentInfo: e.target.value,
+                        }))
+                      }
+                      className="cim-input"
+                      placeholder="투자 정보를 입력하세요"
+                    />
+                  </div>
+
+                  <div className="cim-field">
+                    <label>투자 손익</label>
+                    <input
+                      type="text"
+                      value={businessInfo.investmentProfitLoss}
+                      onChange={(e) => handleProfitLossChange(e.target.value)}
+                      className="cim-input"
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div className="cim-field">
+                    <label>투자 성향</label>
+                    <select
+                      value={businessInfo.investmentTendency}
+                      onChange={(e) =>
+                        setBusinessInfo((prev) => ({
+                          ...prev,
+                          investmentTendency: e.target.value,
+                        }))
+                      }
+                      className="cim-select"
+                    >
+                      <option value="안정형">안정형</option>
+                      <option value="안정추구형">안정추구형</option>
+                      <option value="위험중립형">위험중립형</option>
+                      <option value="적극투자형">적극투자형</option>
+                      <option value="공격투자형">공격투자형</option>
+                    </select>
+                  </div>
+
+                  <div className="cim-field cim-full-width">
+                    <label>비고</label>
+                    <textarea
+                      value={businessInfo.remarks}
+                      onChange={(e) =>
+                        setBusinessInfo((prev) => ({
+                          ...prev,
+                          remarks: e.target.value,
+                        }))
+                      }
+                      className="cim-textarea"
+                      placeholder="비고를 입력하세요"
+                      rows="3"
+                    />
+                  </div>
+                </div>
+
+                {/* 결제 내역 */}
+                <div className="cim-subsection">
+                  <h4 className="cim-subsection-title">결제 내역</h4>
+                  <div className="cim-payment-input">
+                    <input
+                      type="date"
+                      value={newPayment.date}
+                      onChange={(e) => {
+                        setNewPayment((prev) => ({
+                          ...prev,
+                          date: e.target.value,
+                        }));
+                        setValidationErrors((prev) => ({
+                          ...prev,
+                          payment: { ...prev.payment, date: false },
+                        }));
+                      }}
+                      className={`cim-input cim-date-input ${
+                        validationErrors.payment.date ? "cim-error" : ""
+                      }`}
+                      placeholder="날짜 선택"
+                    />
+                    <input
+                      type="text"
+                      value={newPayment.amount}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^0-9]/g, "");
+                        setNewPayment((prev) => ({
+                          ...prev,
+                          amount: formatNumber(value),
+                        }));
+                        setValidationErrors((prev) => ({
+                          ...prev,
+                          payment: { ...prev.payment, amount: false },
+                        }));
+                      }}
+                      className={`cim-input ${
+                        validationErrors.payment.amount ? "cim-error" : ""
+                      }`}
+                      placeholder="금액"
+                    />
+                    <select
+                      value={newPayment.method}
+                      onChange={(e) => {
+                        setNewPayment((prev) => ({
+                          ...prev,
+                          method: e.target.value,
+                        }));
+                        setValidationErrors((prev) => ({
+                          ...prev,
+                          payment: { ...prev.payment, method: false },
+                        }));
+                      }}
+                      className={`cim-select ${
+                        validationErrors.payment.method ? "cim-error" : ""
+                      }`}
+                    >
+                      <option value="카드">카드</option>
+                      <option value="계좌이체">계좌이체</option>
+                      <option value="현금">현금</option>
+                      <option value="가상계좌">가상계좌</option>
+                      <option value="페이팔">페이팔</option>
+                    </select>
+                    <input
+                      type="text"
+                      value={newPayment.description}
+                      onChange={(e) => {
+                        setNewPayment((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }));
+                        setValidationErrors((prev) => ({
+                          ...prev,
+                          payment: { ...prev.payment, description: false },
+                        }));
+                      }}
+                      className={`cim-input ${
+                        validationErrors.payment.description ? "cim-error" : ""
+                      }`}
+                      placeholder="설명"
+                    />
+                    <button
+                      onClick={handleAddPayment}
+                      className="cim-btn cim-btn-primary"
+                    >
+                      추가
+                    </button>
+                  </div>
+                  <div className="cim-payment-list">
+                    {paymentHistory.map((payment) => (
+                      <div key={payment.id} className="cim-payment-item">
+                        <span className="cim-payment-date">{payment.date}</span>
+                        <span className="cim-payment-amount">
+                          {payment.amount}원
+                        </span>
+                        <span className="cim-payment-method">
+                          {payment.method}
+                        </span>
+                        <span className="cim-payment-desc">
+                          {payment.description}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 일정 추가 */}
+                <div className="cim-subsection">
+                  <h4 className="cim-subsection-title">일정 관리</h4>
+                  <div className="cim-schedule-input">
+                    <input
+                      type="date"
+                      value={newSchedule.date}
+                      onChange={(e) => {
+                        setNewSchedule((prev) => ({
+                          ...prev,
+                          date: e.target.value,
+                        }));
+                        setValidationErrors((prev) => ({
+                          ...prev,
+                          schedule: { ...prev.schedule, date: false },
+                        }));
+                      }}
+                      className={`cim-input cim-date-input ${
+                        validationErrors.schedule.date ? "cim-error" : ""
+                      }`}
+                      placeholder="날짜 선택"
+                    />
+                    <div
+                      className={`cim-time-picker-v2 ${
+                        validationErrors.schedule.hour ||
+                        validationErrors.schedule.minute
+                          ? "cim-error"
+                          : ""
+                      }`}
+                    >
+                      <select
+                        value={newSchedule.ampm}
+                        onChange={(e) => {
+                          setNewSchedule((prev) => ({
+                            ...prev,
+                            ampm: e.target.value,
+                          }));
+                        }}
+                        className="cim-select cim-ampm-select"
+                      >
+                        <option value="오전">오전</option>
+                        <option value="오후">오후</option>
+                      </select>
+                      <select
+                        value={newSchedule.hour}
+                        onChange={(e) => {
+                          setNewSchedule((prev) => ({
+                            ...prev,
+                            hour: e.target.value,
+                          }));
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            schedule: { ...prev.schedule, hour: false },
+                          }));
+                        }}
+                        className="cim-select cim-time-select"
+                      >
+                        <option value="">시</option>
+                        {generateHourOptions().map((hour) => (
+                          <option key={hour} value={hour}>
+                            {hour}
+                          </option>
+                        ))}
+                      </select>
+                      <span className="cim-time-separator">:</span>
+                      <select
+                        value={newSchedule.minute}
+                        onChange={(e) => {
+                          setNewSchedule((prev) => ({
+                            ...prev,
+                            minute: e.target.value,
+                          }));
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            schedule: { ...prev.schedule, minute: false },
+                          }));
+                        }}
+                        className="cim-select cim-time-select"
+                      >
+                        <option value="">분</option>
+                        {generateMinuteOptions().map((minute) => (
+                          <option key={minute} value={minute}>
+                            {minute}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <input
+                      type="text"
+                      value={newSchedule.content}
+                      onChange={(e) => {
+                        setNewSchedule((prev) => ({
+                          ...prev,
+                          content: e.target.value,
+                        }));
+                        setValidationErrors((prev) => ({
+                          ...prev,
+                          schedule: { ...prev.schedule, content: false },
+                        }));
+                      }}
+                      className={`cim-input ${
+                        validationErrors.schedule.content ? "cim-error" : ""
+                      }`}
+                      placeholder="일정 내용"
+                    />
+                    <button
+                      onClick={handleAddSchedule}
+                      className="cim-btn cim-btn-primary"
+                    >
+                      추가
+                    </button>
+                  </div>
+                  <div className="cim-schedule-list">
+                    {schedules.map((schedule) => {
+                      const timeInfo = convertTo12Hour(schedule.hour);
+                      return (
+                        <div key={schedule.id} className="cim-schedule-item">
+                          <span className="cim-schedule-datetime">
+                            {schedule.date} {timeInfo.ampm} {timeInfo.hour}:
+                            {schedule.minute}
+                          </span>
+                          <span className="cim-schedule-content">
+                            {schedule.content}
+                          </span>
+                          <button
+                            onClick={() => handleRemoveSchedule(schedule.id)}
+                            className="cim-btn-delete cim-schedule-delete-btn"
+                            title="일정 삭제"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 오른쪽 컬럼 - 상담 내용 기록 */}
+            <div className="cim-right-column">
+              <div className="cim-consultation-section">
+                <h3 className="cim-section-title">상담 내용 기록</h3>
+                <div className="cim-consultation-input">
+                  <div className="cim-consultation-input-row">
+                    <select
+                      value={newConsultation.category}
+                      onChange={(e) =>
+                        setNewConsultation((prev) => ({
+                          ...prev,
+                          category: e.target.value,
+                        }))
+                      }
+                      className="cim-select cim-consultation-category"
+                    >
+                      {consultationCategories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={handleAddConsultation}
+                      className="cim-btn cim-btn-primary cim-btn-sm"
+                    >
+                      추가
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={newConsultation.content}
+                    onChange={(e) =>
+                      setNewConsultation((prev) => ({
+                        ...prev,
+                        content: e.target.value,
+                      }))
+                    }
+                    className="cim-input"
+                    placeholder="상담 내용을 입력하세요..."
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && handleAddConsultation()
+                    }
+                  />
+                </div>
+                <div className="cim-consultation-list cim-consultation-list-full">
+                  {consultations.map((consultation) => (
+                    <div
+                      key={consultation.id}
+                      className="cim-consultation-item"
+                    >
+                      <div className="cim-consultation-header">
+                        <span
+                          className={`cim-consultation-category-badge ${getCategoryClass(
+                            consultation.category
+                          )}`}
+                        >
+                          {consultation.category}
+                        </span>
+                        <span className="cim-consultation-author">
+                          {consultation.author}
+                        </span>
+                        <span className="cim-consultation-timestamp">
+                          {consultation.timestamp}
+                        </span>
+                        <button
+                          onClick={() =>
+                            handleRemoveConsultation(consultation.id)
+                          }
+                          className="cim-btn-delete cim-consultation-delete-btn"
+                          title="상담 기록 삭제"
+                        >
+                          ×
+                        </button>
+                      </div>
+                      <div className="cim-consultation-content">
+                        {consultation.content}
+                      </div>
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 데이터 정보 영역 */}
-          <div className="cim-section">
-            <h3 className="cim-section-title">데이터 정보</h3>
-            <div className="cim-field-grid">
-              <div className="cim-field">
-                <label>신청 경로</label>
-                <input
-                  type="text"
-                  value={dataInfo.applicationRoute}
-                  onChange={(e) =>
-                    setDataInfo((prev) => ({
-                      ...prev,
-                      applicationRoute: e.target.value,
-                    }))
-                  }
-                  className="cim-input"
-                />
-              </div>
-
-              <div className="cim-field">
-                <label>사이트</label>
-                <input
-                  type="text"
-                  value={dataInfo.site}
-                  onChange={(e) =>
-                    setDataInfo((prev) => ({ ...prev, site: e.target.value }))
-                  }
-                  className="cim-input"
-                />
-              </div>
-
-              <div className="cim-field">
-                <label>매체사</label>
-                <input
-                  type="text"
-                  value={dataInfo.mediaCompany}
-                  onChange={(e) =>
-                    setDataInfo((prev) => ({
-                      ...prev,
-                      mediaCompany: e.target.value,
-                    }))
-                  }
-                  className="cim-input"
-                />
-              </div>
-
-              <div className="cim-field">
-                <label>신청시간</label>
-                <input
-                  type="text"
-                  value={dataInfo.applicationTime}
-                  readOnly
-                  className="cim-input cim-readonly"
-                />
-              </div>
-
-              <div className="cim-field">
-                <label>배정시간</label>
-                <input
-                  type="text"
-                  value={dataInfo.assignmentTime}
-                  readOnly
-                  className="cim-input cim-readonly"
-                />
-              </div>
-
-              <div className="cim-field">
-                <label>담당팀</label>
-                <input
-                  type="text"
-                  value={dataInfo.assignedTeam}
-                  readOnly
-                  className="cim-input cim-readonly"
-                />
-              </div>
-
-              <div className="cim-field">
-                <label>담당자</label>
-                <input
-                  type="text"
-                  value={dataInfo.assignedPerson}
-                  readOnly
-                  className="cim-input cim-readonly"
-                />
-              </div>
-
-              <div className="cim-field cim-full-width">
-                <label>특이사항</label>
-                <textarea
-                  value={dataInfo.specialNotes}
-                  onChange={(e) =>
-                    setDataInfo((prev) => ({
-                      ...prev,
-                      specialNotes: e.target.value,
-                    }))
-                  }
-                  className="cim-textarea"
-                  placeholder="특이사항을 입력하세요"
-                  rows="3"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 영업 정보 영역 */}
-          <div className="cim-section">
-            <h3 className="cim-section-title">영업 정보</h3>
-            <div className="cim-field-grid">
-              <div className="cim-field">
-                <label>투자 정보</label>
-                <input
-                  type="text"
-                  value={businessInfo.investmentInfo}
-                  onChange={(e) =>
-                    setBusinessInfo((prev) => ({
-                      ...prev,
-                      investmentInfo: e.target.value,
-                    }))
-                  }
-                  className="cim-input"
-                  placeholder="투자 정보를 입력하세요"
-                />
-              </div>
-
-              <div className="cim-field">
-                <label>투자 손익</label>
-                <input
-                  type="text"
-                  value={businessInfo.investmentProfitLoss}
-                  onChange={(e) => handleProfitLossChange(e.target.value)}
-                  className="cim-input"
-                  placeholder="0"
-                />
-              </div>
-
-              <div className="cim-field">
-                <label>투자 성향</label>
-                <select
-                  value={businessInfo.investmentTendency}
-                  onChange={(e) =>
-                    setBusinessInfo((prev) => ({
-                      ...prev,
-                      investmentTendency: e.target.value,
-                    }))
-                  }
-                  className="cim-select"
-                >
-                  <option value="안정형">안정형</option>
-                  <option value="안정추구형">안정추구형</option>
-                  <option value="위험중립형">위험중립형</option>
-                  <option value="적극투자형">적극투자형</option>
-                  <option value="공격투자형">공격투자형</option>
-                </select>
-              </div>
-
-              <div className="cim-field cim-full-width">
-                <label>비고</label>
-                <textarea
-                  value={businessInfo.remarks}
-                  onChange={(e) =>
-                    setBusinessInfo((prev) => ({
-                      ...prev,
-                      remarks: e.target.value,
-                    }))
-                  }
-                  className="cim-textarea"
-                  placeholder="비고를 입력하세요"
-                  rows="3"
-                />
-              </div>
-            </div>
-
-            {/* 결제 내역 */}
-            <div className="cim-subsection">
-              <h4 className="cim-subsection-title">결제 내역</h4>
-              <div className="cim-payment-input">
-                <input
-                  type="date"
-                  value={newPayment.date}
-                  onChange={(e) => {
-                    setNewPayment((prev) => ({
-                      ...prev,
-                      date: e.target.value,
-                    }));
-                    setValidationErrors((prev) => ({
-                      ...prev,
-                      payment: { ...prev.payment, date: false },
-                    }));
-                  }}
-                  className={`cim-input cim-date-input ${
-                    validationErrors.payment.date ? "cim-error" : ""
-                  }`}
-                  placeholder="날짜 선택"
-                />
-                <input
-                  type="text"
-                  value={newPayment.amount}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/[^0-9]/g, "");
-                    setNewPayment((prev) => ({
-                      ...prev,
-                      amount: formatNumber(value),
-                    }));
-                    setValidationErrors((prev) => ({
-                      ...prev,
-                      payment: { ...prev.payment, amount: false },
-                    }));
-                  }}
-                  className={`cim-input ${
-                    validationErrors.payment.amount ? "cim-error" : ""
-                  }`}
-                  placeholder="금액"
-                />
-                <select
-                  value={newPayment.method}
-                  onChange={(e) => {
-                    setNewPayment((prev) => ({
-                      ...prev,
-                      method: e.target.value,
-                    }));
-                    setValidationErrors((prev) => ({
-                      ...prev,
-                      payment: { ...prev.payment, method: false },
-                    }));
-                  }}
-                  className={`cim-select ${
-                    validationErrors.payment.method ? "cim-error" : ""
-                  }`}
-                >
-                  <option value="카드">카드</option>
-                  <option value="계좌이체">계좌이체</option>
-                  <option value="현금">현금</option>
-                  <option value="가상계좌">가상계좌</option>
-                  <option value="페이팔">페이팔</option>
-                </select>
-                <input
-                  type="text"
-                  value={newPayment.description}
-                  onChange={(e) => {
-                    setNewPayment((prev) => ({
-                      ...prev,
-                      description: e.target.value,
-                    }));
-                    setValidationErrors((prev) => ({
-                      ...prev,
-                      payment: { ...prev.payment, description: false },
-                    }));
-                  }}
-                  className={`cim-input ${
-                    validationErrors.payment.description ? "cim-error" : ""
-                  }`}
-                  placeholder="설명"
-                />
-                <button
-                  onClick={handleAddPayment}
-                  className="cim-btn cim-btn-primary"
-                >
-                  추가
-                </button>
-              </div>
-              <div className="cim-payment-list">
-                {paymentHistory.map((payment) => (
-                  <div key={payment.id} className="cim-payment-item">
-                    <span className="cim-payment-date">{payment.date}</span>
-                    <span className="cim-payment-amount">
-                      {payment.amount}원
-                    </span>
-                    <span className="cim-payment-method">{payment.method}</span>
-                    <span className="cim-payment-desc">
-                      {payment.description}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 일정 추가 */}
-            <div className="cim-subsection">
-              <h4 className="cim-subsection-title">일정 관리</h4>
-              <div className="cim-schedule-input">
-                <input
-                  type="date"
-                  value={newSchedule.date}
-                  onChange={(e) => {
-                    setNewSchedule((prev) => ({
-                      ...prev,
-                      date: e.target.value,
-                    }));
-                    setValidationErrors((prev) => ({
-                      ...prev,
-                      schedule: { ...prev.schedule, date: false },
-                    }));
-                  }}
-                  className={`cim-input cim-date-input ${
-                    validationErrors.schedule.date ? "cim-error" : ""
-                  }`}
-                  placeholder="날짜 선택"
-                />
-                <div
-                  className={`cim-time-picker-v2 ${
-                    validationErrors.schedule.hour ||
-                    validationErrors.schedule.minute
-                      ? "cim-error"
-                      : ""
-                  }`}
-                >
-                  <select
-                    value={newSchedule.ampm}
-                    onChange={(e) => {
-                      setNewSchedule((prev) => ({
-                        ...prev,
-                        ampm: e.target.value,
-                      }));
-                    }}
-                    className="cim-select cim-ampm-select"
-                  >
-                    <option value="오전">오전</option>
-                    <option value="오후">오후</option>
-                  </select>
-                  <select
-                    value={newSchedule.hour}
-                    onChange={(e) => {
-                      setNewSchedule((prev) => ({
-                        ...prev,
-                        hour: e.target.value,
-                      }));
-                      setValidationErrors((prev) => ({
-                        ...prev,
-                        schedule: { ...prev.schedule, hour: false },
-                      }));
-                    }}
-                    className="cim-select cim-time-select"
-                  >
-                    <option value="">시</option>
-                    {generateHourOptions().map((hour) => (
-                      <option key={hour} value={hour}>
-                        {hour}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="cim-time-separator">:</span>
-                  <select
-                    value={newSchedule.minute}
-                    onChange={(e) => {
-                      setNewSchedule((prev) => ({
-                        ...prev,
-                        minute: e.target.value,
-                      }));
-                      setValidationErrors((prev) => ({
-                        ...prev,
-                        schedule: { ...prev.schedule, minute: false },
-                      }));
-                    }}
-                    className="cim-select cim-time-select"
-                  >
-                    <option value="">분</option>
-                    {generateMinuteOptions().map((minute) => (
-                      <option key={minute} value={minute}>
-                        {minute}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <input
-                  type="text"
-                  value={newSchedule.content}
-                  onChange={(e) => {
-                    setNewSchedule((prev) => ({
-                      ...prev,
-                      content: e.target.value,
-                    }));
-                    setValidationErrors((prev) => ({
-                      ...prev,
-                      schedule: { ...prev.schedule, content: false },
-                    }));
-                  }}
-                  className={`cim-input ${
-                    validationErrors.schedule.content ? "cim-error" : ""
-                  }`}
-                  placeholder="일정 내용"
-                />
-                <button
-                  onClick={handleAddSchedule}
-                  className="cim-btn cim-btn-primary"
-                >
-                  추가
-                </button>
-              </div>
-              <div className="cim-schedule-list">
-                {schedules.map((schedule) => {
-                  const timeInfo = convertTo12Hour(schedule.hour);
-                  return (
-                    <div key={schedule.id} className="cim-schedule-item">
-                      <span className="cim-schedule-datetime">
-                        {schedule.date} {timeInfo.ampm} {timeInfo.hour}:
-                        {schedule.minute}
-                      </span>
-                      <span className="cim-schedule-content">
-                        {schedule.content}
-                      </span>
-                      <button
-                        onClick={() => handleRemoveSchedule(schedule.id)}
-                        className="cim-btn-delete cim-schedule-delete-btn"
-                        title="일정 삭제"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* 상담 내용 기록 */}
-            <div className="cim-subsection">
-              <h4 className="cim-subsection-title">상담 내용 기록</h4>
-              <div className="cim-consultation-input">
-                <input
-                  type="text"
-                  value={newConsultation}
-                  onChange={(e) => setNewConsultation(e.target.value)}
-                  className="cim-input"
-                  placeholder="상담 내용을 입력하세요..."
-                  onKeyPress={(e) =>
-                    e.key === "Enter" && handleAddConsultation()
-                  }
-                />
-                <button
-                  onClick={handleAddConsultation}
-                  className="cim-btn cim-btn-primary"
-                >
-                  추가
-                </button>
-              </div>
-              <div className="cim-consultation-list">
-                {consultations.map((consultation) => (
-                  <div key={consultation.id} className="cim-consultation-item">
-                    <div className="cim-consultation-meta">
-                      <span className="cim-consultation-author">
-                        {consultation.author}
-                      </span>
-                      <span className="cim-consultation-content-inline">
-                        {consultation.content}
-                      </span>
-                      <span className="cim-consultation-timestamp">
-                        {consultation.timestamp}
-                      </span>
-                      <button
-                        onClick={() =>
-                          handleRemoveConsultation(consultation.id)
-                        }
-                        className="cim-btn-delete cim-consultation-delete-btn"
-                        title="상담 기록 삭제"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
           </div>

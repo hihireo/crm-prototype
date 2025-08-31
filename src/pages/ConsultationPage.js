@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import CustomerInfoModal from "../components/CustomerInfoModal";
 import "./ConsultationPage.css";
 
@@ -8,6 +8,46 @@ const ConsultationPage = ({ user, service }) => {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [aiMessage, setAiMessage] = useState("");
   const [aiChatHistory, setAiChatHistory] = useState([]);
+
+  // 탭 상태 관리
+  const [activeTab, setActiveTab] = useState("전체");
+
+  // 필터 모달 상태 관리
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    platform: "all",
+    statusCategories: [],
+  });
+  const [appliedFilters, setAppliedFilters] = useState({
+    platform: "all",
+    statusCategories: [],
+  });
+
+  // 드롭다운 상태 관리
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+  });
+
+  // 레이아웃 모드 상태 관리
+  const [layoutMode, setLayoutMode] = useState("default"); // "default" 또는 "compact"
+
+  // 상담 카테고리 옵션
+  const consultationCategories = [
+    "일반",
+    "부재",
+    "재상담",
+    "관리중",
+    "AS요청",
+    "AS확정",
+    "실패",
+    "결제완료",
+    "무료방안내",
+    "무료방입장",
+    "결제유력",
+  ];
 
   // 메신저별 채팅 목록
   const [conversations, setConversations] = useState([
@@ -21,6 +61,7 @@ const ConsultationPage = ({ user, service }) => {
       timestamp: "Aug 20, 4:20:00 PM",
       unreadCount: 1,
       status: "New Lead",
+      consultationStatus: "상담 중",
       avatar: "S",
       messages: [
         {
@@ -42,6 +83,7 @@ const ConsultationPage = ({ user, service }) => {
       timestamp: "Aug 20, 3:45:00 PM",
       unreadCount: 3,
       status: "Hot Lead",
+      consultationStatus: "상담 중",
       avatar: "김",
       messages: [
         {
@@ -77,6 +119,7 @@ const ConsultationPage = ({ user, service }) => {
       timestamp: "Aug 20, 2:15:00 PM",
       unreadCount: 0,
       status: "Customer",
+      consultationStatus: "상담 완료",
       avatar: "박",
       messages: [
         {
@@ -120,6 +163,7 @@ const ConsultationPage = ({ user, service }) => {
       timestamp: "Aug 20, 1:30:00 PM",
       unreadCount: 2,
       status: "New Lead",
+      consultationStatus: "상담 중",
       avatar: "이",
       messages: [
         {
@@ -250,9 +294,139 @@ const ConsultationPage = ({ user, service }) => {
     }
   };
 
-  const filteredConversations = conversations.sort(
-    (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
-  );
+  // 필터 함수들
+  const handleFilterChange = (filterType, value) => {
+    setFilters((prev) => ({
+      ...prev,
+      [filterType]: value,
+    }));
+  };
+
+  const handleFilterApply = () => {
+    setAppliedFilters({ ...filters });
+    setIsFilterModalOpen(false);
+  };
+
+  const handleFilterReset = () => {
+    const resetFilters = {
+      platform: "all",
+      statusCategories: [],
+    };
+    setFilters(resetFilters);
+  };
+
+  // 상담 카테고리 다중 선택 핸들러
+  const handleStatusCategoryToggle = (category) => {
+    setFilters((prev) => {
+      const currentCategories = prev.statusCategories;
+      const isSelected = currentCategories.includes(category);
+
+      if (isSelected) {
+        return {
+          ...prev,
+          statusCategories: currentCategories.filter((c) => c !== category),
+        };
+      } else {
+        return {
+          ...prev,
+          statusCategories: [...currentCategories, category],
+        };
+      }
+    });
+  };
+
+  // 카테고리 제거 핸들러
+  const handleRemoveStatusCategory = (categoryToRemove) => {
+    setFilters((prev) => ({
+      ...prev,
+      statusCategories: prev.statusCategories.filter(
+        (category) => category !== categoryToRemove
+      ),
+    }));
+  };
+
+  // 드롭다운 위치 계산 및 열기
+  const handleDropdownToggle = (e) => {
+    if (!isStatusDropdownOpen) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+    setIsStatusDropdownOpen(!isStatusDropdownOpen);
+  };
+
+  // 드롭다운 외부 클릭 감지
+  const handleDropdownClickOutside = useCallback((e) => {
+    if (!e.target.closest(".cp-status-dropdown-container")) {
+      setIsStatusDropdownOpen(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isStatusDropdownOpen) {
+      document.addEventListener("click", handleDropdownClickOutside);
+      return () => {
+        document.removeEventListener("click", handleDropdownClickOutside);
+      };
+    }
+  }, [isStatusDropdownOpen, handleDropdownClickOutside]);
+
+  // 상담 완료 처리 함수
+  const handleConsultationComplete = () => {
+    if (selectedChat) {
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === selectedChat.id
+            ? { ...conv, consultationStatus: "상담 완료" }
+            : conv
+        )
+      );
+      setSelectedChat((prev) => ({
+        ...prev,
+        consultationStatus: "상담 완료",
+      }));
+      setActiveTab("상담 완료");
+    }
+  };
+
+  // 탭과 필터에 따른 대화 목록 필터링
+  const getFilteredConversations = () => {
+    let filtered = conversations;
+
+    // 탭 필터링
+    if (activeTab === "상담 중") {
+      filtered = filtered.filter(
+        (conv) => conv.consultationStatus === "상담 중"
+      );
+    } else if (activeTab === "상담 완료") {
+      filtered = filtered.filter(
+        (conv) => conv.consultationStatus === "상담 완료"
+      );
+    }
+
+    // 플랫폼 필터링
+    if (appliedFilters.platform !== "all") {
+      filtered = filtered.filter(
+        (conv) => conv.platform === appliedFilters.platform
+      );
+    }
+
+    // 상담 카테고리 필터링
+    if (appliedFilters.statusCategories.length > 0) {
+      filtered = filtered.filter((conv) =>
+        appliedFilters.statusCategories.includes(conv.status)
+      );
+    }
+
+    return filtered.sort(
+      (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+    );
+  };
+
+  const filteredConversations = getFilteredConversations();
 
   return (
     <div
@@ -272,12 +446,79 @@ const ConsultationPage = ({ user, service }) => {
           {/* 채팅 목록 사이드바 */}
           <div className="chat-sidebar">
             <div className="sidebar-header">
-              <h2>상담 채팅</h2>
+              <div className="cp-header-top">
+                <h2>상담 채팅</h2>
+                <div className="cp-header-actions">
+                  <button
+                    className="cp-filter-btn"
+                    onClick={() => setIsFilterModalOpen(true)}
+                    title="필터"
+                  >
+                    <div className="cp-filter-icon">
+                      <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path
+                          fillRule="evenodd"
+                          d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </button>
+                  <div className="cp-layout-toggle">
+                    <button
+                      className={`cp-layout-option ${
+                        layoutMode === "default" ? "cp-layout-active" : ""
+                      }`}
+                      onClick={() => setLayoutMode("default")}
+                      title="기본 레이아웃"
+                    >
+                      ☰
+                    </button>
+                    <button
+                      className={`cp-layout-option ${
+                        layoutMode === "compact" ? "cp-layout-active" : ""
+                      }`}
+                      onClick={() => setLayoutMode("compact")}
+                      title="컴팩트 레이아웃"
+                    >
+                      <div className="cp-grid-icon">
+                        <div className="cp-grid-dots">
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 탭 영역 */}
+              <div className="cp-tabs">
+                {["전체", "상담 중", "상담 완료"].map((tab) => (
+                  <button
+                    key={tab}
+                    className={`cp-tab ${
+                      activeTab === tab ? "cp-tab-active" : ""
+                    }`}
+                    onClick={() => setActiveTab(tab)}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
               <div className="chat-stats">
-                <span>총 {conversations.length}건</span>
+                <span>총 {filteredConversations.length}건</span>
                 <span>
                   미읽음{" "}
-                  {conversations.reduce(
+                  {filteredConversations.reduce(
                     (sum, conv) => sum + conv.unreadCount,
                     0
                   )}
@@ -286,38 +527,17 @@ const ConsultationPage = ({ user, service }) => {
               </div>
             </div>
 
-            <div className="platform-filters">
-              <button className="platform-filter active">전체</button>
-              <button className="platform-filter">
-                <img
-                  src="/images/platforms/telegram_logo.png"
-                  alt="Telegram"
-                  className="filter-icon"
-                />
-              </button>
-              <button className="platform-filter">
-                <img
-                  src="/images/platforms/Instagram_logo.png"
-                  alt="Instagram"
-                  className="filter-icon"
-                />
-              </button>
-              <button className="platform-filter">
-                <img
-                  src="/images/platforms/line_logo.png"
-                  alt="Line"
-                  className="filter-icon"
-                />
-              </button>
-            </div>
-
-            <div className="chat-list">
+            <div
+              className={`chat-list ${
+                layoutMode === "compact" ? "cp-compact-layout" : ""
+              }`}
+            >
               {filteredConversations.map((conversation) => (
                 <div
                   key={conversation.id}
                   className={`chat-item ${
                     selectedChat?.id === conversation.id ? "active" : ""
-                  }`}
+                  } ${layoutMode === "compact" ? "cp-compact-item" : ""}`}
                   onClick={() => {
                     // 채팅방 선택시 해당 채팅방의 읽지 않은 메시지 카운트를 0으로 설정
                     const updatedConversation = {
@@ -336,35 +556,58 @@ const ConsultationPage = ({ user, service }) => {
                     );
                   }}
                 >
-                  <div className="chat-avatar-section">
-                    <div className="chat-avatar">{conversation.avatar}</div>
-                  </div>
-
-                  <div className="chat-info">
-                    <div className="chat-header">
-                      <div className="customer-name-with-icon">
-                        <span className="customer-name">
-                          {conversation.customerName}
-                        </span>
-                        <span className="platform-badge">
-                          {getPlatformIcon(conversation.platform)}
-                        </span>
+                  {layoutMode === "compact" ? (
+                    // 컴팩트 레이아웃
+                    <div className="cp-compact-content">
+                      <div className="cp-compact-name">
+                        {conversation.customerName}
                       </div>
-                      <span className="chat-time">
-                        {conversation.timestamp.split(" ").slice(-2).join(" ")}
-                      </span>
-                    </div>
-                    <div className="chat-preview">
-                      <span className="last-message">
-                        {conversation.lastMessage}
-                      </span>
+                      <div className="cp-compact-platform">
+                        {getPlatformIcon(conversation.platform)}
+                      </div>
                       {conversation.unreadCount > 0 && (
-                        <span className="unread-count">
+                        <div className="cp-compact-unread">
                           {conversation.unreadCount}
-                        </span>
+                        </div>
                       )}
                     </div>
-                  </div>
+                  ) : (
+                    // 기본 레이아웃
+                    <>
+                      <div className="chat-avatar-section">
+                        <div className="chat-avatar">{conversation.avatar}</div>
+                      </div>
+
+                      <div className="chat-info">
+                        <div className="chat-header">
+                          <div className="customer-name-with-icon">
+                            <span className="customer-name">
+                              {conversation.customerName}
+                            </span>
+                            <span className="platform-badge">
+                              {getPlatformIcon(conversation.platform)}
+                            </span>
+                          </div>
+                          <span className="chat-time">
+                            {conversation.timestamp
+                              .split(" ")
+                              .slice(-2)
+                              .join(" ")}
+                          </span>
+                        </div>
+                        <div className="chat-preview">
+                          <span className="last-message">
+                            {conversation.lastMessage}
+                          </span>
+                          {conversation.unreadCount > 0 && (
+                            <span className="unread-count">
+                              {conversation.unreadCount}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
@@ -487,8 +730,16 @@ const ConsultationPage = ({ user, service }) => {
 
                   <div className="profile-actions-compact">
                     {/* <button className="btn btn-secondary btn-small">노트</button> */}
-                    <button className="btn btn-primary btn-small">
-                      상담 완료
+                    <button
+                      className="btn btn-primary btn-small"
+                      onClick={handleConsultationComplete}
+                      disabled={
+                        selectedChat?.consultationStatus === "상담 완료"
+                      }
+                    >
+                      {selectedChat?.consultationStatus === "상담 완료"
+                        ? "완료됨"
+                        : "상담 완료"}
                     </button>
                   </div>
                 </div>
@@ -569,6 +820,213 @@ const ConsultationPage = ({ user, service }) => {
         onClose={() => setIsCustomerModalOpen(false)}
         customerData={selectedChat}
       />
+
+      {/* 필터 모달 */}
+      {isFilterModalOpen && (
+        <div
+          className="cp-filter-modal-overlay"
+          onClick={() => setIsFilterModalOpen(false)}
+        >
+          <div className="cp-filter-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="cp-filter-modal-header">
+              <h3>필터 설정</h3>
+              <button
+                className="cp-filter-modal-close"
+                onClick={() => setIsFilterModalOpen(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="cp-filter-modal-content">
+              {/* 메신저 필터 */}
+              <div className="cp-filter-group">
+                <label>메신저</label>
+                <div className="cp-platform-options">
+                  <button
+                    className={`cp-platform-btn ${
+                      filters.platform === "all" ? "cp-platform-active" : ""
+                    }`}
+                    onClick={() => handleFilterChange("platform", "all")}
+                    title="전체"
+                  >
+                    전체
+                  </button>
+                  <button
+                    className={`cp-platform-btn ${
+                      filters.platform === "telegram"
+                        ? "cp-platform-active"
+                        : ""
+                    }`}
+                    onClick={() => handleFilterChange("platform", "telegram")}
+                    title="텔레그램"
+                  >
+                    <img
+                      src="/images/platforms/telegram_logo.png"
+                      alt="Telegram"
+                      className="cp-platform-icon"
+                    />
+                  </button>
+                  <button
+                    className={`cp-platform-btn ${
+                      filters.platform === "instagram"
+                        ? "cp-platform-active"
+                        : ""
+                    }`}
+                    onClick={() => handleFilterChange("platform", "instagram")}
+                    title="인스타그램"
+                  >
+                    <img
+                      src="/images/platforms/Instagram_logo.png"
+                      alt="Instagram"
+                      className="cp-platform-icon"
+                    />
+                  </button>
+                  <button
+                    className={`cp-platform-btn ${
+                      filters.platform === "line" ? "cp-platform-active" : ""
+                    }`}
+                    onClick={() => handleFilterChange("platform", "line")}
+                    title="라인"
+                  >
+                    <img
+                      src="/images/platforms/line_logo.png"
+                      alt="Line"
+                      className="cp-platform-icon"
+                    />
+                  </button>
+                </div>
+              </div>
+
+              {/* 처리상태 필터 */}
+              <div className="cp-filter-group">
+                <label>처리상태</label>
+                <div className="cp-status-filter-container">
+                  <div className="cp-status-dropdown-container">
+                    {/* 드롭다운 버튼 */}
+                    <button
+                      type="button"
+                      onClick={handleDropdownToggle}
+                      className="cp-dropdown-trigger"
+                    >
+                      <span className="cp-dropdown-text">
+                        {filters.statusCategories.length === 0
+                          ? "상태 선택"
+                          : `${filters.statusCategories.length}개 선택됨`}
+                      </span>
+                      <svg
+                        className={`cp-dropdown-icon ${
+                          isStatusDropdownOpen ? "cp-dropdown-icon-open" : ""
+                        }`}
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* 선택된 카테고리 태그들 */}
+                  {filters.statusCategories.length > 0 && (
+                    <div className="cp-selected-tags">
+                      {filters.statusCategories.map((category) => (
+                        <span key={category} className="cp-category-tag">
+                          {category}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveStatusCategory(category)}
+                            className="cp-tag-remove"
+                            aria-label={`${category} 제거`}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="cp-filter-modal-actions">
+              <button
+                className="cp-filter-btn-reset"
+                onClick={handleFilterReset}
+              >
+                초기화
+              </button>
+              <button
+                className="cp-filter-btn-apply"
+                onClick={handleFilterApply}
+              >
+                적용
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 드롭다운 메뉴 - 모달 외부에 렌더링 */}
+      {isStatusDropdownOpen && (
+        <div
+          className="cp-dropdown-menu"
+          style={{
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`,
+            width: `${dropdownPosition.width}px`,
+          }}
+        >
+          {/* 카테고리 옵션들 */}
+          <div className="cp-dropdown-options">
+            {consultationCategories.map((category) => (
+              <label
+                key={category}
+                className="cp-dropdown-option"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleStatusCategoryToggle(category);
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={filters.statusCategories.includes(category)}
+                  onChange={() => {}} // 빈 함수로 설정하여 label onClick으로만 처리
+                  className="cp-checkbox"
+                />
+                <span className="cp-checkbox-label">{category}</span>
+              </label>
+            ))}
+          </div>
+
+          {/* 드롭다운 하단 액션 */}
+          <div className="cp-dropdown-actions">
+            <button
+              type="button"
+              onClick={() => {
+                setFilters((prev) => ({
+                  ...prev,
+                  statusCategories: [],
+                }));
+              }}
+              className="cp-clear-all"
+            >
+              전체 해제
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsStatusDropdownOpen(false)}
+              className="cp-dropdown-close"
+            >
+              완료
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

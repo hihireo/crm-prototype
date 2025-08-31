@@ -27,10 +27,131 @@
 .sidebar-header {
   padding: 20px 24px;
   border-bottom: 1px solid #e2e8f0;
-  min-height: 89px;
+  min-height: 140px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+/* CP prefix for consultation page specific styles */
+.cp-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.cp-header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.cp-filter-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.cp-filter-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.cp-layout-toggle {
+  display: flex;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  overflow: hidden;
+}
+
+.cp-layout-option {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.cp-layout-option:not(:last-child) {
+  border-right: 1px solid #e2e8f0;
+}
+
+.cp-layout-option:hover {
+  background: #f8fafc;
+}
+
+.cp-layout-option.cp-layout-active {
+  background: #3b82f6;
+  color: white;
+}
+
+.cp-grid-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cp-grid-dots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  width: 12px;
+  height: 12px;
+}
+
+.cp-grid-dots span {
+  width: 2px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 50%;
+}
+
+.cp-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.cp-tab {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cp-tab:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.cp-tab-active {
+  background: white;
+  color: #3b82f6;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .sidebar-header h2 {
@@ -79,7 +200,7 @@
 }
 
 .chat-list {
-  flex: 1;
+  /* flex: 1; */
   overflow-y: auto;
 }
 
@@ -905,4 +1026,447 @@
 .messages-container::-webkit-scrollbar-thumb:hover,
 .ai-chat-messages::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* CP 컴팩트 레이아웃 스타일 */
+.cp-compact-layout {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 12px;
+  grid-auto-rows: minmax(70px, auto);
+}
+
+.cp-compact-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 10px !important;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  transition: all 0.2s;
+  min-height: 70px;
+  max-height: 70px;
+}
+
+.cp-compact-item:hover {
+  background: #f8fafc !important;
+  border-color: #cbd5e1;
+}
+
+.cp-compact-item.active {
+  background: #eff6ff !important;
+  border-color: #3b82f6;
+  border-right: 3px solid #3b82f6;
+}
+
+.cp-compact-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+  height: 100%;
+}
+
+.cp-compact-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.cp-compact-platform {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cp-compact-platform .platform-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.cp-compact-unread {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 8px;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* CP 필터 모달 스타일 */
+.cp-filter-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  overflow: visible;
+}
+
+.cp-filter-modal {
+  background: white;
+  border-radius: 12px;
+  width: 400px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow: visible;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.cp-filter-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.cp-filter-modal-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.cp-filter-modal-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  font-size: 20px;
+  color: #64748b;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.cp-filter-modal-close:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.cp-filter-modal-content {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow: visible;
+}
+
+.cp-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: visible;
+}
+
+.cp-filter-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.cp-filter-select {
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  color: #1e293b;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.cp-filter-select:focus {
+  border-color: #3b82f6;
+}
+
+.cp-filter-modal-actions {
+  padding: 20px 24px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.cp-filter-btn-reset,
+.cp-filter-btn-apply {
+  padding: 10px 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cp-filter-btn-reset {
+  background: white;
+  color: #64748b;
+}
+
+.cp-filter-btn-reset:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.cp-filter-btn-apply {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.cp-filter-btn-apply:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+/* CP 필터 아이콘 스타일 */
+.cp-filter-icon {
+  width: 16px;
+  height: 16px;
+  color: #64748b;
+}
+
+.cp-filter-btn:hover .cp-filter-icon {
+  color: #374151;
+}
+
+/* CP 플랫폼 버튼 스타일 */
+.cp-platform-options {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.cp-platform-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  min-height: 48px;
+}
+
+.cp-platform-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.cp-platform-btn.cp-platform-active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.cp-platform-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+/* CP 상태 드롭다운 스타일 (ApplicationsPage 스타일 참조) */
+.cp-status-filter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: visible;
+}
+
+.cp-status-dropdown-container {
+  position: relative;
+  overflow: visible;
+}
+
+.cp-dropdown-trigger {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  color: #374151;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.cp-dropdown-trigger:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.cp-dropdown-text {
+  font-weight: 500;
+}
+
+.cp-dropdown-icon {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s;
+  color: #64748b;
+}
+
+.cp-dropdown-icon-open {
+  transform: rotate(180deg);
+}
+
+.cp-dropdown-menu {
+  position: fixed;
+  z-index: 1100;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  max-height: 250px;
+  overflow-y: auto;
+  min-width: 200px;
+}
+
+.cp-dropdown-options {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.cp-dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  user-select: none;
+}
+
+.cp-dropdown-option:hover {
+  background: #f8fafc;
+}
+
+.cp-checkbox {
+  margin: 0;
+  accent-color: #3b82f6;
+}
+
+.cp-checkbox-label {
+  font-size: 14px;
+  color: #374151;
+  flex: 1;
+}
+
+.cp-no-results {
+  padding: 12px;
+  text-align: center;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.cp-dropdown-actions {
+  padding: 12px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cp-clear-all,
+.cp-dropdown-close {
+  padding: 6px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cp-clear-all {
+  background: white;
+  color: #64748b;
+}
+
+.cp-clear-all:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.cp-dropdown-close {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.cp-dropdown-close:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+/* CP 선택된 태그 스타일 */
+.cp-selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cp-category-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: #eff6ff;
+  color: #3b82f6;
+  border: 1px solid #bfdbfe;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.cp-tag-remove {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.cp-tag-remove:hover {
+  background: #dbeafe;
 }

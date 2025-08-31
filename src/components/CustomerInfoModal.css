@@ -207,8 +207,75 @@
 /* 모달 콘텐츠 */
 .cim-modal-content {
   flex: 1;
-  overflow-y: auto;
+  overflow: hidden;
   padding: 28px;
+}
+
+/* 2열 레이아웃 컨테이너 */
+.cim-two-column-layout {
+  display: flex;
+  gap: 24px;
+  height: calc(90vh - 200px); /* 모달 크기에 맞는 높이 조정 */
+  min-height: 600px; /* 최소 높이 증가 */
+  max-height: calc(90vh - 150px); /* 최대 높이 제한 */
+}
+
+/* 왼쪽 컬럼 */
+.cim-left-column {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 12px;
+  min-width: 0;
+  height: 100%;
+}
+
+/* 오른쪽 컬럼 */
+.cim-right-column {
+  flex: 0 0 420px; /* 너비를 약간 늘림 */
+  overflow: hidden;
+  padding-left: 12px;
+  border-left: 2px solid #e5e7eb;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 상담 섹션 전용 스타일 */
+.cim-consultation-section {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  min-height: 600px; /* 최소 높이 보장 */
+}
+
+/* 상담 입력 영역 개선 */
+.cim-consultation-section .cim-consultation-input {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-shrink: 0; /* 입력 영역이 축소되지 않도록 */
+}
+
+.cim-consultation-section .cim-consultation-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.cim-consultation-section .cim-consultation-list-full {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+  min-height: 500px; /* 상담 리스트의 최소 높이 확보 */
+  max-height: calc(90vh - 300px); /* 모달 크기에 맞는 최대 높이 */
 }
 
 /* 섹션 스타일 */
@@ -613,9 +680,107 @@
 /* 상담 내용 기록 */
 .cim-consultation-input {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 120px 1fr auto;
   gap: 10px;
   margin-bottom: 16px;
+}
+
+/* 오른쪽 컬럼 상담 입력 영역 개선된 스타일 */
+.cim-consultation-section .cim-consultation-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.cim-consultation-section .cim-consultation-category {
+  flex: 0 0 120px;
+}
+
+.cim-consultation-section .cim-btn-sm {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* 상담 아이템 헤더와 내용 분리 */
+.cim-consultation-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.cim-consultation-content {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.5;
+  padding: 8px 12px;
+  background: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  word-break: break-word;
+}
+
+/* 상담 카테고리 선택 */
+.cim-consultation-category {
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+/* 상담 카테고리 배지 */
+.cim-consultation-category-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 12px;
+  margin-right: 8px;
+  white-space: nowrap;
+  color: white;
+}
+
+/* 카테고리별 색상 */
+.cim-consultation-category-badge {
+  background: #3b82f6; /* 일반 */
+}
+
+.cim-consultation-category-badge.cim-category-부재 {
+  background: #ef4444;
+}
+
+.cim-consultation-category-badge.cim-category-재상담 {
+  background: #f59e0b;
+}
+
+.cim-consultation-category-badge.cim-category-관리중 {
+  background: #10b981;
+}
+
+.cim-consultation-category-badge.cim-category-AS요청 {
+  background: #8b5cf6;
+}
+
+.cim-consultation-category-badge.cim-category-AS확정 {
+  background: #6366f1;
+}
+
+.cim-consultation-category-badge.cim-category-실패 {
+  background: #dc2626;
+}
+
+.cim-consultation-category-badge.cim-category-결제완료 {
+  background: #059669;
+}
+
+.cim-consultation-category-badge.cim-category-무료방안내 {
+  background: #0891b2;
+}
+
+.cim-consultation-category-badge.cim-category-무료방입장 {
+  background: #0284c7;
+}
+
+.cim-consultation-category-badge.cim-category-결제유력 {
+  background: #16a34a;
 }
 
 .cim-consultation-list {
@@ -775,7 +940,9 @@
 .cim-schedule-list::-webkit-scrollbar,
 .cim-consultation-list::-webkit-scrollbar,
 .cim-messenger-list::-webkit-scrollbar,
-.cim-modal-content::-webkit-scrollbar {
+.cim-modal-content::-webkit-scrollbar,
+.cim-left-column::-webkit-scrollbar,
+.cim-right-column::-webkit-scrollbar {
   width: 6px;
 }
 
@@ -783,7 +950,9 @@
 .cim-schedule-list::-webkit-scrollbar-track,
 .cim-consultation-list::-webkit-scrollbar-track,
 .cim-messenger-list::-webkit-scrollbar-track,
-.cim-modal-content::-webkit-scrollbar-track {
+.cim-modal-content::-webkit-scrollbar-track,
+.cim-left-column::-webkit-scrollbar-track,
+.cim-right-column::-webkit-scrollbar-track {
   background: #f1f5f9;
   border-radius: 3px;
 }
@@ -792,7 +961,9 @@
 .cim-schedule-list::-webkit-scrollbar-thumb,
 .cim-consultation-list::-webkit-scrollbar-thumb,
 .cim-messenger-list::-webkit-scrollbar-thumb,
-.cim-modal-content::-webkit-scrollbar-thumb {
+.cim-modal-content::-webkit-scrollbar-thumb,
+.cim-left-column::-webkit-scrollbar-thumb,
+.cim-right-column::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 3px;
 }
@@ -801,7 +972,9 @@
 .cim-schedule-list::-webkit-scrollbar-thumb:hover,
 .cim-consultation-list::-webkit-scrollbar-thumb:hover,
 .cim-messenger-list::-webkit-scrollbar-thumb:hover,
-.cim-modal-content::-webkit-scrollbar-thumb:hover {
+.cim-modal-content::-webkit-scrollbar-thumb:hover,
+.cim-left-column::-webkit-scrollbar-thumb:hover,
+.cim-right-column::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
 
@@ -852,6 +1025,20 @@
   .cim-time-picker-v2 {
     min-width: 140px;
   }
+
+  /* 2열 레이아웃 반응형 */
+  .cim-right-column {
+    flex: 0 0 380px; /* 너비를 적절하게 조정 */
+  }
+
+  .cim-two-column-layout {
+    gap: 20px;
+    min-height: 550px; /* 최소 높이 조정 */
+  }
+
+  .cim-consultation-section .cim-consultation-list-full {
+    min-height: 450px; /* 1200px 이하에서 높이 조정 */
+  }
 }
 
 @media (max-width: 768px) {
@@ -864,6 +1051,52 @@
   .cim-modal-content,
   .cim-modal-footer {
     padding: 16px 20px;
+  }
+
+  /* 모바일에서는 1열 레이아웃으로 변경 */
+  .cim-two-column-layout {
+    flex-direction: column;
+    gap: 20px;
+    height: auto;
+    min-height: auto;
+  }
+
+  .cim-left-column {
+    flex: none;
+    overflow-y: auto;
+    padding: 0;
+    border-left: none;
+    min-width: auto;
+    height: auto;
+    max-height: 60vh; /* 왼쪽 컬럼 최대 높이 제한 */
+  }
+
+  .cim-right-column {
+    flex: none;
+    overflow: hidden;
+    padding: 0;
+    padding-top: 20px;
+    border-left: none;
+    border-top: 2px solid #e5e7eb;
+    min-width: auto;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cim-consultation-section {
+    height: auto;
+    min-height: 400px; /* 모바일에서도 충분한 높이 확보 */
+    max-height: 50vh; /* 모바일에서 최대 높이 제한 */
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cim-consultation-section .cim-consultation-list-full {
+    flex: 1;
+    min-height: 300px; /* 모바일에서 최소 높이 */
+    max-height: none; /* 모바일에서는 부모 컨테이너가 높이 제한 */
+    overflow-y: auto;
   }
 
   .cim-field-grid {
@@ -912,6 +1145,19 @@
     gap: 8px;
   }
 
+  .cim-consultation-section .cim-consultation-input-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .cim-consultation-section .cim-consultation-category {
+    flex: none;
+  }
+
+  .cim-consultation-category {
+    min-width: auto;
+  }
+
   .cim-messenger-input {
     grid-template-columns: 1fr;
     gap: 8px;
@@ -952,6 +1198,12 @@
   }
 
   .cim-consultation-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .cim-consultation-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
@@ -1022,6 +1274,20 @@
   .cim-ssn-field .cim-ssn-group {
     grid-template-columns: 1fr;
     gap: 8px;
+  }
+
+  /* 480px 이하에서 추가 스크롤 개선 */
+  .cim-left-column {
+    max-height: 50vh; /* 더 작은 화면에서 높이 제한 */
+  }
+
+  .cim-consultation-section {
+    min-height: 350px; /* 최소 높이 축소 */
+    max-height: 45vh; /* 더 작은 화면에 맞게 조정 */
+  }
+
+  .cim-consultation-section .cim-consultation-list-full {
+    min-height: 250px; /* 최소 높이 축소 */
   }
 }
 

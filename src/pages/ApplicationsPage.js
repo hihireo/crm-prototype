@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import CustomerInfoModal from "../components/CustomerInfoModal";
 import CustomerAssignmentModal from "../components/CustomerAssignmentModal";
+import CustomerRegistrationModal from "../components/CustomerRegistrationModal";
 import "./ApplicationsPage.css";
 
 const ApplicationsPage = () => {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
+  const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
 
   // 현재 사용자 정보 (실제로는 props나 context에서 받아올 데이터)
   const currentUser = {
@@ -36,11 +38,22 @@ const ApplicationsPage = () => {
       consultations: [
         {
           id: 1,
+          category: "일반",
           content: "초기 상담 완료, 투자 관심 있음",
           timestamp: "2024-01-11 10:30",
         },
-        { id: 2, content: "추가 자료 요청", timestamp: "2024-01-12 14:20" },
-        { id: 3, content: "재상담 예정", timestamp: "2024-01-13 16:45" },
+        {
+          id: 2,
+          category: "재상담",
+          content: "추가 자료 요청",
+          timestamp: "2024-01-12 14:20",
+        },
+        {
+          id: 3,
+          category: "관리중",
+          content: "재상담 예정",
+          timestamp: "2024-01-13 16:45",
+        },
       ],
     },
     {
@@ -63,10 +76,16 @@ const ApplicationsPage = () => {
       consultations: [
         {
           id: 1,
+          category: "일반",
           content: "교육 과정 안내 완료",
           timestamp: "2024-01-11 09:15",
         },
-        { id: 2, content: "수강 신청 완료", timestamp: "2024-01-12 11:30" },
+        {
+          id: 2,
+          category: "결제완료",
+          content: "수강 신청 완료",
+          timestamp: "2024-01-12 11:30",
+        },
       ],
     },
     {
@@ -125,9 +144,24 @@ const ApplicationsPage = () => {
       status: "관리 중",
       checked: false,
       consultations: [
-        { id: 1, content: "인테리어 상담 진행", timestamp: "2024-01-11 13:20" },
-        { id: 2, content: "견적서 발송", timestamp: "2024-01-12 15:10" },
-        { id: 3, content: "계약 검토 중", timestamp: "2024-01-13 10:45" },
+        {
+          id: 1,
+          category: "일반",
+          content: "인테리어 상담 진행",
+          timestamp: "2024-01-11 13:20",
+        },
+        {
+          id: 2,
+          category: "관리중",
+          content: "견적서 발송",
+          timestamp: "2024-01-12 15:10",
+        },
+        {
+          id: 3,
+          category: "결제유력",
+          content: "계약 검토 중",
+          timestamp: "2024-01-13 10:45",
+        },
       ],
     },
   ]);
@@ -148,7 +182,7 @@ const ApplicationsPage = () => {
     siteName: "",
     team: "all",
     manager: "all",
-    status: "all",
+    consultationCategories: [],
     applicationStartDate: "",
     applicationEndDate: "",
     assignmentStartDate: "",
@@ -162,12 +196,30 @@ const ApplicationsPage = () => {
     siteName: "",
     team: "all",
     manager: "all",
-    status: "all",
+    consultationCategories: [],
     applicationStartDate: "",
     applicationEndDate: "",
     assignmentStartDate: "",
     assignmentEndDate: "",
   });
+
+  // 상담 카테고리 옵션
+  const consultationCategories = [
+    "일반",
+    "부재",
+    "재상담",
+    "관리중",
+    "AS요청",
+    "AS확정",
+    "실패",
+    "결제완료",
+    "무료방안내",
+    "무료방입장",
+    "결제유력",
+  ];
+
+  // 드롭다운 상태 관리
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleCheckItem = (id) => {
     const newCheckedItems = new Set(checkedItems);
@@ -206,7 +258,7 @@ const ApplicationsPage = () => {
       siteName: "",
       team: "all",
       manager: "all",
-      status: "all",
+      consultationCategories: [],
       applicationStartDate: "",
       applicationEndDate: "",
       assignmentStartDate: "",
@@ -219,6 +271,54 @@ const ApplicationsPage = () => {
   const handleFilterApply = () => {
     setAppliedFilters({ ...filters });
   };
+
+  // 상담 카테고리 다중 선택 핸들러
+  const handleConsultationCategoryToggle = (category) => {
+    setFilters((prev) => {
+      const currentCategories = prev.consultationCategories;
+      const isSelected = currentCategories.includes(category);
+
+      if (isSelected) {
+        return {
+          ...prev,
+          consultationCategories: currentCategories.filter(
+            (c) => c !== category
+          ),
+        };
+      } else {
+        return {
+          ...prev,
+          consultationCategories: [...currentCategories, category],
+        };
+      }
+    });
+  };
+
+  // 카테고리 제거 핸들러
+  const handleRemoveCategory = (categoryToRemove) => {
+    setFilters((prev) => ({
+      ...prev,
+      consultationCategories: prev.consultationCategories.filter(
+        (category) => category !== categoryToRemove
+      ),
+    }));
+  };
+
+  // 드롭다운 외부 클릭 감지
+  const handleDropdownClickOutside = useCallback((e) => {
+    if (!e.target.closest(".ap-category-dropdown-container")) {
+      setIsDropdownOpen(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isDropdownOpen) {
+      document.addEventListener("click", handleDropdownClickOutside);
+      return () => {
+        document.removeEventListener("click", handleDropdownClickOutside);
+      };
+    }
+  }, [isDropdownOpen, handleDropdownClickOutside]);
 
   // 마우스 호버 이벤트 핸들러
   const handleMouseEnter = (e, app) => {
@@ -235,37 +335,40 @@ const ApplicationsPage = () => {
     setTooltipData((prev) => ({ ...prev, visible: false }));
   };
 
-  const handleMouseMove = (e) => {
-    if (tooltipData.visible) {
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      const tooltipWidth = 320; // 툴팁의 대략적인 너비
-      const tooltipHeight = 200; // 툴팁의 대략적인 높이
+  const handleMouseMove = useCallback(
+    (e) => {
+      if (tooltipData.visible) {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const tooltipWidth = 320; // 툴팁의 대략적인 너비
+        const tooltipHeight = 200; // 툴팁의 대략적인 높이
 
-      let x = e.clientX + 10;
-      let y = e.clientY + 10;
+        let x = e.clientX + 10;
+        let y = e.clientY + 10;
 
-      // 오른쪽 경계 체크
-      if (x + tooltipWidth > viewportWidth - 20) {
-        x = e.clientX - tooltipWidth - 10;
+        // 오른쪽 경계 체크
+        if (x + tooltipWidth > viewportWidth - 20) {
+          x = e.clientX - tooltipWidth - 10;
+        }
+
+        // 아래쪽 경계 체크
+        if (y + tooltipHeight > viewportHeight - 20) {
+          y = e.clientY - tooltipHeight - 10;
+        }
+
+        // 최소 여백 보장
+        x = Math.max(10, x);
+        y = Math.max(10, y);
+
+        setTooltipData((prev) => ({
+          ...prev,
+          x,
+          y,
+        }));
       }
-
-      // 아래쪽 경계 체크
-      if (y + tooltipHeight > viewportHeight - 20) {
-        y = e.clientY - tooltipHeight - 10;
-      }
-
-      // 최소 여백 보장
-      x = Math.max(10, x);
-      y = Math.max(10, y);
-
-      setTooltipData((prev) => ({
-        ...prev,
-        x,
-        y,
-      }));
-    }
-  };
+    },
+    [tooltipData.visible]
+  );
 
   // 마우스 이벤트 등록
   useEffect(() => {
@@ -273,7 +376,7 @@ const ApplicationsPage = () => {
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
     };
-  }, [tooltipData.visible]);
+  }, [handleMouseMove]);
 
   const handleRowClick = (app) => {
     setSelectedCustomer({
@@ -286,6 +389,23 @@ const ApplicationsPage = () => {
       // 추가 정보들을 앱 데이터에서 매핑
     });
     setIsCustomerModalOpen(true);
+  };
+
+  const handleCustomerRegistration = (newCustomer) => {
+    // 새로운 고객을 applications 배열에 추가
+    const customerWithNumber = {
+      ...newCustomer,
+      number: `APP-2024-${String(applications.length + 1).padStart(3, "0")}`,
+      codeName: `CUST${String(applications.length + 1).padStart(3, "0")}`,
+      contact: newCustomer.phone1,
+      checked: false,
+    };
+
+    // 실제로는 API 호출이나 상태 업데이트를 통해 처리
+    console.log("새로운 고객이 등록되었습니다:", customerWithNumber);
+
+    // 모달 닫기
+    setIsRegistrationModalOpen(false);
   };
 
   const handleBulkAssignment = () => {
@@ -305,19 +425,6 @@ const ApplicationsPage = () => {
         phone: app.contact,
         applicationNumber: app.number,
       }));
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "종료":
-        return "status-completed";
-      case "관리 중":
-        return "status-progress";
-      case "대기":
-        return "status-waiting";
-      default:
-        return "";
-    }
   };
 
   const filteredApplications = applications.filter((app) => {
@@ -359,8 +466,14 @@ const ApplicationsPage = () => {
       app.manager !== appliedFilters.manager
     )
       return false;
-    if (appliedFilters.status !== "all" && app.status !== appliedFilters.status)
-      return false;
+
+    // 상담 카테고리 필터 (다중 선택)
+    if (appliedFilters.consultationCategories.length > 0) {
+      const hasMatchingCategory = app.consultations?.some((consultation) =>
+        appliedFilters.consultationCategories.includes(consultation.category)
+      );
+      if (!hasMatchingCategory) return false;
+    }
 
     // 날짜 범위 필터 (신청시간)
     if (appliedFilters.applicationStartDate) {
@@ -494,18 +607,115 @@ const ApplicationsPage = () => {
                   )}
                 </select>
               </div>
-              <div className="ap-filter-group">
-                <label>처리상태:</label>
-                <select
-                  value={filters.status}
-                  onChange={(e) => handleFilterChange("status", e.target.value)}
-                  className="ap-filter-select"
-                >
-                  <option value="all">전체</option>
-                  <option value="대기">대기</option>
-                  <option value="관리 중">관리 중</option>
-                  <option value="종료">종료</option>
-                </select>
+            </div>
+
+            {/* 상담 카테고리 필터 - 별도 행 */}
+            <div className="ap-filter-row">
+              <div className="ap-filter-group ap-consultation-category-group">
+                <label>상담 카테고리:</label>
+                <div className="ap-category-filter-container">
+                  <div className="ap-category-dropdown-container">
+                    {/* 드롭다운 버튼 */}
+                    <button
+                      type="button"
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      className="ap-dropdown-trigger"
+                    >
+                      <span className="ap-dropdown-text">
+                        {filters.consultationCategories.length === 0
+                          ? "카테고리 선택"
+                          : `${filters.consultationCategories.length}개 선택됨`}
+                      </span>
+                      <svg
+                        className={`ap-dropdown-icon ${
+                          isDropdownOpen ? "ap-dropdown-icon-open" : ""
+                        }`}
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+
+                    {/* 드롭다운 메뉴 */}
+                    {isDropdownOpen && (
+                      <div className="ap-dropdown-menu">
+                        {/* 카테고리 옵션들 */}
+                        <div className="ap-dropdown-options">
+                          {consultationCategories.map((category) => (
+                            <label
+                              key={category}
+                              className="ap-dropdown-option"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleConsultationCategoryToggle(category);
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={filters.consultationCategories.includes(
+                                  category
+                                )}
+                                onChange={() => {}} // 빈 함수로 설정하여 label onClick으로만 처리
+                                className="ap-checkbox"
+                              />
+                              <span className="ap-checkbox-label">
+                                {category}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+
+                        {/* 드롭다운 하단 액션 */}
+                        <div className="ap-dropdown-actions">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFilters((prev) => ({
+                                ...prev,
+                                consultationCategories: [],
+                              }));
+                            }}
+                            className="ap-clear-all"
+                          >
+                            전체 해제
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="ap-dropdown-close"
+                          >
+                            완료
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 선택된 카테고리 태그들 - 드롭다운 오른쪽 */}
+                  {filters.consultationCategories.length > 0 && (
+                    <div className="ap-selected-tags">
+                      {filters.consultationCategories.map((category) => (
+                        <span key={category} className="ap-category-tag">
+                          {category}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCategory(category)}
+                            className="ap-tag-remove"
+                            aria-label={`${category} 제거`}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -574,6 +784,13 @@ const ApplicationsPage = () => {
         {/* 액션 버튼 영역 */}
         <div className="ap-action-container">
           <div className="ap-action-section">
+            <button
+              className="btn btn-primary"
+              onClick={() => setIsRegistrationModalOpen(true)}
+              style={{ backgroundColor: "#10b981", borderColor: "#10b981" }}
+            >
+              고객 등록
+            </button>
             <button className="btn btn-primary" onClick={handleBulkAssignment}>
               일괄 배정
             </button>
@@ -602,7 +819,6 @@ const ApplicationsPage = () => {
                   <th>담당자</th>
                   <th>신청시간</th>
                   <th>배정시간</th>
-                  <th>처리상태</th>
                 </tr>
               </thead>
               <tbody>
@@ -629,13 +845,6 @@ const ApplicationsPage = () => {
                     <td className="ap-bold-cell">{app.manager || "-"}</td>
                     <td>{app.applicationTime}</td>
                     <td>{app.assignmentTime || "-"}</td>
-                    <td>
-                      <span
-                        className={`status-badge ${getStatusColor(app.status)}`}
-                      >
-                        {app.status}
-                      </span>
-                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -675,6 +884,13 @@ const ApplicationsPage = () => {
         onClose={() => setIsAssignmentModalOpen(false)}
         selectedCustomers={getSelectedCustomers()}
         currentUser={currentUser}
+      />
+
+      {/* 고객 등록 모달 */}
+      <CustomerRegistrationModal
+        isOpen={isRegistrationModalOpen}
+        onClose={() => setIsRegistrationModalOpen(false)}
+        onRegister={handleCustomerRegistration}
       />
 
       {/* 전역 상담 내용 툴팁 */}

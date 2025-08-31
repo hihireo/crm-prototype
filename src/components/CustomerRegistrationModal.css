@@ -1,0 +1,437 @@
+/* Customer Registration Modal CSS - 고유 prefix: crm- (Customer Registration Modal) */
+
+/* 모달 오버레이 */
+.crm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+/* 모달 컨테이너 */
+.crm-customer-modal {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: crm-modal-appear 0.3s ease-out;
+}
+
+@keyframes crm-modal-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* 모달 헤더 */
+.crm-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 28px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.crm-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.crm-close-btn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #6b7280;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.crm-close-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+/* 모달 컨텐츠 */
+.crm-modal-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 28px;
+}
+
+/* 섹션 */
+.crm-section {
+  margin-bottom: 32px;
+}
+
+.crm-section:last-child {
+  margin-bottom: 0;
+}
+
+.crm-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 20px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+/* 필드 그리드 */
+.crm-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+/* 필드 */
+.crm-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.crm-field label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.crm-required::after {
+  content: " *";
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* 입력 필드 */
+.crm-input,
+.crm-select,
+.crm-textarea {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #374151;
+  background: white;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.crm-input:focus,
+.crm-select:focus,
+.crm-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.crm-input::placeholder {
+  color: #9ca3af;
+}
+
+.crm-select {
+  cursor: pointer;
+}
+
+.crm-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* 에러 상태 */
+.crm-input-error {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.crm-error-message {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* 전화번호 필드 */
+.crm-phone-field .crm-phone-group {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 8px;
+}
+
+/* 주민번호 필드 */
+.crm-ssn-field .crm-ssn-group {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.crm-ssn-separator {
+  color: #6b7280;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* 특이사항 필드 */
+.crm-special-notes-field {
+  grid-column: 1 / -1;
+}
+
+/* 읽기 전용 입력 필드 */
+.crm-input-readonly {
+  background: #f9fafb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.crm-input-readonly:focus {
+  border-color: #d1d5db;
+  box-shadow: none;
+}
+
+/* 메신저 섹션 (기본 정보 내부) */
+.crm-messenger-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.crm-messenger-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 16px 0;
+}
+
+/* 메신저 입력 */
+.crm-messenger-input {
+  margin-bottom: 16px;
+}
+
+.crm-messenger-group {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.crm-add-btn {
+  padding: 10px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.crm-add-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.crm-add-btn:active {
+  transform: translateY(0);
+}
+
+/* 메신저 리스트 */
+.crm-messenger-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.crm-messenger-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+
+.crm-messenger-platform {
+  background: #3b82f6;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 60px;
+  text-align: center;
+}
+
+.crm-messenger-account {
+  flex: 1;
+  font-size: 14px;
+  color: #374151;
+}
+
+.crm-remove-btn {
+  padding: 4px 8px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.crm-remove-btn:hover {
+  background: #dc2626;
+}
+
+/* 모달 푸터 */
+.crm-modal-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 20px 28px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.crm-cancel-btn,
+.crm-submit-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.crm-cancel-btn {
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.crm-cancel-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+.crm-submit-btn {
+  background: #3b82f6;
+  color: white;
+}
+
+.crm-submit-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.crm-submit-btn:active {
+  transform: translateY(0);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .crm-customer-modal {
+    width: 95%;
+    max-height: 95vh;
+  }
+
+  .crm-modal-header,
+  .crm-modal-content,
+  .crm-modal-footer {
+    padding: 16px 20px;
+  }
+
+  .crm-field-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .crm-phone-field .crm-phone-group {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .crm-ssn-field .crm-ssn-group {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .crm-ssn-separator {
+    display: none;
+  }
+
+  .crm-messenger-group {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .crm-messenger-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .crm-messenger-platform {
+    align-self: flex-start;
+  }
+
+  .crm-modal-footer {
+    flex-direction: column;
+  }
+
+  .crm-cancel-btn,
+  .crm-submit-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .crm-customer-modal {
+    width: 98%;
+    margin: 10px;
+  }
+
+  .crm-modal-header,
+  .crm-modal-content,
+  .crm-modal-footer {
+    padding: 12px 16px;
+  }
+
+  .crm-section-title {
+    font-size: 16px;
+  }
+
+  .crm-title {
+    font-size: 20px;
+  }
+}
