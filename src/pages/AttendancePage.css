@@ -298,6 +298,20 @@
   color: #1e293b;
 }
 
+.attn-clickable-name {
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 6px;
+  padding: 8px 12px !important;
+  margin: -8px -12px;
+}
+
+.attn-clickable-name:hover {
+  background: #f0f9ff;
+  color: #3b82f6;
+  transform: translateX(2px);
+}
+
 .attn-team {
   color: #64748b;
   font-weight: 500;

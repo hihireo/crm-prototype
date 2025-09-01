@@ -424,30 +424,30 @@ const DashboardPage = ({ user, service }) => {
                 <div className="stat-icon">👥</div>
                 <div className="stat-content">
                   <h3>{customerStats.newAssigned}</h3>
-                  <p>새로 할당된 고객</p>
+                  <p>오늘 배정된 고객</p>
                 </div>
               </div>
               <div className="stat-card waiting">
                 <div className="stat-icon">⏳</div>
                 <div className="stat-content">
                   <h3>{customerStats.waiting}</h3>
-                  <p>대기중인 고객</p>
+                  <p>전체 배정된 고객</p>
                 </div>
               </div>
-              <div className="stat-card in-progress">
+              {/* <div className="stat-card in-progress">
                 <div className="stat-icon">🔄</div>
                 <div className="stat-content">
                   <h3>{customerStats.inProgress}</h3>
                   <p>진행중인 고객</p>
                 </div>
-              </div>
-              <div className="stat-card completed">
+              </div> */}
+              {/* <div className="stat-card completed">
                 <div className="stat-icon">✅</div>
                 <div className="stat-content">
                   <h3>{customerStats.completed}</h3>
                   <p>완료된 고객</p>
                 </div>
-              </div>
+              </div> */}
               <div className="stat-card payment-rate">
                 <div className="stat-icon">📊</div>
                 <div className="stat-content">

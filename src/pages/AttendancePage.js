@@ -1,9 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./AttendancePage.css";
+import EmployeeInfoModal from "../components/EmployeeInfoModal";
 
 const AttendancePage = ({ user, service }) => {
   const [selectedDate, setSelectedDate] = useState(new Date(2025, 8, 1)); // 2025년 9월 1일
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [employeeComments, setEmployeeComments] = useState({});
   const calendarRef = useRef(null);
 
   // 2025년 9월 직원 출퇴근 데이터 생성
@@ -200,6 +204,30 @@ const AttendancePage = ({ user, service }) => {
 
   const currentAttendance = getAttendanceForDate(selectedDate);
 
+  // 직원 클릭 핸들러
+  const handleEmployeeClick = (employee) => {
+    setSelectedEmployee(employee);
+    setIsEmployeeModalOpen(true);
+  };
+
+  // 댓글 추가 함수
+  const handleAddComment = (employeeId, comment) => {
+    setEmployeeComments((prev) => ({
+      ...prev,
+      [employeeId]: [...(prev[employeeId] || []), comment],
+    }));
+  };
+
+  // 댓글 삭제 함수
+  const handleDeleteComment = (employeeId, commentId) => {
+    setEmployeeComments((prev) => ({
+      ...prev,
+      [employeeId]: (prev[employeeId] || []).filter(
+        (comment) => comment.id !== commentId
+      ),
+    }));
+  };
+
   return (
     <div className="attn-page">
       <div className="container">
@@ -318,7 +346,12 @@ const AttendancePage = ({ user, service }) => {
                 {currentAttendance.length > 0 ? (
                   currentAttendance.map((employee) => (
                     <tr key={employee.id}>
-                      <td className="attn-name">{employee.name}</td>
+                      <td
+                        className="attn-name attn-clickable-name"
+                        onClick={() => handleEmployeeClick(employee)}
+                      >
+                        {employee.name}
+                      </td>
                       <td className="attn-team">{employee.team}</td>
                       <td className="attn-position">{employee.position}</td>
                       <td className="attn-time">{employee.checkIn}</td>
@@ -337,6 +370,17 @@ const AttendancePage = ({ user, service }) => {
             </table>
           </div>
         </div>
+
+        {/* 직원 정보 모달 */}
+        <EmployeeInfoModal
+          isOpen={isEmployeeModalOpen}
+          onClose={() => setIsEmployeeModalOpen(false)}
+          employee={selectedEmployee}
+          user={user}
+          employeeComments={employeeComments}
+          onAddComment={handleAddComment}
+          onDeleteComment={handleDeleteComment}
+        />
       </div>
     </div>
   );

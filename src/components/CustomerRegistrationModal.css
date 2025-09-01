@@ -21,12 +21,20 @@
   border-radius: 16px;
   width: 90%;
   max-width: 800px;
-  max-height: 90vh;
+  max-height: 80vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   animation: crm-modal-appear 0.3s ease-out;
+}
+
+/* 폼 컨테이너 */
+.crm-customer-modal form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 @keyframes crm-modal-appear {
@@ -81,7 +89,10 @@
 .crm-modal-content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 24px 28px;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* 섹션 */
@@ -362,7 +373,16 @@
 @media (max-width: 768px) {
   .crm-customer-modal {
     width: 95%;
-    max-height: 95vh;
+    max-height: 80vh;
+    overflow: hidden;
+  }
+
+  .crm-modal-content {
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+    min-height: 0;
   }
 
   .crm-modal-header,
@@ -418,7 +438,17 @@
 @media (max-width: 480px) {
   .crm-customer-modal {
     width: 98%;
+    height: 85vh;
     margin: 10px;
+    overflow: hidden;
+  }
+
+  .crm-modal-content {
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+    min-height: 0;
   }
 
   .crm-modal-header,
