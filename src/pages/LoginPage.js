@@ -31,8 +31,7 @@ const LoginPage = ({ onLogin }) => {
       <div className="login-container">
         <div className="login-card">
           <div className="login-header">
-            <h1>CRM 시스템</h1>
-            <p>고객관리 시스템에 로그인하세요</p>
+            <h1>TalkGate</h1>
           </div>
 
           <form className="login-form" onSubmit={handleEmailLogin}>

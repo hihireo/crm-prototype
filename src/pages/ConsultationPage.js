@@ -877,10 +877,10 @@ const ConsultationPage = ({ user, service }) => {
                       <label>ID</label>
                       <span>{selectedChat.customerId}</span>
                     </div>
-                    <div className="field-group-compact">
+                    {/* <div className="field-group-compact">
                       <label>담당자</label>
                       <span>{user.name}</span>
-                    </div>
+                    </div> */}
                   </div>
 
                   <div className="profile-actions-compact">

@@ -6,6 +6,11 @@
   z-index: 100;
 }
 
+/* .header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+} */
+
 .header-content {
   display: flex;
   align-items: center;
@@ -54,7 +59,7 @@
   color: #64748b;
   text-decoration: none;
   font-weight: 500;
-  font-size: 15px;
+  font-size: 14px;
   transition: color 0.2s;
   padding: 8px 0;
 }
