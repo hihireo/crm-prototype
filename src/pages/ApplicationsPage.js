@@ -189,10 +189,416 @@ const ApplicationsPage = () => {
         },
       ],
     },
+    {
+      id: 6,
+      number: "APP-2024-005",
+      mediaCompany: "네이버",
+      applicationPath: "블로그광고",
+      siteName: "인테리어",
+      codeName: "IN001",
+      applicantName: "정수진",
+      contact: "010-5678-9012",
+      memo: "신축 아파트",
+      applicationTime: "2024-01-10 18:10",
+      assignmentTime: "2024-01-10 18:15",
+      landingType: "모바일",
+      team: "영업3팀",
+      manager: "박인테리어",
+      status: "관리 중",
+      checked: false,
+      consultations: [
+        {
+          id: 1,
+          category: "일반",
+          content: "인테리어 상담 진행",
+          timestamp: "2024-01-11 13:20",
+        },
+        {
+          id: 2,
+          category: "관리중",
+          content: "견적서 발송",
+          timestamp: "2024-01-12 15:10",
+        },
+        {
+          id: 3,
+          category: "결제유력",
+          content: "계약 검토 중",
+          timestamp: "2024-01-13 10:45",
+        },
+      ],
+    },
+    {
+      id: 7,
+      number: "APP-2024-007",
+      mediaCompany: "유튜브",
+      applicationPath: "동영상광고",
+      siteName: "요리클래스",
+      codeName: "CK001",
+      applicantName: "최요리",
+      contact: "010-6789-0123",
+      memo: "베이킹 클래스 문의",
+      applicationTime: "2024-01-11 09:30",
+      assignmentTime: "2024-01-11 09:35",
+      landingType: "PC",
+      team: "영업1팀",
+      manager: "김영업",
+      status: "관리 중",
+      checked: false,
+      consultations: [
+        {
+          id: 1,
+          category: "일반",
+          content: "베이킹 클래스 상담",
+          timestamp: "2024-01-11 14:30",
+        },
+      ],
+    },
+    {
+      id: 8,
+      number: "APP-2024-008",
+      mediaCompany: "인스타그램",
+      applicationPath: "소셜광고",
+      siteName: "패션쇼핑몰",
+      codeName: "FS001",
+      applicantName: "강패션",
+      contact: "010-7890-1234",
+      memo: "신상품 런칭",
+      applicationTime: "2024-01-11 11:20",
+      assignmentTime: null,
+      landingType: "모바일",
+      team: "영업2팀",
+      manager: null,
+      status: "대기",
+      checked: false,
+      consultations: [],
+    },
+    {
+      id: 9,
+      number: "APP-2024-009",
+      mediaCompany: "네이버",
+      applicationPath: "검색광고",
+      siteName: "자동차매매",
+      codeName: "CR001",
+      applicantName: "윤자동차",
+      contact: "010-8901-2345",
+      memo: "중고차 매매",
+      applicationTime: "2024-01-11 13:45",
+      assignmentTime: "2024-01-11 14:00",
+      landingType: "PC",
+      team: "영업3팀",
+      manager: "정상담",
+      status: "관리 중",
+      checked: false,
+      consultations: [
+        {
+          id: 1,
+          category: "일반",
+          content: "차량 매매 상담",
+          timestamp: "2024-01-12 10:15",
+        },
+        {
+          id: 2,
+          category: "관리중",
+          content: "가격 협상 중",
+          timestamp: "2024-01-13 15:30",
+        },
+      ],
+    },
+    {
+      id: 10,
+      number: "APP-2024-010",
+      mediaCompany: "구글",
+      applicationPath: "쇼핑광고",
+      siteName: "화장품몰",
+      codeName: "CS001",
+      applicantName: "임뷰티",
+      contact: "010-9012-3456",
+      memo: "신제품 런칭",
+      applicationTime: "2024-01-11 16:30",
+      assignmentTime: "2024-01-11 16:45",
+      landingType: "모바일",
+      team: "영업1팀",
+      manager: "김영업",
+      status: "종료",
+      checked: false,
+      consultations: [
+        {
+          id: 1,
+          category: "일반",
+          content: "화장품 마케팅 상담",
+          timestamp: "2024-01-12 09:20",
+        },
+        {
+          id: 2,
+          category: "결제완료",
+          content: "광고 집행 완료",
+          timestamp: "2024-01-14 16:00",
+        },
+      ],
+    },
+    {
+      id: 11,
+      number: "APP-2024-011",
+      mediaCompany: "틱톡",
+      applicationPath: "숏폼광고",
+      siteName: "댄스학원",
+      codeName: "DN001",
+      applicantName: "조댄스",
+      contact: "010-0123-4567",
+      memo: "K-POP 댄스 클래스",
+      applicationTime: "2024-01-12 10:15",
+      assignmentTime: null,
+      landingType: "모바일",
+      team: "영업2팀",
+      manager: null,
+      status: "대기",
+      checked: false,
+      consultations: [],
+    },
+    {
+      id: 12,
+      number: "APP-2024-012",
+      mediaCompany: "네이버",
+      applicationPath: "검색광고",
+      siteName: "반려동물용품",
+      codeName: "PT001",
+      applicantName: "한펫샵",
+      contact: "010-1234-0987",
+      memo: "강아지 용품 전문",
+      applicationTime: "2024-01-12 14:20",
+      assignmentTime: "2024-01-12 14:30",
+      landingType: "PC",
+      team: "영업3팀",
+      manager: "정상담",
+      status: "관리 중",
+      checked: false,
+      consultations: [
+        {
+          id: 1,
+          category: "일반",
+          content: "반려동물 용품 상담",
+          timestamp: "2024-01-13 11:15",
+        },
+      ],
+    },
+    {
+      id: 13,
+      number: "APP-2024-013",
+      mediaCompany: "페이스북",
+      applicationPath: "소셜광고",
+      siteName: "피트니스센터",
+      codeName: "FT001",
+      applicantName: "김헬스",
+      contact: "010-2345-1098",
+      memo: "PT 회원 모집",
+      applicationTime: "2024-01-12 16:40",
+      assignmentTime: "2024-01-12 17:00",
+      landingType: "모바일",
+      team: "영업1팀",
+      manager: "김영업",
+      status: "관리 중",
+      checked: false,
+      consultations: [
+        {
+          id: 1,
+          category: "일반",
+          content: "피트니스 프로그램 안내",
+          timestamp: "2024-01-13 09:30",
+        },
+        {
+          id: 2,
+          category: "재상담",
+          content: "회원권 상담",
+          timestamp: "2024-01-14 14:15",
+        },
+      ],
+    },
+    {
+      id: 14,
+      number: "APP-2024-014",
+      mediaCompany: "구글",
+      applicationPath: "디스플레이광고",
+      siteName: "영어학원",
+      codeName: "EN001",
+      applicantName: "박영어",
+      contact: "010-3456-2109",
+      memo: "토익 강의 문의",
+      applicationTime: "2024-01-13 08:45",
+      assignmentTime: null,
+      landingType: "PC",
+      team: "영업2팀",
+      manager: null,
+      status: "대기",
+      checked: false,
+      consultations: [],
+    },
+    {
+      id: 15,
+      number: "APP-2024-015",
+      mediaCompany: "카카오",
+      applicationPath: "DA광고",
+      siteName: "카페창업",
+      codeName: "CF001",
+      applicantName: "이카페",
+      contact: "010-4567-3210",
+      memo: "카페 창업 컨설팅",
+      applicationTime: "2024-01-13 12:30",
+      assignmentTime: "2024-01-13 13:00",
+      landingType: "모바일",
+      team: "영업3팀",
+      manager: "정상담",
+      status: "관리 중",
+      checked: false,
+      consultations: [
+        {
+          id: 1,
+          category: "일반",
+          content: "카페 창업 상담",
+          timestamp: "2024-01-14 10:20",
+        },
+        {
+          id: 2,
+          category: "관리중",
+          content: "사업계획서 검토",
+          timestamp: "2024-01-15 16:45",
+        },
+      ],
+    },
+    {
+      id: 16,
+      number: "APP-2024-016",
+      mediaCompany: "네이버",
+      applicationPath: "블로그광고",
+      siteName: "여행사",
+      codeName: "TV001",
+      applicantName: "최여행",
+      contact: "010-5678-4321",
+      memo: "해외여행 패키지",
+      applicationTime: "2024-01-13 15:20",
+      assignmentTime: "2024-01-13 15:35",
+      landingType: "PC",
+      team: "영업1팀",
+      manager: "김영업",
+      status: "종료",
+      checked: false,
+      consultations: [
+        {
+          id: 1,
+          category: "일반",
+          content: "유럽 여행 상담",
+          timestamp: "2024-01-14 11:30",
+        },
+        {
+          id: 2,
+          category: "결제완료",
+          content: "여행 예약 완료",
+          timestamp: "2024-01-15 14:20",
+        },
+      ],
+    },
+    {
+      id: 17,
+      number: "APP-2024-017",
+      mediaCompany: "유튜브",
+      applicationPath: "동영상광고",
+      siteName: "음악학원",
+      codeName: "MS001",
+      applicantName: "송음악",
+      contact: "010-6789-5432",
+      memo: "피아노 레슨",
+      applicationTime: "2024-01-14 09:10",
+      assignmentTime: null,
+      landingType: "모바일",
+      team: "영업2팀",
+      manager: null,
+      status: "대기",
+      checked: false,
+      consultations: [],
+    },
+    {
+      id: 18,
+      number: "APP-2024-018",
+      mediaCompany: "인스타그램",
+      applicationPath: "소셜광고",
+      siteName: "웨딩플래너",
+      codeName: "WD001",
+      applicantName: "김웨딩",
+      contact: "010-7890-6543",
+      memo: "결혼식 플래닝",
+      applicationTime: "2024-01-14 11:45",
+      assignmentTime: "2024-01-14 12:00",
+      landingType: "PC",
+      team: "영업3팀",
+      manager: "정상담",
+      status: "관리 중",
+      checked: false,
+      consultations: [
+        {
+          id: 1,
+          category: "일반",
+          content: "웨딩 플래닝 상담",
+          timestamp: "2024-01-15 10:30",
+        },
+      ],
+    },
+    {
+      id: 19,
+      number: "APP-2024-019",
+      mediaCompany: "구글",
+      applicationPath: "검색광고",
+      siteName: "법무사무소",
+      codeName: "LW001",
+      applicantName: "박법무",
+      contact: "010-8901-7654",
+      memo: "부동산 등기",
+      applicationTime: "2024-01-14 14:15",
+      assignmentTime: "2024-01-14 14:20",
+      landingType: "PC",
+      team: "영업1팀",
+      manager: "김영업",
+      status: "관리 중",
+      checked: false,
+      consultations: [
+        {
+          id: 1,
+          category: "일반",
+          content: "부동산 등기 상담",
+          timestamp: "2024-01-15 09:45",
+        },
+        {
+          id: 2,
+          category: "관리중",
+          content: "서류 준비 중",
+          timestamp: "2024-01-16 11:20",
+        },
+      ],
+    },
+    {
+      id: 20,
+      number: "APP-2024-020",
+      mediaCompany: "카카오",
+      applicationPath: "DA광고",
+      siteName: "온라인쇼핑몰",
+      codeName: "OS001",
+      applicantName: "이쇼핑",
+      contact: "010-9012-8765",
+      memo: "의류 쇼핑몰 런칭",
+      applicationTime: "2024-01-14 16:50",
+      assignmentTime: null,
+      landingType: "모바일",
+      team: "영업2팀",
+      manager: null,
+      status: "대기",
+      checked: false,
+      consultations: [],
+    },
   ]);
 
   const [checkedItems, setCheckedItems] = useState(new Set());
   const [selectAll, setSelectAll] = useState(false);
+  const [showSelectTooltip, setShowSelectTooltip] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const [tooltipData, setTooltipData] = useState({
     visible: false,
     x: 0,
@@ -258,16 +664,210 @@ const ApplicationsPage = () => {
       newCheckedItems.add(id);
     }
     setCheckedItems(newCheckedItems);
-    setSelectAll(newCheckedItems.size === applications.length);
+    setSelectAll(newCheckedItems.size === getCurrentPageApplications().length);
   };
 
   const handleSelectAll = () => {
     if (selectAll) {
+      // 이미 선택된 상태라면 모든 선택 해제
       setCheckedItems(new Set());
+      setSelectAll(false);
     } else {
-      setCheckedItems(new Set(applications.map((app) => app.id)));
+      // 선택되지 않은 상태라면 툴팁 표시
+      setShowSelectTooltip(true);
     }
-    setSelectAll(!selectAll);
+  };
+
+  const handleSelectAllPages = () => {
+    // 전체 목록 선택 (필터링된 모든 결과)
+    const filteredApps = getFilteredApplications();
+    setCheckedItems(new Set(filteredApps.map((app) => app.id)));
+    setSelectAll(true);
+    setShowSelectTooltip(false);
+  };
+
+  const handleSelectCurrentPage = () => {
+    // 현재 페이지만 선택
+    const currentPageApps = getCurrentPageApplications();
+    setCheckedItems(new Set(currentPageApps.map((app) => app.id)));
+    setSelectAll(currentPageApps.length === getFilteredApplications().length);
+    setShowSelectTooltip(false);
+  };
+
+  const handleCancelSelect = () => {
+    setShowSelectTooltip(false);
+  };
+
+  // 페이지네이션 핸들러
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    setShowSelectTooltip(false); // 페이지 변경시 툴팁 숨김
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      setShowSelectTooltip(false);
+    }
+  };
+
+  const handleNextPage = () => {
+    const totalPages = Math.ceil(
+      getFilteredApplications().length / itemsPerPage
+    );
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      setShowSelectTooltip(false);
+    }
+  };
+
+  // 페이지 번호 생성
+  const generatePageNumbers = () => {
+    const totalPages = Math.ceil(
+      getFilteredApplications().length / itemsPerPage
+    );
+    const pages = [];
+
+    if (totalPages <= 5) {
+      // 총 페이지가 5개 이하면 모든 페이지 표시
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // 총 페이지가 5개 초과면 현재 페이지 기준으로 표시
+      let start = Math.max(1, currentPage - 2);
+      let end = Math.min(totalPages, currentPage + 2);
+
+      // 시작이나 끝에 가까우면 5개가 되도록 조정
+      if (end - start < 4) {
+        if (start === 1) {
+          end = Math.min(totalPages, start + 4);
+        } else {
+          start = Math.max(1, end - 4);
+        }
+      }
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+    }
+
+    return pages;
+  };
+
+  // 툴팁 외부 클릭 감지
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        showSelectTooltip &&
+        !event.target.closest(".apcl-select-container")
+      ) {
+        setShowSelectTooltip(false);
+      }
+    };
+
+    if (showSelectTooltip) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [showSelectTooltip]);
+
+  // 필터링된 신청서 목록 가져오기
+  const getFilteredApplications = () => {
+    return applications.filter((app) => {
+      // 문자열 검색 필터
+      if (
+        appliedFilters.name &&
+        !app.applicantName
+          .toLowerCase()
+          .includes(appliedFilters.name.toLowerCase())
+      )
+        return false;
+      if (
+        appliedFilters.phone &&
+        !app.contact.toLowerCase().includes(appliedFilters.phone.toLowerCase())
+      )
+        return false;
+
+      // 상담 내용 검색 필터
+      if (
+        appliedFilters.consultationContent &&
+        !app.consultations?.some((consultation) =>
+          consultation.content
+            .toLowerCase()
+            .includes(appliedFilters.consultationContent.toLowerCase())
+        )
+      )
+        return false;
+
+      // 드롭다운 선택 필터
+      if (
+        appliedFilters.applicationPath !== "all" &&
+        app.applicationPath !== appliedFilters.applicationPath
+      )
+        return false;
+      if (
+        appliedFilters.mediaCompany !== "all" &&
+        app.mediaCompany !== appliedFilters.mediaCompany
+      )
+        return false;
+      if (
+        appliedFilters.siteName !== "all" &&
+        app.siteName !== appliedFilters.siteName
+      )
+        return false;
+      if (appliedFilters.team !== "all" && app.team !== appliedFilters.team)
+        return false;
+      if (
+        appliedFilters.manager !== "all" &&
+        app.manager !== appliedFilters.manager
+      )
+        return false;
+
+      // 상담 카테고리 필터 (다중 선택)
+      if (appliedFilters.consultationCategories.length > 0) {
+        const hasMatchingCategory = app.consultations?.some((consultation) =>
+          appliedFilters.consultationCategories.includes(consultation.category)
+        );
+        if (!hasMatchingCategory) return false;
+      }
+
+      // 날짜 범위 필터 (신청시간)
+      if (appliedFilters.applicationStartDate) {
+        const appDate = new Date(app.applicationTime.split(" ")[0]);
+        const startDate = new Date(appliedFilters.applicationStartDate);
+        if (appDate < startDate) return false;
+      }
+      if (appliedFilters.applicationEndDate) {
+        const appDate = new Date(app.applicationTime.split(" ")[0]);
+        const endDate = new Date(appliedFilters.applicationEndDate);
+        if (appDate > endDate) return false;
+      }
+
+      // 날짜 범위 필터 (배정시간)
+      if (appliedFilters.assignmentStartDate && app.assignmentTime) {
+        const assignDate = new Date(app.assignmentTime.split(" ")[0]);
+        const startDate = new Date(appliedFilters.assignmentStartDate);
+        if (assignDate < startDate) return false;
+      }
+      if (appliedFilters.assignmentEndDate && app.assignmentTime) {
+        const assignDate = new Date(app.assignmentTime.split(" ")[0]);
+        const endDate = new Date(appliedFilters.assignmentEndDate);
+        if (assignDate > endDate) return false;
+      }
+
+      return true;
+    });
+  };
+
+  // 현재 페이지의 신청서 목록 가져오기
+  const getCurrentPageApplications = () => {
+    const filtered = getFilteredApplications();
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filtered.slice(startIndex, endIndex);
   };
 
   const handleFilterChange = (filterType, value) => {
@@ -297,10 +897,12 @@ const ApplicationsPage = () => {
     };
     setFilters(resetFilters);
     setAppliedFilters(resetFilters);
+    setCurrentPage(1); // 필터 리셋시 첫 페이지로 이동
   };
 
   const handleFilterApply = () => {
     setAppliedFilters({ ...filters });
+    setCurrentPage(1); // 필터 적용시 첫 페이지로 이동
   };
 
   // 상담 카테고리 다중 선택 핸들러
@@ -458,90 +1060,8 @@ const ApplicationsPage = () => {
       }));
   };
 
-  const filteredApplications = applications.filter((app) => {
-    // 문자열 검색 필터
-    if (
-      appliedFilters.name &&
-      !app.applicantName
-        .toLowerCase()
-        .includes(appliedFilters.name.toLowerCase())
-    )
-      return false;
-    if (
-      appliedFilters.phone &&
-      !app.contact.toLowerCase().includes(appliedFilters.phone.toLowerCase())
-    )
-      return false;
-
-    // 상담 내용 검색 필터
-    if (
-      appliedFilters.consultationContent &&
-      !app.consultations?.some((consultation) =>
-        consultation.content
-          .toLowerCase()
-          .includes(appliedFilters.consultationContent.toLowerCase())
-      )
-    )
-      return false;
-
-    // 드롭다운 선택 필터
-    if (
-      appliedFilters.applicationPath !== "all" &&
-      app.applicationPath !== appliedFilters.applicationPath
-    )
-      return false;
-    if (
-      appliedFilters.mediaCompany !== "all" &&
-      app.mediaCompany !== appliedFilters.mediaCompany
-    )
-      return false;
-    if (
-      appliedFilters.siteName !== "all" &&
-      app.siteName !== appliedFilters.siteName
-    )
-      return false;
-    if (appliedFilters.team !== "all" && app.team !== appliedFilters.team)
-      return false;
-    if (
-      appliedFilters.manager !== "all" &&
-      app.manager !== appliedFilters.manager
-    )
-      return false;
-
-    // 상담 카테고리 필터 (다중 선택)
-    if (appliedFilters.consultationCategories.length > 0) {
-      const hasMatchingCategory = app.consultations?.some((consultation) =>
-        appliedFilters.consultationCategories.includes(consultation.category)
-      );
-      if (!hasMatchingCategory) return false;
-    }
-
-    // 날짜 범위 필터 (신청시간)
-    if (appliedFilters.applicationStartDate) {
-      const appDate = new Date(app.applicationTime.split(" ")[0]);
-      const startDate = new Date(appliedFilters.applicationStartDate);
-      if (appDate < startDate) return false;
-    }
-    if (appliedFilters.applicationEndDate) {
-      const appDate = new Date(app.applicationTime.split(" ")[0]);
-      const endDate = new Date(appliedFilters.applicationEndDate);
-      if (appDate > endDate) return false;
-    }
-
-    // 날짜 범위 필터 (배정시간)
-    if (appliedFilters.assignmentStartDate && app.assignmentTime) {
-      const assignDate = new Date(app.assignmentTime.split(" ")[0]);
-      const startDate = new Date(appliedFilters.assignmentStartDate);
-      if (assignDate < startDate) return false;
-    }
-    if (appliedFilters.assignmentEndDate && app.assignmentTime) {
-      const assignDate = new Date(app.assignmentTime.split(" ")[0]);
-      const endDate = new Date(appliedFilters.assignmentEndDate);
-      if (assignDate > endDate) return false;
-    }
-
-    return true;
-  });
+  // 필터링된 신청서 목록 (함수로 변경됨)
+  const filteredApplications = getCurrentPageApplications();
 
   return (
     <div className="applications-page">
@@ -886,12 +1406,44 @@ const ApplicationsPage = () => {
             <table className="applications-table">
               <thead>
                 <tr>
-                  <th>
-                    <input
-                      type="checkbox"
-                      checked={selectAll}
-                      onChange={handleSelectAll}
-                    />
+                  <th className="apcl-select-header">
+                    <div className="apcl-select-container">
+                      <input
+                        type="checkbox"
+                        checked={selectAll}
+                        onChange={handleSelectAll}
+                      />
+
+                      {/* 선택 툴팁 */}
+                      {showSelectTooltip && (
+                        <div className="apcl-select-tooltip">
+                          <div
+                            className="apcl-tooltip-overlay"
+                            onClick={handleCancelSelect}
+                          ></div>
+                          <div className="apcl-tooltip-content">
+                            <button
+                              className="apcl-tooltip-option"
+                              onClick={handleSelectAllPages}
+                            >
+                              전체 목록 선택
+                              <span className="apcl-tooltip-desc">
+                                ({getFilteredApplications().length}개)
+                              </span>
+                            </button>
+                            <button
+                              className="apcl-tooltip-option"
+                              onClick={handleSelectCurrentPage}
+                            >
+                              현재 페이지 선택
+                              <span className="apcl-tooltip-desc">
+                                ({getCurrentPageApplications().length}개)
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </th>
                   <th>이름</th>
                   <th>신청경로</th>
@@ -937,18 +1489,40 @@ const ApplicationsPage = () => {
         <div className="table-footer">
           <div className="table-info">
             <span>
-              총 {filteredApplications.length}건 ({checkedItems.size}개 선택됨)
+              총 {getFilteredApplications().length}건 ({checkedItems.size}개
+              선택됨)
             </span>
           </div>
 
           <div className="pagination">
-            <button className="btn btn-secondary">이전</button>
+            <button
+              className="btn btn-secondary"
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+            >
+              이전
+            </button>
             <div className="page-numbers">
-              <button className="page-btn active">1</button>
-              <button className="page-btn">2</button>
-              <button className="page-btn">3</button>
+              {generatePageNumbers().map((page) => (
+                <button
+                  key={page}
+                  className={`page-btn ${currentPage === page ? "active" : ""}`}
+                  onClick={() => handlePageChange(page)}
+                >
+                  {page}
+                </button>
+              ))}
             </div>
-            <button className="btn btn-secondary">다음</button>
+            <button
+              className="btn btn-secondary"
+              onClick={handleNextPage}
+              disabled={
+                currentPage ===
+                Math.ceil(getFilteredApplications().length / itemsPerPage)
+              }
+            >
+              다음
+            </button>
           </div>
         </div>
       </div>

@@ -157,7 +157,7 @@ function AppContent() {
               !user || !currentService ? (
                 <Navigate to="/login" replace />
               ) : (
-                <SettingsPage service={currentService} />
+                <SettingsPage service={currentService} user={user} />
               )
             }
           />
