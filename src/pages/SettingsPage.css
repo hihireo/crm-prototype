@@ -969,3 +969,224 @@
     font-size: 40px;
   }
 }
+
+/* 새로운 스타일 추가 - stgs prefix */
+.stgs-section-description {
+  margin: -16px 0 24px 0;
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* 서비스 이름 설정 */
+.stgs-service-name-section {
+  margin-bottom: 32px;
+}
+
+.stgs-service-name-content {
+  margin-top: 16px;
+}
+
+.stgs-service-name-display {
+  padding: 12px 0;
+}
+
+.stgs-service-name-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.stgs-service-name-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stgs-service-name-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* 서비스 삭제 */
+.stgs-service-delete-section {
+  margin-bottom: 32px;
+}
+
+.stgs-danger-section {
+  border: 2px solid #fecaca;
+  border-radius: 12px;
+  padding: 24px;
+  background: linear-gradient(135deg, #fef2f2 0%, #fff1f1 100%);
+  position: relative;
+}
+
+.stgs-danger-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #dc2626, #ef4444);
+  border-radius: 12px 12px 0 0;
+}
+
+.stgs-danger-text {
+  color: #dc2626;
+  margin: 8px 0 20px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  background: rgba(220, 38, 38, 0.05);
+  padding: 12px 16px;
+  border-radius: 8px;
+  border-left: 4px solid #dc2626;
+}
+
+.stgs-danger-btn {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+}
+
+.stgs-danger-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
+}
+
+.stgs-danger-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 모달 스타일 확장 */
+.stgs-delete-modal {
+  max-width: 560px;
+}
+
+.stgs-danger-header {
+  background: linear-gradient(135deg, #fef2f2 0%, #fff1f1 100%);
+  border-bottom-color: #fecaca;
+  position: relative;
+}
+
+.stgs-danger-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #dc2626, #ef4444);
+  border-radius: 12px 12px 0 0;
+}
+
+.stgs-danger-header h4 {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.stgs-delete-warning {
+  text-align: center;
+}
+
+.stgs-warning-icon {
+  font-size: 56px;
+  margin-bottom: 20px;
+  animation: stgs-pulse 2s infinite;
+}
+
+@keyframes stgs-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.stgs-delete-warning h5 {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.stgs-delete-warning p {
+  margin: 0 0 20px 0;
+  font-size: 15px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.stgs-delete-list {
+  text-align: left;
+  margin: 20px 0;
+  padding: 16px 20px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 4px solid #dc2626;
+}
+
+.stgs-delete-list li {
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #475569;
+  position: relative;
+  padding-left: 8px;
+}
+
+.stgs-delete-list li::before {
+  content: "•";
+  color: #dc2626;
+  position: absolute;
+  left: -8px;
+  font-weight: bold;
+}
+
+.stgs-confirm-section {
+  margin-top: 28px;
+  text-align: left;
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.stgs-confirm-section label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.stgs-confirm-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.stgs-confirm-input:focus {
+  outline: none;
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  background: white;
+}

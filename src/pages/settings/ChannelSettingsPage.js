@@ -1,7 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./ChannelSettingsPage.css";
 
 const ChannelSettingsPage = ({ service }) => {
+  // Instagram 연결 상태를 로컬 스토리지에서 확인
+  const getInstagramConnectionStatus = () => {
+    const connection = localStorage.getItem("instagram_connection");
+    return connection ? JSON.parse(connection).isConnected : false;
+  };
+
   const [channels, setChannels] = useState([
     {
       id: "instagram",
@@ -10,7 +16,7 @@ const ChannelSettingsPage = ({ service }) => {
       icon: "/images/platforms/Instagram_logo.png",
       category: "Business Messaging",
       isPopular: false,
-      isConnected: true,
+      isConnected: getInstagramConnectionStatus(),
       isBeta: false,
     },
     {
@@ -37,6 +43,27 @@ const ChannelSettingsPage = ({ service }) => {
 
   const [activeCategory, setActiveCategory] = useState("All");
 
+  // 컴포넌트 마운트 시 Instagram 연결 상태 업데이트
+  useEffect(() => {
+    const updateInstagramStatus = () => {
+      const isConnected = getInstagramConnectionStatus();
+      setChannels((prev) =>
+        prev.map((channel) =>
+          channel.id === "instagram" ? { ...channel, isConnected } : channel
+        )
+      );
+    };
+
+    updateInstagramStatus();
+
+    // storage 이벤트 리스너 추가 (다른 탭에서 연결 상태가 변경될 때)
+    window.addEventListener("storage", updateInstagramStatus);
+
+    return () => {
+      window.removeEventListener("storage", updateInstagramStatus);
+    };
+  }, []);
+
   const categories = [
     "All",
     "Business Messaging",
@@ -47,19 +74,63 @@ const ChannelSettingsPage = ({ service }) => {
   ];
 
   const handleConnect = (channelId) => {
-    setChannels((prev) =>
-      prev.map((channel) =>
-        channel.id === channelId ? { ...channel, isConnected: true } : channel
-      )
+    if (channelId === "instagram") {
+      handleInstagramConnect();
+    } else {
+      // 다른 채널들은 기존 로직 사용
+      setChannels((prev) =>
+        prev.map((channel) =>
+          channel.id === channelId ? { ...channel, isConnected: true } : channel
+        )
+      );
+    }
+  };
+
+  const handleInstagramConnect = () => {
+    // Instagram OAuth URL 구성
+    const clientId = "622214674056498";
+    const redirectUri = "http://localhost:3000/instagram/callback";
+    const scope = [
+      "instagram_business_basic",
+      "instagram_business_manage_messages",
+      "instagram_business_manage_comments",
+      "instagram_business_content_publish",
+      "instagram_business_manage_insights",
+    ].join(",");
+
+    const instagramAuthUrl = `https://www.instagram.com/oauth/authorize?force_reauth=true&client_id=${clientId}&redirect_uri=${encodeURIComponent(
+      redirectUri
+    )}&response_type=code&scope=${encodeURIComponent(scope)}`;
+
+    // 새 창에서 Instagram 인증 페이지 열기
+    window.open(
+      instagramAuthUrl,
+      "instagram_auth",
+      "width=600,height=700,scrollbars=yes"
     );
   };
 
   const handleDisconnect = (channelId) => {
-    setChannels((prev) =>
-      prev.map((channel) =>
-        channel.id === channelId ? { ...channel, isConnected: false } : channel
-      )
-    );
+    if (channelId === "instagram") {
+      // Instagram 연결 해제
+      localStorage.removeItem("instagram_connection");
+      setChannels((prev) =>
+        prev.map((channel) =>
+          channel.id === channelId
+            ? { ...channel, isConnected: false }
+            : channel
+        )
+      );
+    } else {
+      // 다른 채널들은 기존 로직 사용
+      setChannels((prev) =>
+        prev.map((channel) =>
+          channel.id === channelId
+            ? { ...channel, isConnected: false }
+            : channel
+        )
+      );
+    }
   };
 
   const filteredChannels = channels.filter(

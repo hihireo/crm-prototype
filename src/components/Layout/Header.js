@@ -4,6 +4,7 @@ import "./Header.css";
 
 const Header = ({ user, currentService, onLogout }) => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
   // 샘플 알림 데이터
@@ -154,15 +155,56 @@ const Header = ({ user, currentService, onLogout }) => {
                 </div>
 
                 {/* 프로필 */}
-                <div className="user-info">
-                  <div className="user-avatar">{user.name.charAt(0)}</div>
-                  <span className="user-name">{user.name}</span>
+                <div className="hdr-profile-wrapper">
                   <button
-                    className="btn btn-secondary logout-btn"
-                    onClick={onLogout}
+                    className="hdr-profile-btn"
+                    onClick={() =>
+                      setIsProfileDropdownOpen(!isProfileDropdownOpen)
+                    }
                   >
-                    로그아웃
+                    <div className="user-avatar">{user.name.charAt(0)}</div>
                   </button>
+
+                  {isProfileDropdownOpen && (
+                    <div className="hdr-profile-dropdown">
+                      <div className="hdr-profile-info">
+                        <div className="hdr-profile-avatar">
+                          {user.name.charAt(0)}
+                        </div>
+                        <div className="hdr-profile-details">
+                          <div className="hdr-profile-email">
+                            {user.email || "user@example.com"}
+                          </div>
+                          <div className="hdr-profile-uid">
+                            UID: {user.uid || "12345"}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="hdr-profile-divider"></div>
+                      <div className="hdr-profile-actions">
+                        <button
+                          className="hdr-profile-action-btn"
+                          onClick={() => {
+                            setIsProfileDropdownOpen(false);
+                            navigate("/personal-settings");
+                          }}
+                        >
+                          <span className="hdr-action-icon">⚙️</span>
+                          개인 설정
+                        </button>
+                        <button
+                          className="hdr-profile-action-btn hdr-logout-btn"
+                          onClick={() => {
+                            setIsProfileDropdownOpen(false);
+                            onLogout();
+                          }}
+                        >
+                          <span className="hdr-action-icon">🚪</span>
+                          로그아웃
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -175,6 +217,14 @@ const Header = ({ user, currentService, onLogout }) => {
         <div
           className="notification-overlay"
           onClick={() => setIsNotificationOpen(false)}
+        />
+      )}
+
+      {/* 프로필 드롭다운 바깥 클릭 시 닫기 */}
+      {isProfileDropdownOpen && (
+        <div
+          className="hdr-profile-overlay"
+          onClick={() => setIsProfileDropdownOpen(false)}
         />
       )}
     </header>

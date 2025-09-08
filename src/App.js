@@ -17,6 +17,8 @@ import ApplicationsPage from "./pages/ApplicationsPage";
 import StatisticsPage from "./pages/StatisticsPage";
 import AttendancePage from "./pages/AttendancePage";
 import SettingsPage from "./pages/SettingsPage";
+import PersonalSettingsPage from "./pages/PersonalSettingsPage";
+import InstagramCallbackPage from "./pages/InstagramCallbackPage";
 
 function AppContent() {
   const navigate = useNavigate();
@@ -160,6 +162,20 @@ function AppContent() {
                 <SettingsPage service={currentService} user={user} />
               )
             }
+          />
+          <Route
+            path="/personal-settings/*"
+            element={
+              !user ? (
+                <Navigate to="/login" replace />
+              ) : (
+                <PersonalSettingsPage user={user} />
+              )
+            }
+          />
+          <Route
+            path="/instagram/callback"
+            element={<InstagramCallbackPage />}
           />
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
