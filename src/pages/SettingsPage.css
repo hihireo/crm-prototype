@@ -271,10 +271,10 @@
 
 /* 서비스 설정 섹션 */
 .stgs-menu-section {
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 32px;
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
   border: 1px solid #e2e8f0;
 }
 
@@ -980,7 +980,11 @@
 
 /* 서비스 이름 설정 */
 .stgs-service-name-section {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
 }
 
 .stgs-service-name-content {
@@ -1011,7 +1015,7 @@
 
 /* 서비스 삭제 */
 .stgs-service-delete-section {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .stgs-danger-section {
@@ -1189,4 +1193,194 @@
   border-color: #dc2626;
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
   background: white;
+}
+
+/* 처리상태 관리 - stgs prefix */
+.stgs-status-section {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.stgs-status-section h4 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.stgs-status-add {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stgs-status-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.stgs-status-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.stgs-add-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.stgs-add-btn:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.stgs-add-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.stgs-status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stgs-status-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 12px 16px;
+  transition: all 0.2s;
+}
+
+.stgs-status-item:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.stgs-status-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stgs-status-name {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.stgs-status-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.stgs-edit-btn,
+.stgs-delete-btn,
+.stgs-save-btn,
+.stgs-cancel-btn {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid;
+}
+
+.stgs-edit-btn {
+  background: #f8fafc;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+.stgs-edit-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.stgs-delete-btn {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.stgs-delete-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+.stgs-save-btn {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #bbf7d0;
+}
+
+.stgs-save-btn:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+}
+
+.stgs-cancel-btn {
+  background: #f8fafc;
+  color: #64748b;
+  border-color: #cbd5e1;
+}
+
+.stgs-cancel-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.stgs-status-edit {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.stgs-status-edit .stgs-status-input {
+  flex: 1;
+  margin: 0;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .stgs-status-add {
+    flex-direction: column;
+  }
+
+  .stgs-status-display {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .stgs-status-actions {
+    align-self: stretch;
+    justify-content: flex-end;
+  }
+
+  .stgs-status-edit {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .stgs-status-edit .stgs-status-actions {
+    justify-content: center;
+  }
 }

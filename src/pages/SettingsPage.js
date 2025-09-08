@@ -88,6 +88,24 @@ const GeneralSettings = ({ service, user }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
+  // 처리상태 관리 상태
+  const [statusList, setStatusList] = useState([
+    "일반",
+    "부재",
+    "재상담",
+    "관리중",
+    "AS요청",
+    "AS확정",
+    "실패",
+    "결제완료",
+    "무료방안내",
+    "무료방입장",
+    "결제유력",
+  ]);
+  const [newStatus, setNewStatus] = useState("");
+  const [editingIndex, setEditingIndex] = useState(-1);
+  const [editingValue, setEditingValue] = useState("");
+
   const handleServiceNameSave = () => {
     setIsEditingServiceName(false);
     alert("서비스 이름이 변경되었습니다.");
@@ -111,6 +129,40 @@ const GeneralSettings = ({ service, user }) => {
   const handleCancelDelete = () => {
     setShowDeleteModal(false);
     setDeleteConfirmText("");
+  };
+
+  // 처리상태 관리 함수들
+  const handleAddStatus = () => {
+    if (newStatus.trim() && !statusList.includes(newStatus.trim())) {
+      setStatusList([...statusList, newStatus.trim()]);
+      setNewStatus("");
+    }
+  };
+
+  const handleDeleteStatus = (index) => {
+    if (window.confirm(`"${statusList[index]}" 상태를 삭제하시겠습니까?`)) {
+      setStatusList(statusList.filter((_, i) => i !== index));
+    }
+  };
+
+  const handleEditStart = (index) => {
+    setEditingIndex(index);
+    setEditingValue(statusList[index]);
+  };
+
+  const handleEditSave = () => {
+    if (editingValue.trim() && !statusList.includes(editingValue.trim())) {
+      const newList = [...statusList];
+      newList[editingIndex] = editingValue.trim();
+      setStatusList(newList);
+    }
+    setEditingIndex(-1);
+    setEditingValue("");
+  };
+
+  const handleEditCancel = () => {
+    setEditingIndex(-1);
+    setEditingValue("");
   };
 
   return (
@@ -162,6 +214,82 @@ const GeneralSettings = ({ service, user }) => {
               <span className="stgs-service-name-value">{serviceName}</span>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* 처리상태 관리 섹션 */}
+      <div className="stgs-status-section">
+        <h4>처리상태 관리</h4>
+        <p className="stgs-section-description">
+          고객 상담에서 사용될 처리상태를 관리합니다.
+        </p>
+
+        {/* 새 상태 추가 */}
+        <div className="stgs-status-add">
+          <input
+            type="text"
+            value={newStatus}
+            onChange={(e) => setNewStatus(e.target.value)}
+            placeholder="새 상태 이름을 입력하세요"
+            className="stgs-status-input"
+            onKeyPress={(e) => e.key === "Enter" && handleAddStatus()}
+          />
+          <button
+            className="stgs-add-btn"
+            onClick={handleAddStatus}
+            disabled={!newStatus.trim()}
+          >
+            추가
+          </button>
+        </div>
+
+        {/* 상태 목록 */}
+        <div className="stgs-status-list">
+          {statusList.map((status, index) => (
+            <div key={index} className="stgs-status-item">
+              {editingIndex === index ? (
+                <div className="stgs-status-edit">
+                  <input
+                    type="text"
+                    value={editingValue}
+                    onChange={(e) => setEditingValue(e.target.value)}
+                    className="stgs-status-input"
+                    onKeyPress={(e) => e.key === "Enter" && handleEditSave()}
+                    autoFocus
+                  />
+                  <div className="stgs-status-actions">
+                    <button className="stgs-save-btn" onClick={handleEditSave}>
+                      저장
+                    </button>
+                    <button
+                      className="stgs-cancel-btn"
+                      onClick={handleEditCancel}
+                    >
+                      취소
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="stgs-status-display">
+                  <span className="stgs-status-name">{status}</span>
+                  <div className="stgs-status-actions">
+                    <button
+                      className="stgs-edit-btn"
+                      onClick={() => handleEditStart(index)}
+                    >
+                      수정
+                    </button>
+                    <button
+                      className="stgs-delete-btn"
+                      onClick={() => handleDeleteStatus(index)}
+                    >
+                      삭제
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
 

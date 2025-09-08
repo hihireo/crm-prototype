@@ -16,6 +16,7 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
     ssnSecond: "",
     age: "",
     job: "",
+    gender: "",
   });
 
   // 메신저 계정 정보 상태
@@ -528,7 +529,7 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
                   </div>
 
                   <div className="cim-field">
-                    <label>연령</label>
+                    <label>연령대</label>
                     <input
                       type="text"
                       value={customerInfo.age}
@@ -539,8 +540,25 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
                         }))
                       }
                       className="cim-input"
-                      placeholder="연령을 입력하세요"
+                      placeholder="연령대를 입력하세요"
                     />
+                  </div>
+
+                  <div className="cim-field">
+                    <label>성별</label>
+                    <select
+                      value={customerInfo.gender}
+                      onChange={(e) =>
+                        setCustomerInfo((prev) => ({
+                          ...prev,
+                          gender: e.target.value,
+                        }))
+                      }
+                      className="cim-select"
+                    >
+                      <option value="남자">남자</option>
+                      <option value="여자">여자</option>
+                    </select>
                   </div>
 
                   <div className="cim-field">
