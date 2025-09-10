@@ -795,22 +795,6 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
                       <option value="공격투자형">공격투자형</option>
                     </select>
                   </div>
-
-                  <div className="cim-field cim-full-width">
-                    <label>비고</label>
-                    <textarea
-                      value={businessInfo.remarks}
-                      onChange={(e) =>
-                        setBusinessInfo((prev) => ({
-                          ...prev,
-                          remarks: e.target.value,
-                        }))
-                      }
-                      className="cim-textarea"
-                      placeholder="비고를 입력하세요"
-                      rows="3"
-                    />
-                  </div>
                 </div>
 
                 {/* 결제 내역 */}
