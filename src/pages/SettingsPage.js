@@ -479,7 +479,7 @@ const ServiceProfileSettings = ({ service, user }) => {
                 </div>
               )}
             </div>
-            {isEditingProfile && (
+            {/* {isEditingProfile && (
               <div className="stgs-image-upload">
                 <input
                   type="file"
@@ -495,7 +495,7 @@ const ServiceProfileSettings = ({ service, user }) => {
                   사진 변경
                 </label>
               </div>
-            )}
+            )} */}
           </div>
 
           <div className="stgs-profile-info">
