@@ -57,23 +57,302 @@
 
 .teams-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 28px;
 }
 
-.team-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
-  padding: 24px;
-  transition: transform 0.2s, box-shadow 0.2s;
+/* 현대적인 팀 카드 스타일 */
+.team-card-modern {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.5);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
 
-.team-card:hover {
+.team-card-modern::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.team-card-modern:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.team-card-modern:hover::before {
+  opacity: 1;
+}
+
+.team-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 0;
+  margin-bottom: 20px;
+}
+
+.team-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.team-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.team-stats-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(59, 130, 246, 0.1);
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.member-count {
+  font-size: 18px;
+  font-weight: 700;
+  color: #3b82f6;
+  line-height: 1;
+}
+
+.member-label {
+  font-size: 11px;
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.team-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(100, 116, 139, 0.1);
+  color: #64748b;
+}
+
+.action-btn:hover {
+  transform: scale(1.05);
+}
+
+.edit-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.delete-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.team-content {
+  padding: 0 24px;
+}
+
+.team-title-section {
+  margin-bottom: 24px;
+}
+
+.team-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+.team-description {
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.team-leader-modern {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.05),
+    rgba(139, 92, 246, 0.05)
+  );
+  border-radius: 16px;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.leader-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  position: relative;
+}
+
+.leader-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.leader-name {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 16px;
+}
+
+.leader-role {
+  font-size: 13px;
+  color: #3b82f6;
+  font-weight: 500;
+  background: rgba(59, 130, 246, 0.1);
+  padding: 2px 8px;
+  border-radius: 8px;
+  align-self: flex-start;
+}
+
+.leader-crown {
+  color: #f59e0b;
+  opacity: 0.8;
+}
+
+.team-members-preview {
+  margin-bottom: 24px;
+}
+
+.members-avatars {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.member-avatar-small {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  border: 3px solid white;
+  margin-left: -8px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.member-avatar-small:first-child {
+  margin-left: 0;
+}
+
+.member-avatar-small.is-leader {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.member-avatar-small.more-members {
+  background: #e2e8f0;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.member-avatar-small:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  z-index: 10 !important;
+}
+
+.members-count-text {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.team-footer-modern {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 24px;
+  border-top: 1px solid rgba(226, 232, 240, 0.5);
+  margin-top: 24px;
+}
+
+.created-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.created-info svg {
+  opacity: 0.7;
+}
+
+.manage-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.manage-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
 }
 
 .team-header {
@@ -300,6 +579,7 @@
   flex: 1;
 }
 
+/* 반응형 디자인 */
 @media (max-width: 768px) {
   .teams-header {
     flex-direction: column;
@@ -313,26 +593,1022 @@
 
   .teams-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 
-  .team-header {
+  /* 현대적인 팀 카드 모바일 스타일 */
+  .team-card-modern {
+    border-radius: 16px;
+  }
+
+  .team-card-header {
+    padding: 20px 20px 0;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
     align-items: flex-start;
   }
 
-  .delete-team-btn {
+  .team-badge {
+    align-self: stretch;
+    justify-content: space-between;
+  }
+
+  .team-actions {
     align-self: flex-end;
   }
 
-  .team-footer {
+  .team-content {
+    padding: 0 20px;
+  }
+
+  .team-name {
+    font-size: 20px;
+  }
+
+  .team-leader-modern {
+    padding: 16px;
+  }
+
+  .leader-avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
+  }
+
+  .team-members-preview {
+    margin-bottom: 20px;
+  }
+
+  .member-avatar-small {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+    margin-left: -6px;
+  }
+
+  .team-footer-modern {
+    padding: 16px 20px 20px;
     flex-direction: column;
     gap: 12px;
     align-items: stretch;
   }
 
+  .manage-btn {
+    justify-content: center;
+  }
+
+  /* 현대적인 모달 모바일 스타일 */
+  .tmm-modal-content-modern {
+    margin: 16px;
+    max-width: calc(100% - 32px);
+    max-height: calc(100% - 32px);
+    border-radius: 20px;
+  }
+
+  .tmm-modal-header-modern {
+    padding: 20px 20px 16px;
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .tmm-modal-title-section {
+    align-self: stretch;
+  }
+
+  .tmm-modal-team-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .tmm-modal-title-text h4 {
+    font-size: 20px;
+  }
+
+  .tmm-modal-close-modern {
+    align-self: flex-end;
+  }
+
+  .tmm-modal-body-modern {
+    padding: 16px 20px;
+  }
+
+  .tmm-section-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tmm-section-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .tmm-section-header h5 {
+    font-size: 16px;
+  }
+
+  .tmm-leader-card-modern {
+    padding: 20px;
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .tmm-leader-avatar-large {
+    width: 56px;
+    height: 56px;
+    font-size: 20px;
+  }
+
+  .tmm-leader-info-modern {
+    align-items: center;
+  }
+
+  .tmm-candidate-item-modern,
+  .tmm-member-item-modern {
+    padding: 12px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .tmm-candidate-info,
+  .tmm-member-main-info {
+    align-self: stretch;
+  }
+
+  .tmm-member-actions-modern {
+    margin-left: 0;
+    align-self: stretch;
+  }
+
+  .tmm-btn-modern {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tmm-modal-footer-modern {
+    padding: 16px 20px 20px;
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .tmm-team-summary {
+    justify-content: center;
+  }
+
+  .tmm-btn-close {
+    width: 100%;
+  }
+
   .modal-content {
     margin: 16px;
     max-width: calc(100% - 32px);
+  }
+}
+
+/* 현대적인 멤버 관리 모달 스타일 (tmm- prefix) */
+.tmm-modal-overlay-modern {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: tmm-fade-in 0.3s ease-out;
+}
+
+@keyframes tmm-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.tmm-modal-content-modern {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 24px;
+  padding: 0;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: tmm-slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes tmm-slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.tmm-modal-header-modern {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px 32px 20px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.02),
+    rgba(139, 92, 246, 0.02)
+  );
+}
+
+.tmm-modal-title-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tmm-modal-team-icon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+}
+
+.tmm-modal-title-text h4 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.tmm-modal-title-text p {
+  font-size: 15px;
+  color: #64748b;
+  margin: 0;
+  font-weight: 500;
+}
+
+.tmm-modal-close-modern {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(100, 116, 139, 0.1);
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tmm-modal-close-modern:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  transform: scale(1.05);
+}
+
+.tmm-modal-body-modern {
+  padding: 24px 32px;
+  max-height: 60vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(59, 130, 246, 0.3) transparent;
+}
+
+.tmm-modal-body-modern::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tmm-modal-body-modern::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tmm-modal-body-modern::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 3px;
+}
+
+.tmm-modal-body-modern::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.5);
+}
+
+/* 현대적인 섹션 스타일 */
+.tmm-section-modern {
+  margin-bottom: 32px;
+}
+
+.tmm-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(226, 232, 240, 0.3);
+}
+
+.tmm-section-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.1),
+    rgba(139, 92, 246, 0.1)
+  );
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3b82f6;
+}
+
+.tmm-section-header h5 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  flex: 1;
+}
+
+.tmm-member-counter {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* 현재 팀장 스타일 */
+.tmm-current-leader-modern {
+  margin-bottom: 32px;
+}
+
+.tmm-leader-card-modern {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.05),
+    rgba(217, 119, 6, 0.05)
+  );
+  border-radius: 20px;
+  border: 2px solid rgba(245, 158, 11, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.tmm-leader-card-modern::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.tmm-leader-avatar-large {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 24px;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.tmm-leader-crown-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 24px;
+  height: 24px;
+  background: #fbbf24;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tmm-leader-info-modern {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tmm-leader-name-modern {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.tmm-leader-badge {
+  font-size: 14px;
+  color: #f59e0b;
+  font-weight: 600;
+  background: rgba(245, 158, 11, 0.1);
+  padding: 6px 12px;
+  border-radius: 20px;
+  align-self: flex-start;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+/* 팀장 후보 스타일 */
+.tmm-leader-candidates-modern {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tmm-candidate-item-modern {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: rgba(248, 250, 252, 0.8);
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.5);
+  transition: all 0.2s ease;
+}
+
+.tmm-candidate-item-modern:hover {
+  background: rgba(59, 130, 246, 0.02);
+  border-color: rgba(59, 130, 246, 0.2);
+  transform: translateY(-1px);
+}
+
+.tmm-candidate-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.tmm-member-avatar-modern {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.tmm-member-avatar-modern.in-team {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.tmm-member-crown {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
+  background: #fbbf24;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  border: 1px solid white;
+}
+
+.tmm-member-details-modern {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tmm-member-name-modern {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 15px;
+}
+
+.tmm-member-position-modern {
+  font-size: 13px;
+  color: #64748b;
+  background: rgba(100, 116, 139, 0.1);
+  padding: 2px 8px;
+  border-radius: 8px;
+  align-self: flex-start;
+}
+
+/* 전체 멤버 목록 스타일 */
+.tmm-all-members-modern {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tmm-member-item-modern {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: rgba(248, 250, 252, 0.6);
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.3);
+  transition: all 0.2s ease;
+}
+
+.tmm-member-item-modern.is-team-member {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.05),
+    rgba(5, 150, 105, 0.05)
+  );
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.tmm-member-item-modern:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.tmm-member-main-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.tmm-member-info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tmm-member-basic-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tmm-member-teams-modern {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.1);
+  padding: 4px 8px;
+  border-radius: 8px;
+  align-self: flex-start;
+}
+
+.tmm-empty-state {
+  text-align: center;
+  padding: 32px 20px;
+  color: #64748b;
+  background: rgba(248, 250, 252, 0.5);
+  border-radius: 16px;
+  border: 2px dashed rgba(226, 232, 240, 0.5);
+}
+
+.tmm-empty-state p {
+  margin: 0;
+  font-size: 15px;
+}
+
+/* 현대적인 버튼 스타일 */
+.tmm-btn-modern {
+  border: none;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.tmm-btn-modern:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.tmm-btn-modern::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.tmm-btn-modern:hover::before {
+  left: 100%;
+}
+
+.tmm-btn-promote {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.tmm-btn-promote:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+}
+
+.tmm-btn-add {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.tmm-btn-add:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.tmm-btn-remove {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.tmm-btn-remove:hover:not(:disabled) {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+}
+
+.tmm-btn-leader {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: white;
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+}
+
+.tmm-btn-close {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.tmm-btn-close:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+/* 모달 푸터 */
+.tmm-modal-footer-modern {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px 28px;
+  border-top: 1px solid rgba(226, 232, 240, 0.5);
+  background: linear-gradient(
+    135deg,
+    rgba(248, 250, 252, 0.5),
+    rgba(241, 245, 249, 0.5)
+  );
+}
+
+.tmm-team-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tmm-summary-text {
+  font-size: 15px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.tmm-member-actions-modern {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.tmm-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 0;
+  margin-bottom: 24px;
+}
+
+.tmm-modal-header h4 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.tmm-modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  color: #64748b;
+  transition: all 0.2s;
+}
+
+.tmm-modal-close:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.tmm-modal-body {
+  padding: 0 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.tmm-modal-footer {
+  padding: 24px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 현재 팀장 섹션 */
+.tmm-current-leader {
+  margin-bottom: 32px;
+}
+
+.tmm-current-leader h5 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.tmm-leader-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #eff6ff;
+  border-radius: 12px;
+  border-left: 4px solid #3b82f6;
+}
+
+/* 섹션 스타일 */
+.tmm-section {
+  margin-bottom: 32px;
+}
+
+.tmm-section h5 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 16px;
+}
+
+/* 팀장 후보 스타일 */
+.tmm-leader-candidates {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tmm-candidate-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.tmm-candidate-item:hover {
+  background: #f1f5f9;
+}
+
+/* 전체 멤버 목록 */
+.tmm-all-members {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tmm-member-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.tmm-member-item:hover {
+  background: #f1f5f9;
+}
+
+/* 멤버 아바타 */
+.tmm-member-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* 멤버 정보 */
+.tmm-member-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tmm-member-name {
+  font-weight: 500;
+  color: #1e293b;
+  font-size: 14px;
+}
+
+.tmm-member-position {
+  font-size: 12px;
+  color: #64748b;
+  background: #e2e8f0;
+  padding: 2px 8px;
+  border-radius: 10px;
+  align-self: flex-start;
+}
+
+.tmm-member-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tmm-member-teams {
+  font-size: 11px;
+  color: #7c3aed;
+  background: #f3e8ff;
+  padding: 2px 6px;
+  border-radius: 8px;
+  align-self: flex-start;
+}
+
+.tmm-member-actions {
+  margin-left: auto;
+}
+
+/* 버튼 스타일 */
+.tmm-btn {
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.tmm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tmm-btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.tmm-btn-primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.tmm-btn-primary:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.tmm-btn-secondary {
+  background: #6b7280;
+  color: white;
+}
+
+.tmm-btn-secondary:hover:not(:disabled) {
+  background: #4b5563;
+}
+
+.tmm-btn-danger {
+  background: #ef4444;
+  color: white;
+}
+
+.tmm-btn-danger:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.tmm-btn-outline {
+  background: transparent;
+  color: #3b82f6;
+  border: 1px solid #3b82f6;
+}
+
+.tmm-btn-outline:hover:not(:disabled) {
+  background: #3b82f6;
+  color: white;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .tmm-modal-content {
+    margin: 16px;
+    max-width: calc(100% - 32px);
+    max-height: calc(100% - 32px);
+  }
+
+  .tmm-modal-header {
+    padding: 16px 16px 0;
+    margin-bottom: 16px;
+  }
+
+  .tmm-modal-body {
+    padding: 0 16px;
+  }
+
+  .tmm-modal-footer {
+    padding: 16px;
+  }
+
+  .tmm-member-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .tmm-member-actions {
+    margin-left: 0;
+    align-self: stretch;
+  }
+
+  .tmm-btn {
+    width: 100%;
   }
 }
