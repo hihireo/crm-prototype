@@ -3,6 +3,7 @@ import { Routes, Route, Link, useLocation } from "react-router-dom";
 import MembersPage from "./settings/MembersPage";
 import TeamsPage from "./settings/TeamsPage";
 import ChannelSettingsPage from "./settings/ChannelSettingsPage";
+import BulkImportHistoryPage from "./settings/BulkImportHistoryPage";
 import "./SettingsPage.css";
 
 const SettingsPage = ({ service, user }) => {
@@ -19,6 +20,12 @@ const SettingsPage = ({ service, user }) => {
     },
     { id: "members", name: "멤버", path: "/settings/members", icon: "👥" },
     { id: "teams", name: "팀 관리", path: "/settings/teams", icon: "🏢" },
+    {
+      id: "bulk-import",
+      name: "일괄 등록 이력",
+      path: "/settings/bulk-import",
+      icon: "📊",
+    },
   ];
 
   return (
@@ -68,6 +75,10 @@ const SettingsPage = ({ service, user }) => {
                 element={<MembersPage service={service} />}
               />
               <Route path="/teams" element={<TeamsPage service={service} />} />
+              <Route
+                path="/bulk-import"
+                element={<BulkImportHistoryPage service={service} />}
+              />
               <Route
                 path="/"
                 element={<GeneralSettings service={service} user={user} />}
