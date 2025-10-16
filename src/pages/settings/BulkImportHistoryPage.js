@@ -122,21 +122,28 @@ const BulkImportHistoryPage = ({ service }) => {
       const statuses = ["PENDING", "PROCESSING", "COMPLETED", "FAILED"];
 
       for (let i = 1; i <= 47; i++) {
-        const totalCustomers = Math.floor(Math.random() * 500) + 50;
-        let successCount, failureCount;
+        let totalCustomers = Math.floor(Math.random() * 500) + 50;
+        let successCount, failureCount, status;
 
+        // PENDING 상태 케이스 (처리 전이므로 모든 수치가 '-')
+        if (i <= 10 && [1, 4, 9].includes(i)) {
+          status = "PENDING";
+          totalCustomers = null; // null로 설정하여 '-' 표시
+          successCount = null;
+          failureCount = null;
+        }
         // 첫 페이지(1-10번)에 실패가 0인 케이스 3개 포함
-        if (i <= 10 && [2, 5, 8].includes(i)) {
+        else if (i <= 10 && [2, 5, 8].includes(i)) {
           // 실패 0인 케이스
           successCount = totalCustomers;
           failureCount = 0;
+          status = statuses[Math.floor(Math.random() * statuses.length)];
         } else {
           // 일반 케이스
           successCount = Math.floor(Math.random() * totalCustomers);
           failureCount = totalCustomers - successCount;
+          status = statuses[Math.floor(Math.random() * statuses.length)];
         }
-
-        const status = statuses[Math.floor(Math.random() * statuses.length)];
 
         // 실패 데이터가 있는 경우 실패 상세 정보 생성
         const failureDetails = [];
@@ -284,21 +291,29 @@ const BulkImportHistoryPage = ({ service }) => {
                 </td>
                 <td>{item.uploader}</td>
                 <td className="bulk-number">
-                  {item.totalCustomers.toLocaleString()}
+                  {item.totalCustomers !== null
+                    ? item.totalCustomers.toLocaleString()
+                    : "-"}
                 </td>
                 <td className="bulk-number bulk-success">
-                  {item.successCount.toLocaleString()}
+                  {item.successCount !== null
+                    ? item.successCount.toLocaleString()
+                    : "-"}
                 </td>
                 <td className="bulk-number">
-                  {item.failureCount > 0 ? (
-                    <button
-                      className="bulk-failure-link"
-                      onClick={() => handleFailureClick(item)}
-                    >
-                      {item.failureCount.toLocaleString()}
-                    </button>
+                  {item.failureCount !== null ? (
+                    item.failureCount > 0 ? (
+                      <button
+                        className="bulk-failure-link"
+                        onClick={() => handleFailureClick(item)}
+                      >
+                        {item.failureCount.toLocaleString()}
+                      </button>
+                    ) : (
+                      <span className="bulk-success">0</span>
+                    )
                   ) : (
-                    <span className="bulk-success">0</span>
+                    "-"
                   )}
                 </td>
                 <td>
