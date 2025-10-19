@@ -1,14 +1,25 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./AttendancePage.css";
-import EmployeeInfoModal from "../components/EmployeeInfoModal";
+import GlobalEmployeeModal from "../components/GlobalEmployeeModal";
+import {
+  organizationTreeData,
+  getSubordinates as getOrgSubordinates,
+  getAllEmployees,
+  transformEmployeeForModal,
+} from "../utils/organizationData";
+import TreeNode from "../components/TreeNode";
 
 const AttendancePage = ({ user, service }) => {
   const [selectedDate, setSelectedDate] = useState(new Date(2025, 8, 1)); // 2025년 9월 1일
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [employeeComments, setEmployeeComments] = useState({});
   const calendarRef = useRef(null);
+
+  // 예하 트리 찾기 함수 (조직 데이터 시스템 사용)
+  const getSubordinates = (nodeId) => {
+    return getOrgSubordinates(nodeId, organizationTreeData);
+  };
 
   // 2025년 9월 직원 출퇴근 데이터 생성
   const generateAttendanceData = () => {
@@ -206,26 +217,30 @@ const AttendancePage = ({ user, service }) => {
 
   // 직원 클릭 핸들러
   const handleEmployeeClick = (employee) => {
-    setSelectedEmployee(employee);
+    // 조직 데이터에서 해당 직원을 찾거나 임시 데이터 생성
+    const allEmployees = getAllEmployees();
+    let foundEmployee = allEmployees.find(
+      (emp) => emp.name === employee.name || emp.displayName === employee.name
+    );
+
+    if (!foundEmployee) {
+      // 조직 데이터에 없는 경우 임시 직원 데이터 생성
+      foundEmployee = {
+        id: employee.id,
+        type: "member",
+        name: employee.name,
+        position: employee.position,
+        email: `${employee.name
+          .toLowerCase()
+          .replace(/\s+/g, ".")}@company.com`,
+        phone: "010-0000-0000", // 기본값
+        team: employee.team,
+      };
+    }
+
+    const transformedEmployee = transformEmployeeForModal(foundEmployee);
+    setSelectedEmployee(transformedEmployee);
     setIsEmployeeModalOpen(true);
-  };
-
-  // 댓글 추가 함수
-  const handleAddComment = (employeeId, comment) => {
-    setEmployeeComments((prev) => ({
-      ...prev,
-      [employeeId]: [...(prev[employeeId] || []), comment],
-    }));
-  };
-
-  // 댓글 삭제 함수
-  const handleDeleteComment = (employeeId, commentId) => {
-    setEmployeeComments((prev) => ({
-      ...prev,
-      [employeeId]: (prev[employeeId] || []).filter(
-        (comment) => comment.id !== commentId
-      ),
-    }));
   };
 
   return (
@@ -372,14 +387,15 @@ const AttendancePage = ({ user, service }) => {
         </div>
 
         {/* 직원 정보 모달 */}
-        <EmployeeInfoModal
+        <GlobalEmployeeModal
           isOpen={isEmployeeModalOpen}
           onClose={() => setIsEmployeeModalOpen(false)}
           employee={selectedEmployee}
-          user={user}
-          employeeComments={employeeComments}
-          onAddComment={handleAddComment}
-          onDeleteComment={handleDeleteComment}
+          user={user || { role: "admin", position: "팀장" }} // 임시 사용자 정보
+          showTeamManagement={true}
+          showSubordinates={true}
+          subordinates={getSubordinates(2)}
+          TreeNodeComponent={TreeNode}
         />
       </div>
     </div>

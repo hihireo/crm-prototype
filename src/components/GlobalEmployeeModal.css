@@ -1,0 +1,476 @@
+/* 전역 직원 모달 스타일 */
+.global-emp-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.global-emp-modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  max-width: 600px;
+  width: 90%;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.global-emp-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 0 24px;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+}
+
+.global-emp-modal-header h4 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.global-emp-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.global-emp-modal-close:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.global-emp-modal-body {
+  padding: 0 24px 24px 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 기본 정보 섹션 */
+.global-emp-info-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.global-emp-avatar-large {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: white;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.global-emp-profile-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.global-emp-details h3 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.global-emp-email {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+.global-emp-phone {
+  font-size: 14px;
+  color: #64748b;
+  margin: 4px 0 0 0;
+}
+
+.global-emp-team-name {
+  font-size: 14px;
+  color: #3b82f6;
+  font-weight: 600;
+  background: #dbeafe;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-block;
+  margin: 8px 0 0 0;
+}
+
+/* 팀 관리 섹션 */
+.global-emp-team-management {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.global-emp-team-management.center-layout {
+  justify-content: center;
+}
+
+.global-emp-team-info-left {
+  flex: 1;
+  text-align: left;
+}
+
+.global-emp-team-name-display {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.global-emp-team-actions-right {
+  flex-shrink: 0;
+}
+
+/* 버튼 스타일 */
+.global-emp-btn {
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.global-emp-btn-primary {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.global-emp-btn-primary:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+}
+
+.global-emp-btn-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+}
+
+.global-emp-btn-danger:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-1px);
+}
+
+.global-emp-btn-danger.disabled,
+.global-emp-btn-danger:disabled {
+  background: #9ca3af;
+  color: #6b7280;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.global-emp-btn-danger.disabled:hover,
+.global-emp-btn-danger:disabled:hover {
+  background: #9ca3af;
+  transform: none;
+}
+
+/* 탭 네비게이션 */
+.global-emp-modal-tabs {
+  display: flex;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+}
+
+.global-emp-modal-tab {
+  flex: 1;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.global-emp-modal-tab:hover {
+  color: #3b82f6;
+  background: #f8fafc;
+}
+
+.global-emp-modal-tab.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+}
+
+/* 탭 컨텐츠 영역 */
+.global-emp-tab-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px; /* 스크롤바 공간 */
+}
+
+.global-emp-tab-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.global-emp-tab-content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.global-emp-tab-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.global-emp-tab-content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 예하 조직 섹션 */
+.global-emp-subordinates-section h5 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.global-emp-subordinates-tree-container {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fafafa;
+}
+
+.global-emp-no-subordinates {
+  text-align: center;
+  padding: 32px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* 샘플 예하 조직 스타일 - TreeNode와 동일하게 */
+.global-emp-sample-subordinates {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px;
+  background: #fafafa;
+}
+
+.sample-tree-node {
+  margin-bottom: 4px;
+}
+
+.sample-tree-node:last-child {
+  margin-bottom: 0;
+}
+
+.sample-node-content {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sample-node-content:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.sample-node-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.sample-member-node-compact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.sample-member-thumbnail {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.sample-member-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+/* 관리자 정보 섹션 */
+.global-emp-admin-info-section {
+  padding: 0;
+}
+
+.global-emp-admin-info-section h5 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.global-emp-admin-info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.global-emp-admin-personal-info {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.global-emp-admin-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.global-emp-admin-field:last-child {
+  border-bottom: none;
+}
+
+.global-emp-admin-field label {
+  font-weight: 600;
+  color: #475569;
+  font-size: 14px;
+}
+
+.global-emp-admin-field span {
+  color: #1e293b;
+  font-size: 14px;
+}
+
+.global-emp-admin-team-history h6,
+.global-emp-admin-comments h6 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 12px 0;
+}
+
+.global-emp-history-list {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.global-emp-history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.global-emp-history-item:last-child {
+  border-bottom: none;
+}
+
+.global-emp-history-date,
+.global-emp-history-team,
+.global-emp-history-position {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.global-emp-comments-list {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.global-emp-no-comments {
+  text-align: center;
+  color: #94a3b8;
+  font-style: italic;
+  font-size: 13px;
+}
+
+.global-emp-comment-item {
+  margin-bottom: 12px;
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.global-emp-comment-item:last-child {
+  margin-bottom: 0;
+}
+
+.global-emp-comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.global-emp-comment-author {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 13px;
+}
+
+.global-emp-comment-date {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.global-emp-comment-text {
+  color: #374151;
+  font-size: 13px;
+  line-height: 1.4;
+}

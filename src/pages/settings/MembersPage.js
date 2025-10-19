@@ -1,5 +1,13 @@
 import React, { useState } from "react";
 import "./MembersPage.css";
+import GlobalEmployeeModal from "../../components/GlobalEmployeeModal";
+import {
+  organizationTreeData,
+  getSubordinates as getOrgSubordinates,
+  getAllEmployees,
+  transformEmployeeForModal,
+} from "../../utils/organizationData";
+import TreeNode from "../../components/TreeNode";
 
 const MembersPage = ({ service }) => {
   const [members, setMembers] = useState([
@@ -54,11 +62,49 @@ const MembersPage = ({ service }) => {
   const [invitePosition, setInvitePosition] = useState("팀원");
   const [inviteTeam, setInviteTeam] = useState("");
 
+  // 직원 정보 모달 상태
+  const [showEmployeeModal, setShowEmployeeModal] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+
+  // 예하 트리 찾기 함수 (조직 데이터 시스템 사용)
+  const getSubordinates = (nodeId) => {
+    return getOrgSubordinates(nodeId, organizationTreeData);
+  };
+
   // 사용 가능한 팀 목록
   const availableTeams = [
     { id: 1, name: "영업1지점" },
     { id: 2, name: "영업2지점" },
   ];
+
+  // 멤버 클릭 핸들러
+  const handleMemberClick = (member) => {
+    // 조직 데이터에서 해당 직원을 찾거나 임시 데이터 생성
+    const allEmployees = getAllEmployees();
+    let employee = allEmployees.find(
+      (emp) =>
+        emp.name === member.name ||
+        emp.displayName === member.name ||
+        emp.email === member.email
+    );
+
+    if (!employee) {
+      // 조직 데이터에 없는 경우 임시 직원 데이터 생성
+      employee = {
+        id: member.id,
+        type: "member",
+        name: member.name,
+        position: member.position,
+        email: member.email,
+        phone: "010-0000-0000", // 기본값
+        team: member.team,
+      };
+    }
+
+    const transformedEmployee = transformEmployeeForModal(employee);
+    setSelectedEmployee(transformedEmployee);
+    setShowEmployeeModal(true);
+  };
 
   const handleInvite = (e) => {
     e.preventDefault();
@@ -85,19 +131,6 @@ const MembersPage = ({ service }) => {
   const handleRemoveMember = (memberId) => {
     if (window.confirm("정말로 이 멤버를 제거하시겠습니까?")) {
       setMembers(members.filter((member) => member.id !== memberId));
-    }
-  };
-
-  const getRoleColor = (role) => {
-    switch (role) {
-      case "Owner":
-        return "role-owner";
-      case "Manager":
-        return "role-manager";
-      case "Staff":
-        return "role-staff";
-      default:
-        return "role-staff";
     }
   };
 
@@ -165,7 +198,12 @@ const MembersPage = ({ service }) => {
                 <div className="member-info">
                   <div className="member-avatar">{member.avatar}</div>
                   <div className="member-details">
-                    <div className="member-name">{member.name}</div>
+                    <div
+                      className="member-name clickable-name"
+                      onClick={() => handleMemberClick(member)}
+                    >
+                      {member.name}
+                    </div>
                     <div className="member-email">{member.email}</div>
                   </div>
                 </div>
@@ -282,6 +320,18 @@ const MembersPage = ({ service }) => {
           </div>
         </div>
       )}
+
+      {/* 직원 정보 모달 */}
+      <GlobalEmployeeModal
+        isOpen={showEmployeeModal}
+        onClose={() => setShowEmployeeModal(false)}
+        employee={selectedEmployee}
+        user={{ role: "admin", position: "팀장" }} // 임시 사용자 정보
+        showTeamManagement={true}
+        showSubordinates={true}
+        subordinates={getSubordinates(2)}
+        TreeNodeComponent={TreeNode}
+      />
     </div>
   );
 };

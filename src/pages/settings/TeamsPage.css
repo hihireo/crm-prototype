@@ -2,6 +2,15 @@
   width: 100%;
 }
 
+/* 트리 컨테이너 스타일 */
+.teams-tree-container {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
 .teams-header {
   display: flex;
   justify-content: space-between;
@@ -1611,4 +1620,491 @@
   .tmm-btn {
     width: 100%;
   }
+}
+
+/* 노드 정보 모달 스타일 */
+.node-modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 0;
+  width: 100%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.node-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 0;
+  margin-bottom: 24px;
+}
+
+.node-modal-header h4 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.node-modal-body {
+  padding: 0 24px 24px;
+}
+
+.node-info-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.node-avatar-large {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 24px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.profile-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.node-details h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+}
+
+.node-position {
+  font-size: 14px;
+  color: #3b82f6;
+  font-weight: 500;
+  background: rgba(59, 130, 246, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-block;
+  margin: 0 0 8px 0;
+}
+
+.node-email {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+.node-phone {
+  font-size: 14px;
+  color: #64748b;
+  margin: 4px 0 0 0;
+}
+
+.node-team-name {
+  font-size: 14px;
+  color: #3b82f6;
+  font-weight: 600;
+  background: rgba(59, 130, 246, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-block;
+  margin: 8px 0 0 0;
+}
+
+.team-management-section {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.team-management-section.center-layout {
+  justify-content: center;
+}
+
+.team-info-left {
+  flex: 1;
+  text-align: left;
+}
+
+.team-name-display {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.team-actions-right {
+  flex-shrink: 0;
+}
+
+.team-management-section .btn {
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+}
+
+.btn-danger:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-1px);
+}
+
+.btn-danger.disabled,
+.btn-danger:disabled {
+  background: #9ca3af;
+  color: #6b7280;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-danger.disabled:hover,
+.btn-danger:disabled:hover {
+  background: #9ca3af;
+  transform: none;
+}
+
+.subordinates-section h5 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.subordinates-tree-container {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.subordinates-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.subordinate-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.subordinate-item:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.subordinate-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.subordinate-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.subordinate-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1e293b;
+}
+
+.subordinate-position {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.subordinate-type {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+  background: #e2e8f0;
+  color: #64748b;
+}
+
+.no-subordinates {
+  text-align: center;
+  padding: 32px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* 이동 확인 모달 스타일 */
+.move-modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.move-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 0 24px;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+}
+
+.move-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.move-modal-body {
+  padding: 0 24px 24px 24px;
+}
+
+.move-info {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.move-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.move-item:last-child {
+  margin-bottom: 0;
+}
+
+.move-label {
+  font-weight: 600;
+  color: #475569;
+}
+
+.move-value {
+  font-weight: 700;
+  color: #1e293b;
+  background: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.move-value.current-location {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
+}
+
+.move-value.new-location {
+  background: #dcfce7;
+  border-color: #16a34a;
+  color: #15803d;
+}
+
+.move-arrow {
+  text-align: center;
+  font-size: 24px;
+  color: #3b82f6;
+  margin: 16px 0;
+}
+
+.move-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btn-secondary {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-secondary:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+/* 탭 네비게이션 스타일 */
+.modal-tabs {
+  display: flex;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+}
+
+.modal-tab {
+  flex: 1;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-tab:hover {
+  color: #3b82f6;
+  background: #f8fafc;
+}
+
+.modal-tab.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+}
+
+/* 관리자 정보 섹션 스타일 */
+.admin-info-section {
+  padding: 0;
+}
+
+.admin-info-section h5 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.admin-info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.admin-personal-info {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.admin-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-field:last-child {
+  border-bottom: none;
+}
+
+.admin-field label {
+  font-weight: 600;
+  color: #475569;
+  font-size: 14px;
+}
+
+.admin-field span {
+  color: #1e293b;
+  font-size: 14px;
+}
+
+.admin-team-history h6,
+.admin-comments h6 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 12px 0;
+}
+
+.history-list {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.history-item:last-child {
+  border-bottom: none;
+}
+
+.history-date,
+.history-team,
+.history-position {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.comments-list {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.no-comments {
+  text-align: center;
+  color: #94a3b8;
+  font-style: italic;
+  font-size: 13px;
 }
