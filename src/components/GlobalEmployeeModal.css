@@ -474,3 +474,64 @@
   font-size: 13px;
   line-height: 1.4;
 }
+
+/* 팀 생성 폼 스타일 */
+.global-emp-team-creation-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
+}
+
+.global-emp-team-name-input {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.global-emp-team-name-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.global-emp-team-creation-buttons {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.global-emp-btn-small {
+  padding: 6px 12px;
+  font-size: 12px;
+  min-width: auto;
+}
+
+.global-emp-btn-secondary {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.global-emp-btn-secondary:hover:not(:disabled) {
+  background-color: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+/* 탭 내부 팀 관리 섹션 */
+.global-emp-team-management-in-tab {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.global-emp-team-management-in-tab.center-layout {
+  justify-content: center;
+}

@@ -160,7 +160,7 @@ const TeamsPage = ({ service }) => {
   };
 
   // 팀 생성 함수
-  const createTeam = (memberId) => {
+  const createTeam = (memberId, teamName) => {
     const newTreeData = JSON.parse(JSON.stringify(treeData));
 
     const convertMemberToTeam = (nodes) => {
@@ -170,6 +170,7 @@ const TeamsPage = ({ service }) => {
           nodes[i] = {
             ...nodes[i],
             type: "team",
+            name: teamName || `${nodes[i].name}팀`, // 입력받은 팀 이름 사용
             leaderName: nodes[i].name,
             leaderPosition: nodes[i].position || "팀장",
             children: [],
@@ -270,8 +271,8 @@ const TeamsPage = ({ service }) => {
         showTeamManagement={true}
         showSubordinates={true}
         subordinates={selectedNode ? getSubordinates(selectedNode.id) : []}
-        onCreateTeam={(employeeId) => {
-          if (createTeam(employeeId)) {
+        onCreateTeam={(employeeId, teamName) => {
+          if (createTeam(employeeId, teamName)) {
             setShowNodeModal(false);
           }
         }}

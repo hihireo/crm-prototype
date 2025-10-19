@@ -15,17 +15,41 @@ const GlobalEmployeeModal = ({
   treeNodeProps = {},
 }) => {
   const [activeTab, setActiveTab] = useState("organization");
+  const [showTeamNameInput, setShowTeamNameInput] = useState(false);
+  const [teamName, setTeamName] = useState("");
 
   if (!isOpen || !employee) return null;
-
-  // 권한 체크 함수
-  const canViewPrivateInfo = () => {
-    return user?.role === "admin" || user?.position === "팀장" || true; // 임시로 true
-  };
 
   // 팀 생성/제거 가능 여부
   const canManageTeam =
     showTeamManagement && (user?.role === "admin" || user?.position === "팀장");
+
+  // 팀 생성 관련 핸들러
+  const handleTeamCreationStart = () => {
+    setShowTeamNameInput(true);
+    setTeamName("");
+  };
+
+  const handleTeamCreationCancel = () => {
+    setShowTeamNameInput(false);
+    setTeamName("");
+  };
+
+  const handleTeamCreationConfirm = () => {
+    if (teamName.trim()) {
+      onCreateTeam && onCreateTeam(employee.id, teamName.trim());
+      setShowTeamNameInput(false);
+      setTeamName("");
+    }
+  };
+
+  const handleTeamNameKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleTeamCreationConfirm();
+    } else if (e.key === "Escape") {
+      handleTeamCreationCancel();
+    }
+  };
 
   return (
     <div className="global-emp-modal-overlay" onClick={onClose}>
@@ -64,43 +88,6 @@ const GlobalEmployeeModal = ({
             </div>
           </div>
 
-          {/* 팀 관리 섹션 */}
-          {canManageTeam && (
-            <div
-              className={`global-emp-team-management ${
-                employee.type === "member" ? "center-layout" : ""
-              }`}
-            >
-              {employee.type === "team" && employee.teamName && (
-                <div className="global-emp-team-info-left">
-                  <h4 className="global-emp-team-name-display">
-                    {employee.leaderName || "팀장"} ({employee.teamName})
-                  </h4>
-                </div>
-              )}
-              <div className="global-emp-team-actions-right">
-                {employee.type === "member" ? (
-                  <button
-                    className="global-emp-btn global-emp-btn-primary"
-                    onClick={() => onCreateTeam && onCreateTeam(employee.id)}
-                  >
-                    팀 생성
-                  </button>
-                ) : (
-                  <button
-                    className={`global-emp-btn global-emp-btn-danger ${
-                      subordinates.length > 0 ? "disabled" : ""
-                    }`}
-                    disabled={subordinates.length > 0}
-                    onClick={() => onRemoveTeam && onRemoveTeam(employee.id)}
-                  >
-                    팀 제거
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
           {/* 탭 네비게이션 */}
           <div className="global-emp-modal-tabs">
             <button
@@ -109,7 +96,7 @@ const GlobalEmployeeModal = ({
               }`}
               onClick={() => setActiveTab("organization")}
             >
-              예하 조직
+              조직 정보
             </button>
             <button
               className={`global-emp-modal-tab ${
@@ -125,7 +112,74 @@ const GlobalEmployeeModal = ({
           <div className="global-emp-tab-content">
             {activeTab === "organization" && (
               <div className="global-emp-subordinates-section">
-                <h5>예하 조직</h5>
+                {/* 팀 관리 섹션 */}
+                {canManageTeam && (
+                  <div
+                    className={`global-emp-team-management-in-tab ${
+                      employee.type === "member" ? "center-layout" : ""
+                    }`}
+                  >
+                    {employee.type === "team" && employee.teamName && (
+                      <div className="global-emp-team-info-left">
+                        <h4 className="global-emp-team-name-display">
+                          {employee.leaderName || "팀장"} ({employee.teamName})
+                        </h4>
+                      </div>
+                    )}
+                    <div className="global-emp-team-actions-right">
+                      {employee.type === "member" ? (
+                        !showTeamNameInput ? (
+                          <button
+                            className="global-emp-btn global-emp-btn-primary"
+                            onClick={handleTeamCreationStart}
+                          >
+                            팀 생성
+                          </button>
+                        ) : (
+                          <div className="global-emp-team-creation-form">
+                            <input
+                              type="text"
+                              className="global-emp-team-name-input"
+                              placeholder="팀 이름을 입력하세요"
+                              value={teamName}
+                              onChange={(e) => setTeamName(e.target.value)}
+                              onKeyDown={handleTeamNameKeyPress}
+                              autoFocus
+                            />
+                            <div className="global-emp-team-creation-buttons">
+                              <button
+                                className="global-emp-btn global-emp-btn-secondary global-emp-btn-small"
+                                onClick={handleTeamCreationCancel}
+                              >
+                                취소
+                              </button>
+                              <button
+                                className="global-emp-btn global-emp-btn-primary global-emp-btn-small"
+                                onClick={handleTeamCreationConfirm}
+                                disabled={!teamName.trim()}
+                              >
+                                확인
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      ) : (
+                        <button
+                          className={`global-emp-btn global-emp-btn-danger ${
+                            subordinates.length > 0 ? "disabled" : ""
+                          }`}
+                          disabled={subordinates.length > 0}
+                          onClick={() =>
+                            onRemoveTeam && onRemoveTeam(employee.id)
+                          }
+                        >
+                          팀 제거
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {showSubordinates && subordinates.length > 0 ? (
                   <div className="global-emp-subordinates-tree-container">
                     {TreeNodeComponent &&
@@ -178,7 +232,6 @@ const GlobalEmployeeModal = ({
             {/* 관리자 정보 탭 */}
             {activeTab === "admin" && (
               <div className="global-emp-admin-info-section">
-                <h5>관리자 정보</h5>
                 <div className="global-emp-admin-info-content">
                   <div className="global-emp-admin-personal-info">
                     <div className="global-emp-admin-field">
