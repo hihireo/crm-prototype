@@ -312,8 +312,8 @@ const GeneralSettings = ({ service, user }) => {
         </div>
         <div className="stgs-menu-option">
           <div className="stgs-option-info">
-            <label>근퇴 메뉴 사용</label>
-            <p>출퇴근 기능 및 근퇴메뉴를 활성화 합니다.</p>
+            <label>근태 메뉴 사용</label>
+            <p>출퇴근 기능 및 근태메뉴를 활성화 합니다.</p>
           </div>
           <label className="stgs-toggle">
             <input

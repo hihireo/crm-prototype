@@ -248,7 +248,7 @@ const AttendancePage = ({ user, service }) => {
       <div className="container">
         {/* 페이지 헤더 */}
         <div className="attn-header">
-          <h1>🕐 근퇴 관리</h1>
+          <h1>🕐 근태 관리</h1>
           <p>직원들의 출퇴근 현황을 확인하고 관리하세요</p>
         </div>
 
