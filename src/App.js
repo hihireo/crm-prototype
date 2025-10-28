@@ -9,6 +9,7 @@ import {
 import Header from "./components/Layout/Header";
 import LoginPage from "./pages/LoginPage";
 import ServiceSelectPage from "./pages/ServiceSelectPage";
+import CreateServicePage from "./pages/CreateServicePage";
 import DashboardPage from "./pages/DashboardPage";
 import ConsultationPage from "./pages/ConsultationPage";
 import NoticePage from "./pages/NoticePage";
@@ -39,6 +40,13 @@ function AppContent() {
   const handleServiceSelect = (serviceName) => {
     setCurrentService(serviceName);
     localStorage.setItem("currentService", JSON.stringify(serviceName));
+  };
+
+  const handleServiceCreate = (newService) => {
+    // 새로 생성된 서비스를 현재 서비스로 설정
+    setCurrentService(newService.name);
+    localStorage.setItem("currentService", JSON.stringify(newService.name));
+    navigate("/dashboard");
   };
 
   const handleLogout = () => {
@@ -79,7 +87,20 @@ function AppContent() {
               ) : currentService ? (
                 <Navigate to="/dashboard" replace />
               ) : (
-                <ServiceSelectPage onServiceSelect={handleServiceSelect} />
+                <ServiceSelectPage
+                  onServiceSelect={handleServiceSelect}
+                  onServiceCreate={handleServiceCreate}
+                />
+              )
+            }
+          />
+          <Route
+            path="/create-service"
+            element={
+              !user ? (
+                <Navigate to="/login" replace />
+              ) : (
+                <CreateServicePage onServiceCreate={handleServiceCreate} />
               )
             }
           />

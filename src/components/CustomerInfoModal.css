@@ -62,6 +62,115 @@
   min-height: 40px;
 }
 
+/* 채팅방 연동 정보 */
+.cim-chat-connection-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.cim-chat-thumbnail {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.cim-chat-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cim-chat-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.cim-chat-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.cim-chat-platform {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 2px;
+}
+
+.cim-platform-icon {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cim-platform-icon-img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.cim-platform-name {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.cim-chat-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cim-disconnect-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cim-disconnect-btn:hover {
+  background: #fef2f2;
+  transform: scale(1.1);
+}
+
+.cim-disconnect-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  filter: grayscale(0.3);
+  transition: all 0.2s ease;
+}
+
+.cim-disconnect-btn:hover .cim-disconnect-icon {
+  filter: grayscale(0);
+  transform: scale(1.1);
+}
+
 .cim-title {
   margin: 0;
   font-size: 22px;
@@ -1352,4 +1461,118 @@
 .cim-textarea.cim-error:focus {
   border-color: #ef4444;
   box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
+}
+
+/* 연동 끊기 확인 모달 */
+.cim-disconnect-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  backdrop-filter: blur(3px);
+}
+
+.cim-disconnect-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: cim-modal-appear 0.3s ease-out;
+}
+
+.cim-disconnect-modal-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cim-disconnect-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.cim-disconnect-modal-content {
+  padding: 20px 24px;
+}
+
+.cim-disconnect-warning {
+  text-align: center;
+}
+
+.cim-warning-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.cim-disconnect-warning p {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #374151;
+}
+
+.cim-warning-text {
+  font-size: 14px !important;
+  color: #6b7280 !important;
+  line-height: 1.5;
+}
+
+.cim-disconnect-modal-footer {
+  padding: 16px 24px 20px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  border-top: 1px solid #f3f4f6;
+}
+
+.cim-btn-danger {
+  background: #dc2626;
+  color: white;
+  border: 1px solid #dc2626;
+}
+
+.cim-btn-danger:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+  transform: translateY(-1px);
+}
+
+/* 채팅방 연동 정보 반응형 */
+@media (max-width: 768px) {
+  .cim-chat-connection-info {
+    padding: 6px 8px;
+    gap: 8px;
+  }
+
+  .cim-chat-thumbnail {
+    width: 28px;
+    height: 28px;
+  }
+
+  .cim-chat-name {
+    font-size: 12px;
+  }
+
+  .cim-platform-name {
+    font-size: 10px;
+  }
+
+  .cim-platform-icon-img {
+    width: 12px;
+    height: 12px;
+  }
+
+  .cim-disconnect-icon {
+    width: 14px;
+    height: 14px;
+  }
 }

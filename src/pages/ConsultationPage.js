@@ -780,12 +780,24 @@ const ConsultationPage = ({ user, service }) => {
                   </div>
                   <div className="chat-actions">
                     {selectedChat.isLinked ? (
-                      <button
-                        className="btn btn-secondary"
-                        onClick={() => setIsCustomerModalOpen(true)}
-                      >
-                        고객 정보
-                      </button>
+                      <>
+                        <button
+                          className="btn btn-secondary"
+                          onClick={() => setIsCustomerModalOpen(true)}
+                        >
+                          고객 정보
+                        </button>
+                        <button
+                          className="btn btn-secondary"
+                          // onClick={() => setIsCustomerModalOpen(true)}
+                        >
+                          <img
+                            src="/images/chain.png"
+                            alt="연동 끊기"
+                            className="cim-disconnect-icon"
+                          />
+                        </button>
+                      </>
                     ) : (
                       <button
                         className="btn btn-warning"

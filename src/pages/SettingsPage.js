@@ -4,6 +4,7 @@ import MembersPage from "./settings/MembersPage";
 import TeamsPage from "./settings/TeamsPage";
 import ChannelSettingsPage from "./settings/ChannelSettingsPage";
 import BulkImportHistoryPage from "./settings/BulkImportHistoryPage";
+import CustomerApiPage from "./settings/CustomerApiPage";
 import "./SettingsPage.css";
 
 const SettingsPage = ({ service, user }) => {
@@ -17,6 +18,12 @@ const SettingsPage = ({ service, user }) => {
       name: "상담채널",
       path: "/settings/channels",
       icon: "💬",
+    },
+    {
+      id: "customer-api",
+      name: "고객등록 API",
+      path: "/settings/customer-api",
+      icon: "🔗",
     },
     { id: "members", name: "멤버", path: "/settings/members", icon: "👥" },
     { id: "teams", name: "팀 관리", path: "/settings/teams", icon: "🏢" },
@@ -71,6 +78,10 @@ const SettingsPage = ({ service, user }) => {
                 element={<ChannelSettingsPage service={service} />}
               />
               <Route
+                path="/customer-api"
+                element={<CustomerApiPage service={service} />}
+              />
+              <Route
                 path="/members"
                 element={<MembersPage service={service} />}
               />
@@ -99,6 +110,16 @@ const GeneralSettings = ({ service, user }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
+  // 서비스 브랜드 아이콘 및 서브도메인 상태
+  const [serviceData, setServiceData] = useState({
+    icon: null,
+    iconPreview: null,
+    subdomain: "myservice",
+  });
+  const [isEditingServiceData, setIsEditingServiceData] = useState(false);
+  const [subdomainStatus, setSubdomainStatus] = useState("");
+  const [subdomainError, setSubdomainError] = useState("");
+
   // 처리상태 관리 상태
   const [statusList, setStatusList] = useState([
     "일반",
@@ -125,6 +146,156 @@ const GeneralSettings = ({ service, user }) => {
   const handleServiceNameCancel = () => {
     setServiceName(service || "서비스");
     setIsEditingServiceName(false);
+  };
+
+  // 드래그 앤 드롭 상태
+  const [isDragging, setIsDragging] = useState(false);
+
+  // 브랜드 아이콘 업로드 처리
+  const handleIconUpload = (file) => {
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("파일 크기는 5MB 이하여야 합니다.");
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      alert("이미지 파일만 업로드 가능합니다.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setServiceData((prev) => ({
+        ...prev,
+        icon: file,
+        iconPreview: e.target.result,
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // 파일 입력 변경 처리
+  const handleFileInputChange = (e) => {
+    const file = e.target.files[0];
+    handleIconUpload(file);
+  };
+
+  // 드래그 이벤트 처리
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleIconUpload(files[0]);
+    }
+  };
+
+  // 아이콘 영역 클릭 처리
+  const handleIconAreaClick = () => {
+    document.getElementById("service-icon-upload").click();
+  };
+
+  // 서브도메인 유효성 검사
+  const validateSubdomain = (subdomain) => {
+    const regex = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
+    if (!subdomain) return "서브도메인을 입력해주세요.";
+    if (subdomain.length < 3) return "서브도메인은 최소 3자 이상이어야 합니다.";
+    if (subdomain.length > 30) return "서브도메인은 최대 30자까지 가능합니다.";
+    if (!regex.test(subdomain))
+      return "영문 소문자, 숫자, 하이픈(-)만 사용 가능합니다.";
+    if (subdomain.startsWith("-") || subdomain.endsWith("-"))
+      return "하이픈(-)으로 시작하거나 끝날 수 없습니다.";
+    return "";
+  };
+
+  // 서브도메인 중복 확인
+  const checkSubdomainAvailability = async (subdomain) => {
+    const error = validateSubdomain(subdomain);
+    if (error) {
+      setSubdomainError(error);
+      setSubdomainStatus("");
+      return;
+    }
+
+    setSubdomainStatus("checking");
+    setSubdomainError("");
+
+    // 실제로는 API 호출
+    setTimeout(() => {
+      const reservedDomains = [
+        "admin",
+        "api",
+        "www",
+        "mail",
+        "ftp",
+        "test",
+        "dev",
+        "staging",
+      ];
+      const existingDomains = ["demo", "example", "sample"];
+
+      if (
+        reservedDomains.includes(subdomain) ||
+        existingDomains.includes(subdomain)
+      ) {
+        setSubdomainStatus("unavailable");
+        setSubdomainError("이미 사용 중이거나 예약된 도메인입니다.");
+      } else {
+        setSubdomainStatus("available");
+        setSubdomainError("");
+      }
+    }, 1000);
+  };
+
+  // 서브도메인 입력 처리
+  const handleSubdomainChange = (e) => {
+    const value = e.target.value.toLowerCase();
+    setServiceData((prev) => ({ ...prev, subdomain: value }));
+
+    setSubdomainStatus("");
+    setSubdomainError("");
+  };
+
+  // 서비스 데이터 수정 시작
+  const handleServiceDataEdit = () => {
+    setIsEditingServiceData(true);
+  };
+
+  // 서비스 데이터 저장
+  const handleServiceDataSave = () => {
+    if (serviceData.subdomain && subdomainStatus !== "available") {
+      alert("사용 가능한 서브도메인을 입력해주세요.");
+      return;
+    }
+
+    setIsEditingServiceData(false);
+    alert("서비스 정보가 저장되었습니다.");
+  };
+
+  // 서비스 데이터 수정 취소
+  const handleServiceDataCancel = () => {
+    setServiceData({
+      icon: null,
+      iconPreview: null,
+      subdomain: "myservice",
+    });
+    setSubdomainStatus("");
+    setSubdomainError("");
+    setIsDragging(false);
+    setIsEditingServiceData(false);
   };
 
   const handleServiceDelete = () => {
@@ -223,6 +394,153 @@ const GeneralSettings = ({ service, user }) => {
           ) : (
             <div className="stgs-service-name-display">
               <span className="stgs-service-name-value">{serviceName}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 서비스 브랜드 및 도메인 섹션 */}
+      <div className="stgs-service-data-section">
+        <div className="stgs-section-header">
+          <h4>브랜드 아이콘 및 도메인</h4>
+          {!isEditingServiceData && (
+            <button className="stgs-edit-btn" onClick={handleServiceDataEdit}>
+              수정
+            </button>
+          )}
+        </div>
+
+        <div className="stgs-service-data-content">
+          {isEditingServiceData ? (
+            <div className="stgs-service-data-edit">
+              {/* 브랜드 아이콘 업로드 */}
+              <div className="stgs-icon-section">
+                <label className="stgs-field-label">브랜드 아이콘</label>
+                <div className="stgs-icon-upload-section">
+                  <div
+                    className={`stgs-icon-preview ${
+                      isDragging ? "dragging" : ""
+                    } ${serviceData.iconPreview ? "has-image" : ""}`}
+                    onClick={handleIconAreaClick}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  >
+                    {serviceData.iconPreview ? (
+                      <>
+                        <img
+                          src={serviceData.iconPreview}
+                          alt="브랜드 아이콘 미리보기"
+                        />
+                        <div className="stgs-icon-overlay">
+                          <span>🔄</span>
+                          <p>클릭하여 변경</p>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="stgs-icon-placeholder">
+                        <span>{isDragging ? "📁" : "🎨"}</span>
+                        <p>
+                          {isDragging ? "여기에 놓으세요" : "브랜드 아이콘"}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    id="service-icon-upload"
+                    accept="image/*"
+                    onChange={handleFileInputChange}
+                    style={{ display: "none" }}
+                  />
+                  <p className="stgs-upload-hint">
+                    PNG, JPG, SVG 파일 (최대 5MB)
+                  </p>
+                </div>
+              </div>
+
+              {/* 서브도메인 설정 */}
+              <div className="stgs-subdomain-section">
+                <label className="stgs-field-label">서브도메인</label>
+                <div className="stgs-subdomain-input-group">
+                  <input
+                    type="text"
+                    className={`stgs-subdomain-input ${
+                      subdomainError ? "error" : ""
+                    } ${subdomainStatus === "available" ? "success" : ""}`}
+                    placeholder="myservice"
+                    value={serviceData.subdomain}
+                    onChange={handleSubdomainChange}
+                    onBlur={() =>
+                      serviceData.subdomain &&
+                      checkSubdomainAvailability(serviceData.subdomain)
+                    }
+                  />
+                  <span className="stgs-subdomain-suffix">.talkgate.im</span>
+                  {subdomainStatus === "checking" && (
+                    <div className="stgs-subdomain-status checking">
+                      <div className="stgs-loading-spinner"></div>
+                    </div>
+                  )}
+                  {subdomainStatus === "available" && (
+                    <div className="stgs-subdomain-status available">✓</div>
+                  )}
+                  {subdomainStatus === "unavailable" && (
+                    <div className="stgs-subdomain-status unavailable">✗</div>
+                  )}
+                </div>
+                {subdomainError && (
+                  <p className="stgs-error-message">{subdomainError}</p>
+                )}
+                {subdomainStatus === "available" && (
+                  <p className="stgs-success-message">
+                    사용 가능한 도메인입니다!
+                  </p>
+                )}
+                <p className="stgs-input-hint">
+                  영문 소문자, 숫자, 하이픈(-) 사용 가능 (3-30자)
+                </p>
+              </div>
+
+              <div className="stgs-service-data-actions">
+                <button
+                  className="stgs-cancel-btn"
+                  onClick={handleServiceDataCancel}
+                >
+                  취소
+                </button>
+                <button
+                  className="stgs-save-btn"
+                  onClick={handleServiceDataSave}
+                >
+                  저장
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="stgs-service-data-display">
+              <div className="stgs-current-icon">
+                <label className="stgs-field-label">현재 브랜드 아이콘</label>
+                <div className="stgs-icon-preview">
+                  {serviceData.iconPreview ? (
+                    <img
+                      src={serviceData.iconPreview}
+                      alt="현재 브랜드 아이콘"
+                    />
+                  ) : (
+                    <div className="stgs-icon-placeholder">
+                      <span>🎨</span>
+                      <p>아이콘 없음</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="stgs-current-subdomain">
+                <label className="stgs-field-label">현재 도메인</label>
+                <div className="stgs-domain-display">
+                  <code>{serviceData.subdomain}.talkgate.im</code>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -431,20 +749,6 @@ const ServiceProfileSettings = ({ service, user }) => {
   const handleProfileCancel = () => {
     setEditableProfile({ ...profileData });
     setIsEditingProfile(false);
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setEditableProfile((prev) => ({
-          ...prev,
-          profileImage: e.target.result,
-        }));
-      };
-      reader.readAsDataURL(file);
-    }
   };
 
   return (

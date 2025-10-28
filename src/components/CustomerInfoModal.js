@@ -130,6 +130,19 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
     team: "전체",
   };
 
+  // 연동된 채팅방 정보 상태
+  const [connectedChat, setConnectedChat] = useState({
+    isConnected: true,
+    platform: "텔레그램",
+    chatName: "홍길동님과의 채팅",
+    thumbnail: null, // 실제로는 API에서 받아올 썸네일 URL
+    platformIcon: "💬", // 실제로는 플랫폼별 아이콘 이미지
+    connectionId: "chat_12345",
+  });
+
+  // 연동 끊기 확인 모달 상태
+  const [showDisconnectModal, setShowDisconnectModal] = useState(false);
+
   // 숫자 포맷팅 함수
   const formatNumber = (value) => {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -368,6 +381,44 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
     return `cim-category-${category}`;
   };
 
+  // 연동 끊기 처리
+  const handleDisconnectChat = () => {
+    setShowDisconnectModal(true);
+  };
+
+  // 연동 끊기 확인
+  const confirmDisconnect = () => {
+    setConnectedChat((prev) => ({
+      ...prev,
+      isConnected: false,
+    }));
+    setShowDisconnectModal(false);
+    // 실제로는 API 호출하여 연동 해제
+    console.log("채팅방 연동이 해제되었습니다.");
+  };
+
+  // 연동 끊기 취소
+  const cancelDisconnect = () => {
+    setShowDisconnectModal(false);
+  };
+
+  // 플랫폼별 아이콘 반환
+  const getPlatformIcon = (platform) => {
+    const icons = {
+      카카오톡: "💬", // 카카오톡 이미지가 없어서 이모지 사용
+      텔레그램: "/images/platforms/telegram_logo.png",
+      인스타그램: "/images/platforms/Instagram_logo.png",
+      라인: "/images/platforms/line_logo.png",
+      위챗: "💬", // 위챗 이미지가 없어서 이모지 사용
+    };
+    return icons[platform] || "💬";
+  };
+
+  // 플랫폼 아이콘이 이미지인지 이모지인지 확인
+  const isImageIcon = (icon) => {
+    return icon.startsWith("/images/");
+  };
+
   // 모달 닫을 때 상태 초기화
   const handleCloseModal = () => {
     // 새로 입력하던 데이터 초기화
@@ -389,6 +440,9 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
       schedule: {},
     });
 
+    // 연동 끊기 모달 닫기
+    setShowDisconnectModal(false);
+
     // 모달 닫기
     onClose();
   };
@@ -397,7 +451,52 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
     <div className="cim-modal-overlay" onClick={handleCloseModal}>
       <div className="cim-customer-modal" onClick={(e) => e.stopPropagation()}>
         <div className="cim-modal-header">
-          <h2 className="cim-title">고객 정보</h2>
+          <div className="cim-header-content">
+            <h2 className="cim-title">고객 정보</h2>
+            {connectedChat.isConnected && (
+              <div className="cim-chat-connection-info">
+                <div className="cim-chat-thumbnail">
+                  {connectedChat.thumbnail ? (
+                    <img src={connectedChat.thumbnail} alt="채팅방 썸네일" />
+                  ) : (
+                    <div className="cim-chat-avatar-placeholder">
+                      {customerInfo.name.charAt(0)}
+                    </div>
+                  )}
+                </div>
+                <div className="cim-chat-details">
+                  <div className="cim-chat-platform">
+                    <span className="cim-platform-icon">
+                      {isImageIcon(getPlatformIcon(connectedChat.platform)) ? (
+                        <img
+                          src={getPlatformIcon(connectedChat.platform)}
+                          alt={`${connectedChat.platform} 아이콘`}
+                          className="cim-platform-icon-img"
+                        />
+                      ) : (
+                        getPlatformIcon(connectedChat.platform)
+                      )}
+                    </span>
+                    <span className="cim-platform-name">
+                      {connectedChat.platform}
+                    </span>
+                  </div>
+                  <div className="cim-chat-name">{connectedChat.chatName}</div>
+                </div>
+                <button
+                  className="cim-disconnect-btn"
+                  onClick={handleDisconnectChat}
+                  title="연동 끊기"
+                >
+                  <img
+                    src="/images/chain.png"
+                    alt="연동 끊기"
+                    className="cim-disconnect-icon"
+                  />
+                </button>
+              </div>
+            )}
+          </div>
           <button className="cim-close-btn" onClick={handleCloseModal}>
             ×
           </button>
@@ -1152,6 +1251,50 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
         selectedCustomers={getSelectedCustomers()}
         currentUser={currentUser}
       />
+
+      {/* 연동 끊기 확인 모달 */}
+      {showDisconnectModal && (
+        <div
+          className="cim-disconnect-modal-overlay"
+          onClick={cancelDisconnect}
+        >
+          <div
+            className="cim-disconnect-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="cim-disconnect-modal-header">
+              <h3>연동 끊기</h3>
+            </div>
+            <div className="cim-disconnect-modal-content">
+              <div className="cim-disconnect-warning">
+                <span className="cim-warning-icon">⚠️</span>
+                <p>
+                  <strong>{connectedChat.chatName}</strong>과의 연동을
+                  끊으시겠습니까?
+                </p>
+                <p className="cim-warning-text">
+                  연동을 끊으면 해당 채팅방에서 더 이상 메시지를 받을 수
+                  없습니다.
+                </p>
+              </div>
+            </div>
+            <div className="cim-disconnect-modal-footer">
+              <button
+                className="cim-btn cim-btn-secondary"
+                onClick={cancelDisconnect}
+              >
+                취소
+              </button>
+              <button
+                className="cim-btn cim-btn-danger"
+                onClick={confirmDisconnect}
+              >
+                연동 끊기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

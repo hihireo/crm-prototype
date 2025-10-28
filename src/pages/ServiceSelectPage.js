@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./ServiceSelectPage.css";
 
-const ServiceSelectPage = ({ onServiceSelect }) => {
+const ServiceSelectPage = ({ onServiceSelect, onServiceCreate }) => {
+  const navigate = useNavigate();
   const [services, setServices] = useState([
     {
       id: 1,
@@ -19,25 +21,9 @@ const ServiceSelectPage = ({ onServiceSelect }) => {
     },
   ]);
 
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [newServiceName, setNewServiceName] = useState("");
-  const [newServiceDesc, setNewServiceDesc] = useState("");
-
-  const handleCreateService = (e) => {
-    e.preventDefault();
-    if (newServiceName) {
-      const newService = {
-        id: services.length + 1,
-        name: newServiceName,
-        members: 1,
-        assignedCustomers: 0,
-        todaySchedules: 0,
-      };
-      setServices([...services, newService]);
-      setNewServiceName("");
-      setNewServiceDesc("");
-      setShowCreateForm(false);
-    }
+  // 서비스 생성 페이지로 이동
+  const handleCreateServicePage = () => {
+    navigate("/create-service");
   };
 
   const handleDeleteService = (serviceId) => {
@@ -98,43 +84,14 @@ const ServiceSelectPage = ({ onServiceSelect }) => {
           ))}
 
           <div className="service-card create-card">
-            {!showCreateForm ? (
-              <button
-                className="create-service-btn"
-                onClick={() => setShowCreateForm(true)}
-              >
-                <div className="create-icon">+</div>
-                <h3>새 서비스 생성</h3>
-                <p>새로운 고객관리 서비스를 만들어보세요</p>
-              </button>
-            ) : (
-              <form className="create-form" onSubmit={handleCreateService}>
-                <div className="form-group">
-                  <label className="label">서비스 이름</label>
-                  <input
-                    type="text"
-                    className="input"
-                    placeholder="서비스 이름을 입력하세요"
-                    value={newServiceName}
-                    onChange={(e) => setNewServiceName(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="form-actions">
-                  <button type="submit" className="btn btn-primary">
-                    생성
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setShowCreateForm(false)}
-                  >
-                    취소
-                  </button>
-                </div>
-              </form>
-            )}
+            <button
+              className="create-service-btn"
+              onClick={handleCreateServicePage}
+            >
+              <div className="create-icon">+</div>
+              <h3>새 서비스 생성</h3>
+              <p>새로운 고객관리 서비스를 만들어보세요</p>
+            </button>
           </div>
         </div>
       </div>
