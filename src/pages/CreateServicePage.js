@@ -8,7 +8,7 @@ const CreateServicePage = ({ onServiceCreate }) => {
   // 현재 단계 (1: 로고/이름, 2: 서브도메인)
   const [currentStep, setCurrentStep] = useState(1);
 
-  // 서비스 데이터
+  // 프로젝트 데이터
   const [serviceData, setServiceData] = useState({
     name: "",
     icon: null,
@@ -153,7 +153,7 @@ const CreateServicePage = ({ onServiceCreate }) => {
   // 1단계에서 다음으로
   const handleStep1Next = () => {
     if (!serviceData.name.trim()) {
-      alert("서비스 이름을 입력해주세요.");
+      alert("프로젝트 이름을 입력해주세요.");
       return;
     }
     setCurrentStep(2);
@@ -176,7 +176,7 @@ const CreateServicePage = ({ onServiceCreate }) => {
     handleCreateService(finalServiceData);
   };
 
-  // 서비스 생성 완료
+  // 프로젝트 생성 완료
   const handleCreateService = (finalData = null) => {
     const dataToUse = finalData || serviceData;
 
@@ -202,12 +202,12 @@ const CreateServicePage = ({ onServiceCreate }) => {
       todaySchedules: 0,
     };
 
-    // 서비스 생성 콜백 호출
+    // 프로젝트 생성 콜백 호출
     if (onServiceCreate) {
       onServiceCreate(newService);
     }
 
-    alert("서비스가 성공적으로 생성되었습니다!");
+    alert("프로젝트가 성공적으로 생성되었습니다!");
     navigate("/services");
   };
 
@@ -215,7 +215,7 @@ const CreateServicePage = ({ onServiceCreate }) => {
   const handleCancel = () => {
     if (
       window.confirm(
-        "서비스 생성을 취소하시겠습니까? 입력한 정보가 사라집니다."
+        "프로젝트 생성을 취소하시겠습니까? 입력한 정보가 사라집니다."
       )
     ) {
       navigate("/services");
@@ -230,7 +230,7 @@ const CreateServicePage = ({ onServiceCreate }) => {
           <button className="back-button" onClick={handleCancel}>
             ← 뒤로가기
           </button>
-          <h1>새 서비스 생성</h1>
+          <h1>새 프로젝트 생성</h1>
           <div className="step-indicator">
             <div className={`step ${currentStep >= 1 ? "active" : ""}`}>
               <div className="step-number">1</div>
@@ -248,8 +248,8 @@ const CreateServicePage = ({ onServiceCreate }) => {
         {currentStep === 1 && (
           <div className="step-content">
             <div className="step-title">
-              <h2>서비스 기본 정보</h2>
-              <p>서비스 브랜드 아이콘과 이름을 설정해주세요.</p>
+              <h2>프로젝트 기본 정보</h2>
+              <p>브랜드 아이콘과 이름을 설정해주세요.</p>
             </div>
 
             <div className="form-section">
@@ -304,13 +304,13 @@ const CreateServicePage = ({ onServiceCreate }) => {
                 </div>
               </div>
 
-              {/* 서비스 이름 */}
+              {/* 프로젝트 이름 */}
               <div className="form-group">
-                <label className="form-label required">서비스 이름</label>
+                <label className="form-label required">프로젝트 이름</label>
                 <input
                   type="text"
                   className="form-input large"
-                  placeholder="예: 거래소 텔레마케팅 관리"
+                  placeholder=""
                   value={serviceData.name}
                   onChange={(e) =>
                     setServiceData((prev) => ({
@@ -320,7 +320,7 @@ const CreateServicePage = ({ onServiceCreate }) => {
                   }
                   maxLength={50}
                 />
-                <p className="input-hint">최대 50자까지 입력 가능합니다.</p>
+                {/* <p className="input-hint">최대 20자까지 입력 가능합니다.</p> */}
               </div>
             </div>
 
@@ -340,7 +340,7 @@ const CreateServicePage = ({ onServiceCreate }) => {
           <div className="step-content">
             <div className="step-title">
               <h2>도메인 설정</h2>
-              <p>서비스에서 사용할 서브도메인을 설정해주세요.</p>
+              <p>프로젝트에서 사용할 서브도메인을 설정해주세요.</p>
             </div>
 
             <div className="form-section">

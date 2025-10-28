@@ -21,13 +21,13 @@ const ServiceSelectPage = ({ onServiceSelect, onServiceCreate }) => {
     },
   ]);
 
-  // 서비스 생성 페이지로 이동
+  // 프로젝트 생성 페이지로 이동
   const handleCreateServicePage = () => {
     navigate("/create-service");
   };
 
   const handleDeleteService = (serviceId) => {
-    if (window.confirm("정말로 이 서비스를 삭제하시겠습니까?")) {
+    if (window.confirm("정말로 이 프로젝트를 삭제하시겠습니까?")) {
       setServices(services.filter((service) => service.id !== serviceId));
     }
   };
@@ -36,8 +36,8 @@ const ServiceSelectPage = ({ onServiceSelect, onServiceCreate }) => {
     <div className="service-select-page">
       <div className="container">
         <div className="page-header">
-          <h1>서비스 선택</h1>
-          <p>관리할 서비스를 선택하거나 새로운 서비스를 생성하세요</p>
+          <h1>프로젝트 선택</h1>
+          <p>관리할 프로젝트를 선택하거나 새로운 프로젝트를 생성하세요</p>
         </div>
 
         <div className="services-grid">
@@ -53,7 +53,7 @@ const ServiceSelectPage = ({ onServiceSelect, onServiceCreate }) => {
                   e.stopPropagation();
                   handleDeleteService(service.id);
                 }}
-                title="서비스 삭제"
+                title="프로젝트 삭제"
               >
                 🗑️
               </button>
@@ -89,8 +89,8 @@ const ServiceSelectPage = ({ onServiceSelect, onServiceCreate }) => {
               onClick={handleCreateServicePage}
             >
               <div className="create-icon">+</div>
-              <h3>새 서비스 생성</h3>
-              <p>새로운 고객관리 서비스를 만들어보세요</p>
+              <h3>새 프로젝트 생성</h3>
+              <p>새로운 고객관리 프로젝트를 만들어보세요</p>
             </button>
           </div>
         </div>

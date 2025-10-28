@@ -41,7 +41,7 @@ const SettingsPage = ({ service, user }) => {
         <div className="settings-layout">
           <div className="settings-sidebar">
             <div className="settings-header">
-              <h2>서비스 설정</h2>
+              <h2>프로젝트 설정</h2>
               <p>{service}</p>
             </div>
 
@@ -105,12 +105,12 @@ const SettingsPage = ({ service, user }) => {
 // 일반 설정 컴포넌트
 const GeneralSettings = ({ service, user }) => {
   const [useAttendanceMenu, setUseAttendanceMenu] = useState(true);
-  const [serviceName, setServiceName] = useState(service || "서비스");
+  const [serviceName, setServiceName] = useState(service || "프로젝트");
   const [isEditingServiceName, setIsEditingServiceName] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
-  // 서비스 브랜드 아이콘 및 서브도메인 상태
+  // 프로젝트 브랜드 아이콘 및 서브도메인 상태
   const [serviceData, setServiceData] = useState({
     icon: null,
     iconPreview: null,
@@ -140,11 +140,11 @@ const GeneralSettings = ({ service, user }) => {
 
   const handleServiceNameSave = () => {
     setIsEditingServiceName(false);
-    alert("서비스 이름이 변경되었습니다.");
+    alert("프로젝트 이름이 변경되었습니다.");
   };
 
   const handleServiceNameCancel = () => {
-    setServiceName(service || "서비스");
+    setServiceName(service || "프로젝트");
     setIsEditingServiceName(false);
   };
 
@@ -269,12 +269,12 @@ const GeneralSettings = ({ service, user }) => {
     setSubdomainError("");
   };
 
-  // 서비스 데이터 수정 시작
+  // 프로젝트 데이터 수정 시작
   const handleServiceDataEdit = () => {
     setIsEditingServiceData(true);
   };
 
-  // 서비스 데이터 저장
+  // 프로젝트 데이터 저장
   const handleServiceDataSave = () => {
     if (serviceData.subdomain && subdomainStatus !== "available") {
       alert("사용 가능한 서브도메인을 입력해주세요.");
@@ -282,10 +282,10 @@ const GeneralSettings = ({ service, user }) => {
     }
 
     setIsEditingServiceData(false);
-    alert("서비스 정보가 저장되었습니다.");
+    alert("프로젝트 정보가 저장되었습니다.");
   };
 
-  // 서비스 데이터 수정 취소
+  // 프로젝트 데이터 수정 취소
   const handleServiceDataCancel = () => {
     setServiceData({
       icon: null,
@@ -300,11 +300,11 @@ const GeneralSettings = ({ service, user }) => {
 
   const handleServiceDelete = () => {
     if (deleteConfirmText === serviceName) {
-      alert("서비스 삭제 요청이 처리되었습니다.");
+      alert("프로젝트 삭제 요청이 처리되었습니다.");
       setShowDeleteModal(false);
       setDeleteConfirmText("");
     } else {
-      alert("서비스 이름이 일치하지 않습니다.");
+      alert("프로젝트 이름이 일치하지 않습니다.");
     }
   };
 
@@ -351,10 +351,10 @@ const GeneralSettings = ({ service, user }) => {
     <div className="settings-section">
       <h3>일반 설정</h3>
 
-      {/* 서비스 이름 섹션 */}
+      {/* 프로젝트 이름 섹션 */}
       <div className="stgs-service-name-section">
         <div className="stgs-section-header">
-          <h4>서비스 이름</h4>
+          <h4>프로젝트 이름</h4>
           {!isEditingServiceName && (
             <button
               className="stgs-edit-btn"
@@ -373,7 +373,7 @@ const GeneralSettings = ({ service, user }) => {
                 value={serviceName}
                 onChange={(e) => setServiceName(e.target.value)}
                 className="stgs-input"
-                placeholder="서비스 이름을 입력하세요"
+                placeholder="프로젝트 이름을 입력하세요"
               />
               <div className="stgs-service-name-actions">
                 <button
@@ -399,7 +399,7 @@ const GeneralSettings = ({ service, user }) => {
         </div>
       </div>
 
-      {/* 서비스 브랜드 및 도메인 섹션 */}
+      {/* 프로젝트 브랜드 및 도메인 섹션 */}
       <div className="stgs-service-data-section">
         <div className="stgs-section-header">
           <h4>브랜드 아이콘 및 도메인</h4>
@@ -622,11 +622,11 @@ const GeneralSettings = ({ service, user }) => {
         </div>
       </div>
 
-      {/* 서비스 기능 설정 섹션 */}
+      {/* 프로젝트 기능 설정 섹션 */}
       <div className="stgs-menu-section">
         <div className="stgs-service-header">
-          <h4>서비스 기능</h4>
-          <span className="stgs-admin-badge">관리자 전용</span>
+          <h4>프로젝트 기능</h4>
+          {/* <span className="stgs-admin-badge">관리자 전용</span> */}
         </div>
         <div className="stgs-menu-option">
           <div className="stgs-option-info">
@@ -644,22 +644,22 @@ const GeneralSettings = ({ service, user }) => {
         </div>
       </div>
 
-      {/* 서비스 삭제 섹션 */}
+      {/* 프로젝트 삭제 섹션 */}
       <div className="stgs-service-delete-section stgs-danger-section">
-        <h4>서비스 삭제</h4>
+        <h4>프로젝트 삭제</h4>
         <p className="stgs-danger-text">
-          ⚠️ <strong>주의:</strong> 서비스를 삭제하면 모든 데이터가 영구적으로
+          ⚠️ <strong>주의:</strong> 프로젝트를 삭제하면 모든 데이터가 영구적으로
           삭제되며 복구할 수 없습니다.
         </p>
         <button
           className="stgs-danger-btn"
           onClick={() => setShowDeleteModal(true)}
         >
-          서비스 삭제
+          프로젝트 삭제
         </button>
       </div>
 
-      {/* 서비스 삭제 확인 모달 */}
+      {/* 프로젝트 삭제 확인 모달 */}
       {showDeleteModal && (
         <div className="stgs-modal-overlay" onClick={handleCancelDelete}>
           <div
@@ -667,7 +667,7 @@ const GeneralSettings = ({ service, user }) => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="stgs-modal-header stgs-danger-header">
-              <h4>서비스 삭제 확인</h4>
+              <h4>프로젝트 삭제 확인</h4>
               <button className="stgs-modal-close" onClick={handleCancelDelete}>
                 ✕
               </button>
@@ -676,7 +676,7 @@ const GeneralSettings = ({ service, user }) => {
             <div className="stgs-modal-body">
               <div className="stgs-delete-warning">
                 <div className="stgs-warning-icon">⚠️</div>
-                <h5>정말로 서비스를 삭제하시겠습니까?</h5>
+                <h5>정말로 프로젝트를 삭제하시겠습니까?</h5>
                 <p>
                   이 작업은 <strong>되돌릴 수 없으며</strong>, 다음 데이터가
                   영구적으로 삭제됩니다:
@@ -691,7 +691,7 @@ const GeneralSettings = ({ service, user }) => {
 
                 <div className="stgs-confirm-section">
                   <label>
-                    서비스 삭제를 확인하려면 아래에 서비스 이름{" "}
+                    프로젝트 삭제를 확인하려면 아래에 프로젝트 이름{" "}
                     <strong>"{serviceName}"</strong>을 정확히 입력하세요:
                   </label>
                   <input
@@ -714,7 +714,7 @@ const GeneralSettings = ({ service, user }) => {
                 onClick={handleServiceDelete}
                 disabled={deleteConfirmText !== serviceName}
               >
-                서비스 삭제
+                프로젝트 삭제
               </button>
             </div>
           </div>
@@ -724,7 +724,7 @@ const GeneralSettings = ({ service, user }) => {
   );
 };
 
-// 서비스 프로필 설정 컴포넌트
+// 프로젝트 프로필 설정 컴포넌트
 const ServiceProfileSettings = ({ service, user }) => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileData, setProfileData] = useState({
@@ -753,9 +753,9 @@ const ServiceProfileSettings = ({ service, user }) => {
 
   return (
     <div className="settings-section">
-      <h3>서비스 프로필</h3>
+      <h3>프로젝트 프로필</h3>
       <p className="stgs-section-description">
-        서비스에서 사용되는 프로필 정보를 설정합니다.
+        프로젝트에서 사용되는 프로필 정보를 설정합니다.
       </p>
 
       {/* 프로필 정보 섹션 */}
