@@ -5,6 +5,8 @@ import TeamsPage from "./settings/TeamsPage";
 import ChannelSettingsPage from "./settings/ChannelSettingsPage";
 import BulkImportHistoryPage from "./settings/BulkImportHistoryPage";
 import CustomerApiPage from "./settings/CustomerApiPage";
+import SenderNumbersPage from "./settings/SenderNumbersPage";
+import SmsHistoryPage from "./settings/SmsHistoryPage";
 import "./SettingsPage.css";
 
 const SettingsPage = ({ service, user }) => {
@@ -20,6 +22,12 @@ const SettingsPage = ({ service, user }) => {
       icon: "💬",
     },
     {
+      id: "sender-numbers",
+      name: "발신번호 등록",
+      path: "/settings/sender-numbers",
+      icon: "📱",
+    },
+    {
       id: "customer-api",
       name: "고객등록 API",
       path: "/settings/customer-api",
@@ -31,6 +39,13 @@ const SettingsPage = ({ service, user }) => {
       id: "bulk-import",
       name: "일괄 등록 이력",
       path: "/settings/bulk-import",
+      icon: "📊",
+    },
+
+    {
+      id: "sms-history",
+      name: "문자 발송 이력",
+      path: "/settings/sms-history",
       icon: "📊",
     },
   ];
@@ -89,6 +104,14 @@ const SettingsPage = ({ service, user }) => {
               <Route
                 path="/bulk-import"
                 element={<BulkImportHistoryPage service={service} />}
+              />
+              <Route
+                path="/sender-numbers"
+                element={<SenderNumbersPage service={service} user={user} />}
+              />
+              <Route
+                path="/sms-history"
+                element={<SmsHistoryPage service={service} user={user} />}
               />
               <Route
                 path="/"

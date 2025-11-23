@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import CustomerInfoModal from "../components/CustomerInfoModal";
 import CustomerAssignmentModal from "../components/CustomerAssignmentModal";
+import CustomerSmsModal from "../components/CustomerSmsModal";
 import CustomerRegistrationModal from "../components/CustomerRegistrationModal";
 import "./ApplicationsPage.css";
 
@@ -8,6 +9,7 @@ const ApplicationsPage = () => {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
+  const [isSmsModalOpen, setIsSmsModalOpen] = useState(false);
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
 
   // 현재 사용자 정보 (실제로는 props나 context에서 받아올 데이터)
@@ -16,6 +18,13 @@ const ApplicationsPage = () => {
     role: "관리자", // "관리자" 또는 "팀장"
     team: "전체",
   };
+
+  // 등록된 발신번호 목록 (실제로는 API나 상태 관리에서 가져옴)
+  const registeredSenderNumbers = [
+    "010-1234-5678",
+    "010-9876-5432",
+    "010-5555-1234",
+  ];
 
   // 드롭다운 옵션들
   const applicationPathOptions = [
@@ -655,6 +664,11 @@ const ApplicationsPage = () => {
 
   // 드롭다운 상태 관리
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  // const registeredSenderNumbers = [
+  //   "010-1212-3434",
+  //   "02-123-4567",
+  //   "070-8900-1234",
+  // ];
 
   const handleCheckItem = (id) => {
     const newCheckedItems = new Set(checkedItems);
@@ -1049,6 +1063,14 @@ const ApplicationsPage = () => {
     setIsAssignmentModalOpen(true);
   };
 
+  const handleSmsModalOpen = () => {
+    if (checkedItems.size === 0) {
+      alert("문자를 보낼 고객을 선택해주세요.");
+      return;
+    }
+    setIsSmsModalOpen(true);
+  };
+
   const getSelectedCustomers = () => {
     return applications
       .filter((app) => checkedItems.has(app.id))
@@ -1396,6 +1418,13 @@ const ApplicationsPage = () => {
             <button className="btn btn-primary" onClick={handleBulkAssignment}>
               일괄 배정
             </button>
+            <button
+              className="btn btn-primary"
+              onClick={handleSmsModalOpen}
+              disabled={checkedItems.size === 0}
+            >
+              문자 전송
+            </button>
             <button className="btn btn-secondary">엑셀 업로드</button>
             <button className="btn btn-secondary">엑셀 다운로드</button>
           </div>
@@ -1540,6 +1569,14 @@ const ApplicationsPage = () => {
         onClose={() => setIsAssignmentModalOpen(false)}
         selectedCustomers={getSelectedCustomers()}
         currentUser={currentUser}
+      />
+
+      {/* 고객 문자 전송 모달 */}
+      <CustomerSmsModal
+        isOpen={isSmsModalOpen}
+        onClose={() => setIsSmsModalOpen(false)}
+        selectedCustomers={getSelectedCustomers()}
+        senderNumbers={registeredSenderNumbers}
       />
 
       {/* 고객 등록 모달 */}
