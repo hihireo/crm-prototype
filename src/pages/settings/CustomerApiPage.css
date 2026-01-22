@@ -131,6 +131,156 @@
   gap: 4px;
 }
 
+/* API 키 관리 섹션 */
+.api-keys-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.create-api-key-btn {
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.create-api-key-btn:hover {
+  background: #2563eb;
+}
+
+.empty-api-keys {
+  text-align: center;
+  padding: 48px 24px;
+  color: #64748b;
+}
+
+.empty-api-keys p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.api-keys-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.api-key-item {
+  padding: 20px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.api-key-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.api-key-name-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.api-key-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.api-key-date {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.api-key-item-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.delete-btn {
+  padding: 6px 12px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+}
+
+/* 폼 스타일 */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.form-input {
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #1e293b;
+  transition: all 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-input:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.form-help {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+.primary-btn {
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.primary-btn:hover {
+  background: #2563eb;
+}
+
 /* API 스펙 섹션 */
 .api-spec-section {
   background: white;
@@ -463,6 +613,25 @@
     justify-content: flex-end;
   }
 
+  .api-keys-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .create-api-key-btn {
+    width: 100%;
+  }
+
+  .api-key-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .api-key-item-actions {
+    align-self: flex-end;
+  }
+
   .field-item {
     grid-template-columns: 1fr;
     gap: 4px;
@@ -494,7 +663,8 @@
   }
 
   .cancel-btn,
-  .danger-btn {
+  .danger-btn,
+  .primary-btn {
     width: 100%;
   }
 }
