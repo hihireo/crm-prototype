@@ -1,0 +1,468 @@
+/* ===== Dashboard — Modern / Toss-style ===== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+.sdp-page {
+  min-height: 100vh;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+  color: #111;
+}
+
+/* ── Header ── */
+.sdp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  height: 56px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.sdp-back {
+  width: 36px; height: 36px;
+  border: none; background: transparent; color: #111;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; transition: background 0.12s;
+}
+.sdp-back:hover { background: #f5f5f5; }
+
+.sdp-header-center {
+  display: flex; align-items: center; gap: 10px;
+  position: absolute; left: 50%; transform: translateX(-50%);
+}
+
+.sdp-header-title {
+  font-size: 15px; font-weight: 700; color: #111; letter-spacing: -0.01em;
+}
+
+.sdp-header-date {
+  font-size: 12px; color: #bbb;
+}
+
+.sdp-header-right { display: flex; align-items: center; gap: 10px; }
+
+.sdp-client-chip {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13px; color: #555; font-weight: 500; letter-spacing: -0.01em;
+}
+
+.sdp-chip-dot {
+  width: 7px; height: 7px; background: #111; border-radius: 50%; flex-shrink: 0;
+}
+
+/* ── Body ── */
+.sdp-body {
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 28px 60px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Shared section label ── */
+.sdp-section-label {
+  font-size: 11px; font-weight: 700; color: #aaa;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  margin: 0 0 14px;
+}
+
+/* ── Divider ── */
+.sdp-divider {
+  height: 1px; background: #f5f5f5; margin: 24px 0;
+}
+
+/* ── Section ── */
+.sdp-section {
+  padding: 36px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+.sdp-section:last-child { border-bottom: none; }
+
+/* ── 2-col grid ── */
+.sdp-cols2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 48px;
+  border-bottom: 1px solid #f5f5f5;
+}
+.sdp-cols2 .sdp-section {
+  border-bottom: none;
+  padding-right: 0;
+  padding-left: 0;
+}
+.sdp-cols2 .sdp-section:first-child {
+  border-right: 1px solid #f5f5f5;
+  padding-right: 48px;
+}
+
+/* ───────────────────────────
+   ① Hero
+─────────────────────────── */
+.sdp-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 48px 0 36px;
+  border-bottom: 1px solid #f5f5f5;
+  gap: 32px;
+}
+
+.sdp-hero-left { flex: 1; }
+
+.sdp-hero-eyebrow {
+  font-size: 11px; font-weight: 700; color: #aaa;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  margin: 0 0 10px;
+}
+
+.sdp-hero-h1 {
+  font-size: 44px; font-weight: 900; color: #111;
+  letter-spacing: -0.04em; line-height: 1;
+  margin: 0 0 14px;
+}
+
+.sdp-hero-sub {
+  font-size: 14px; color: #666; line-height: 1.7;
+  letter-spacing: -0.01em; margin: 0 0 20px;
+}
+
+.sdp-hero-tags { display: flex; gap: 7px; flex-wrap: wrap; }
+
+.sdp-tag {
+  display: inline-block;
+  padding: 5px 11px;
+  background: #f5f5f5;
+  border-radius: 20px;
+  font-size: 12px; font-weight: 500; color: #555;
+  letter-spacing: -0.01em;
+}
+
+.sdp-hero-right {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  flex-shrink: 0;
+}
+
+.sdp-hero-score-label {
+  font-size: 12px; color: #aaa; letter-spacing: -0.01em; margin: 0;
+}
+
+/* ───────────────────────────
+   ② Options comparison
+─────────────────────────── */
+.sdp-options {
+  display: flex; flex-direction: column; gap: 14px;
+  margin-bottom: 20px;
+}
+
+.sdp-option-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 70px 50px;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f8f8f8;
+}
+.sdp-option-row:last-child { border-bottom: none; }
+.sdp-option-row.recommended { }
+
+.sdp-option-name {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; font-weight: 700; color: #111;
+  letter-spacing: -0.02em;
+}
+
+.sdp-option-tag {
+  font-size: 10px; font-weight: 700; color: #fff;
+  background: #111; padding: 2px 8px; border-radius: 10px;
+  letter-spacing: 0.02em;
+}
+
+.sdp-option-bar-wrap { display: flex; align-items: center; }
+
+.sdp-option-bar {
+  width: 100%; height: 5px;
+  background: #f0f0f0; border-radius: 3px; overflow: hidden;
+}
+
+.sdp-option-fill {
+  height: 100%; background: #111; border-radius: 3px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sdp-option-row:not(.recommended) .sdp-option-fill { background: #ccc; }
+
+.sdp-option-score {
+  text-align: right;
+  display: flex; align-items: baseline; gap: 2px; justify-content: flex-end;
+}
+.sdp-option-score strong { font-size: 18px; font-weight: 800; color: #111; letter-spacing: -0.02em; }
+.sdp-option-score span { font-size: 11px; color: #bbb; }
+
+.sdp-option-grade {
+  font-size: 12px; font-weight: 700;
+  text-align: right;
+}
+.sdp-option-grade.g-양호 { color: #111; }
+.sdp-option-grade.g-보통 { color: #666; }
+.sdp-option-grade.g-낮음 { color: #bbb; }
+
+.sdp-option-reasons {
+  display: flex; flex-direction: column; gap: 6px;
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+
+.sdp-option-reason {
+  font-size: 12px; color: #666; margin: 0; line-height: 1.6;
+  letter-spacing: -0.01em;
+}
+
+.sdp-reason-label {
+  font-weight: 700; color: #333; margin-right: 6px;
+}
+
+/* ───────────────────────────
+   ③ Stat list
+─────────────────────────── */
+.sdp-stat-list {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px 32px;
+  margin-bottom: 0;
+}
+
+.sdp-stat {
+  display: flex; flex-direction: column; gap: 5px;
+}
+
+.sdp-stat-label {
+  font-size: 12px; color: #aaa; letter-spacing: -0.01em;
+}
+
+.sdp-stat-val {
+  font-size: 22px; font-weight: 800; color: #111;
+  letter-spacing: -0.04em; line-height: 1.1;
+}
+
+.sdp-stat-val em {
+  font-style: normal; font-size: 13px; font-weight: 400;
+  color: #bbb; margin-left: 3px;
+}
+
+/* Debt bars */
+.sdp-bars { display: flex; flex-direction: column; gap: 10px; }
+
+.sdp-bar-row {
+  display: grid;
+  grid-template-columns: 75px 1fr 34px 80px;
+  align-items: center;
+  gap: 10px;
+}
+
+.sdp-bar-label { font-size: 12px; color: #666; letter-spacing: -0.01em; }
+
+.sdp-bar-track {
+  height: 5px; background: #f0f0f0; border-radius: 3px; overflow: hidden;
+}
+
+.sdp-bar-fill {
+  height: 100%; background: #333; border-radius: 3px;
+}
+
+.sdp-bar-pct { font-size: 11px; color: #aaa; text-align: right; }
+
+.sdp-bar-amt { font-size: 12px; font-weight: 600; color: #111; text-align: right; letter-spacing: -0.01em; }
+
+/* ───────────────────────────
+   ④ Repayment plan
+─────────────────────────── */
+.sdp-plan-kv {
+  display: flex; flex-direction: column; gap: 0;
+  border: 1px solid #f0f0f0; border-radius: 12px; overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.sdp-kv {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 13px 18px;
+  font-size: 13px; color: #666;
+  border-bottom: 1px solid #f8f8f8;
+  letter-spacing: -0.01em;
+}
+.sdp-kv:last-child { border-bottom: none; }
+.sdp-kv strong { font-size: 15px; font-weight: 700; color: #111; letter-spacing: -0.02em; }
+
+.sdp-exempt-box {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+
+.sdp-exempt-label {
+  font-size: 11px; font-weight: 700; color: #aaa;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  margin: 0;
+}
+
+.sdp-exempt-val {
+  font-size: 28px; font-weight: 900; color: #111;
+  letter-spacing: -0.04em; margin: 4px 0;
+}
+
+.sdp-exempt-desc {
+  font-size: 12px; color: #aaa; margin: 0; line-height: 1.5; letter-spacing: -0.01em;
+}
+
+/* Cautions */
+.sdp-cautions {
+  margin: 0; padding: 0 0 0 14px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+
+.sdp-cautions li {
+  font-size: 13px; color: #777; line-height: 1.5; letter-spacing: -0.01em;
+}
+
+.sdp-cautions strong { color: #111; }
+
+/* ───────────────────────────
+   ⑤ Scripts
+─────────────────────────── */
+.sdp-script-tabs {
+  display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap;
+}
+
+.sdp-script-tab {
+  padding: 7px 15px;
+  border: 1px solid #e8e8e8;
+  border-radius: 20px;
+  background: #fff;
+  font-size: 13px; font-weight: 500; color: #666;
+  cursor: pointer; letter-spacing: -0.01em;
+  transition: all 0.15s;
+}
+.sdp-script-tab.on {
+  background: #111; border-color: #111; color: #fff; font-weight: 700;
+}
+
+.sdp-script-body {
+  background: #fafafa;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+.sdp-script-speaker {
+  font-size: 11px; font-weight: 700; color: #aaa;
+  letter-spacing: 0.05em; text-transform: uppercase;
+}
+
+.sdp-script-quote {
+  font-size: 15px; color: #111; line-height: 1.8;
+  letter-spacing: -0.02em; margin: 0;
+  border-left: 3px solid #111;
+  padding-left: 16px;
+}
+
+.sdp-copy-btn {
+  align-self: flex-start;
+  padding: 9px 18px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13px; font-weight: 600; color: #333;
+  cursor: pointer; letter-spacing: -0.01em;
+  transition: background 0.12s;
+}
+.sdp-copy-btn:hover { background: #f5f5f5; }
+
+/* ───────────────────────────
+   ⑥ Procedure steps (vertical)
+─────────────────────────── */
+.sdp-steps {
+  display: flex; flex-direction: column; gap: 0;
+}
+
+.sdp-step {
+  display: flex; gap: 18px;
+}
+
+.sdp-step-left {
+  display: flex; flex-direction: column; align-items: center;
+  flex-shrink: 0;
+}
+
+.sdp-step-circle {
+  width: 32px; height: 32px;
+  background: #111; color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  flex-shrink: 0;
+}
+
+.sdp-step-line {
+  width: 1px; flex: 1; background: #f0f0f0; margin: 4px 0;
+  min-height: 24px;
+}
+
+.sdp-step-body {
+  padding: 4px 0 28px;
+  flex: 1;
+}
+
+.sdp-step-top {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 5px;
+}
+
+.sdp-step-name {
+  font-size: 14px; font-weight: 700; color: #111; letter-spacing: -0.02em;
+}
+
+.sdp-step-period {
+  font-size: 11px; color: #aaa; font-weight: 500;
+  background: #f5f5f5;
+  padding: 3px 9px; border-radius: 10px;
+}
+
+.sdp-step-desc {
+  font-size: 13px; color: #888; margin: 0; line-height: 1.5; letter-spacing: -0.01em;
+}
+
+/* ───────────────────────────
+   Buttons
+─────────────────────────── */
+.sdp-btn-ghost {
+  padding: 11px 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 14px; font-weight: 600; color: #444;
+  cursor: pointer; letter-spacing: -0.01em;
+  transition: background 0.12s;
+}
+.sdp-btn-ghost:hover { background: #f5f5f5; }
+
+.sdp-btn-primary {
+  padding: 11px 28px;
+  background: #111; color: #fff;
+  border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer; letter-spacing: -0.01em;
+  transition: background 0.12s;
+}
+.sdp-btn-primary:hover { background: #333; }
+
+.sdp-cta-row {
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 32px 0 0;
+}

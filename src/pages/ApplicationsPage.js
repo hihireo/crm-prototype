@@ -11,6 +11,11 @@ const ApplicationsPage = () => {
   const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
   const [isSmsModalOpen, setIsSmsModalOpen] = useState(false);
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
+  const [isExcelUploadModalOpen, setIsExcelUploadModalOpen] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [showUploadSuccessModal, setShowUploadSuccessModal] = useState(false);
 
   // 현재 사용자 정보 (실제로는 props나 context에서 받아올 데이터)
   const currentUser = {
@@ -1082,6 +1087,78 @@ const ApplicationsPage = () => {
       }));
   };
 
+  // 엑셀 업로드 관련 handler
+  const handleExcelUploadModalOpen = () => {
+    setIsExcelUploadModalOpen(true);
+  };
+
+  const handleExcelUploadModalClose = () => {
+    setIsExcelUploadModalOpen(false);
+    setUploadedFile(null);
+    setIsDragging(false);
+  };
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      validateAndSetFile(file);
+    }
+  };
+
+  const validateAndSetFile = (file) => {
+    const validExtensions = [".xlsx", ".xls", ".csv"];
+    const fileExtension = file.name.substring(file.name.lastIndexOf("."));
+
+    if (!validExtensions.includes(fileExtension.toLowerCase())) {
+      alert("지원하지 않는 파일 형식입니다.\n.xlsx, .xls, .csv 파일만 업로드 가능합니다.");
+      return;
+    }
+
+    setUploadedFile(file);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      validateAndSetFile(file);
+    }
+  };
+
+  const handleTemplateDownload = () => {
+    // 실제로는 템플릿 파일 다운로드
+    alert("엑셀 양식 파일을 다운로드합니다.");
+  };
+
+  const handleExcelUpload = () => {
+    if (!uploadedFile) {
+      alert("파일을 선택해주세요.");
+      return;
+    }
+
+    setIsUploading(true);
+
+    // 실제로는 API 호출
+    setTimeout(() => {
+      setIsUploading(false);
+      setIsExcelUploadModalOpen(false);
+      setUploadedFile(null);
+      setShowUploadSuccessModal(true);
+    }, 2000);
+  };
+
   // 필터링된 신청서 목록 (함수로 변경됨)
   const filteredApplications = getCurrentPageApplications();
 
@@ -1425,7 +1502,12 @@ const ApplicationsPage = () => {
             >
               문자 전송
             </button>
-            <button className="btn btn-secondary">엑셀 업로드</button>
+            <button
+              className="btn btn-secondary"
+              onClick={handleExcelUploadModalOpen}
+            >
+              엑셀 업로드
+            </button>
             <button className="btn btn-secondary">엑셀 다운로드</button>
           </div>
         </div>
@@ -1585,6 +1667,194 @@ const ApplicationsPage = () => {
         onClose={() => setIsRegistrationModalOpen(false)}
         onRegister={handleCustomerRegistration}
       />
+
+      {/* 엑셀 업로드 모달 */}
+      {isExcelUploadModalOpen && (
+        <div className="modal-overlay" onClick={handleExcelUploadModalClose}>
+          <div
+            className="modal-content excel-upload-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <h4>엑셀 일괄 업로드</h4>
+              <button
+                className="modal-close"
+                onClick={handleExcelUploadModalClose}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="modal-body">
+              {/* 업로드 안내 섹션 */}
+              <div className="excel-upload-guide">
+                <h5>📋 업로드 안내</h5>
+                <ul className="guide-list">
+                  <li>
+                    <strong>지원 형식:</strong> .xlsx, .xls, .csv 파일만
+                    업로드 가능합니다.
+                  </li>
+                  <li>
+                    <strong>양식 준수:</strong> 지정된 양식을 반드시 지켜주세요.
+                    양식이 다를 경우 업로드가 실패할 수 있습니다.
+                  </li>
+                  <li>
+                    <strong>필수 항목:</strong> 이름, 연락처는 필수 입력
+                    항목입니다.
+                  </li>
+                </ul>
+
+                <div className="guide-actions">
+                  <button
+                    className="btn-download-template"
+                    onClick={handleTemplateDownload}
+                  >
+                    📥 양식 다운로드
+                  </button>
+                  <button
+                    className="link-guide"
+                    onClick={() => {
+                      alert("이용가이드 페이지로 이동합니다.");
+                    }}
+                  >
+                    이용가이드 보기 →
+                  </button>
+                </div>
+              </div>
+
+              {/* 파일 업로드 영역 */}
+              <div
+                className={`file-upload-area ${isDragging ? "dragging" : ""} ${
+                  uploadedFile ? "has-file" : ""
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={() => document.getElementById("file-input").click()}
+              >
+                <input
+                  id="file-input"
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  onChange={handleFileSelect}
+                  style={{ display: "none" }}
+                />
+
+                {uploadedFile ? (
+                  <div className="file-info">
+                    <div className="file-icon">📄</div>
+                    <div className="file-details">
+                      <div className="file-name">{uploadedFile.name}</div>
+                      <div className="file-size">
+                        {(uploadedFile.size / 1024).toFixed(2)} KB
+                      </div>
+                    </div>
+                    <button
+                      className="btn-remove-file"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setUploadedFile(null);
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <div className="upload-placeholder">
+                    <div className="upload-icon">📁</div>
+                    <div className="upload-text">
+                      <strong>클릭하여 파일 선택</strong> 또는 파일을
+                      드래그하여 업로드
+                    </div>
+                    <div className="upload-hint">
+                      .xlsx, .xls, .csv 파일만 지원
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button
+                className="btn btn-secondary"
+                onClick={handleExcelUploadModalClose}
+                disabled={isUploading}
+              >
+                취소
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={handleExcelUpload}
+                disabled={!uploadedFile || isUploading}
+              >
+                {isUploading ? (
+                  <>
+                    <span className="loading-spinner"></span>
+                    처리 중...
+                  </>
+                ) : (
+                  "고객 등록하기"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 업로드 완료 모달 */}
+      {showUploadSuccessModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowUploadSuccessModal(false)}
+        >
+          <div
+            className="modal-content upload-success-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <h4>등록 시작</h4>
+              <button
+                className="modal-close"
+                onClick={() => setShowUploadSuccessModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="success-message">
+                <div className="success-icon">✅</div>
+                <h5>고객 등록이 시작되었습니다</h5>
+                <p>
+                  업로드된 파일을 처리하고 있습니다.
+                  <br />
+                  처리 상태는 <strong>설정 &gt; 일괄 등록 이력</strong>에서
+                  확인하실 수 있습니다.
+                </p>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowUploadSuccessModal(false)}
+              >
+                닫기
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  setShowUploadSuccessModal(false);
+                  // 실제로는 설정 > 일괄 등록 이력 페이지로 이동
+                  alert("설정 > 일괄 등록 이력 페이지로 이동합니다.");
+                }}
+              >
+                이력 확인하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 전역 상담 내용 툴팁 */}
       {tooltipData.visible && (

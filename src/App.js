@@ -20,6 +20,8 @@ import AttendancePage from "./pages/AttendancePage";
 import SettingsPage from "./pages/SettingsPage";
 import PersonalSettingsPage from "./pages/PersonalSettingsPage";
 import InstagramCallbackPage from "./pages/InstagramCallbackPage";
+import SampleChecklistPage from "./pages/sample/SampleChecklistPage";
+import SampleDashboardPage from "./pages/sample/SampleDashboardPage";
 
 function AppContent() {
   const navigate = useNavigate();
@@ -198,6 +200,8 @@ function AppContent() {
             path="/instagram/callback"
             element={<InstagramCallbackPage />}
           />
+          <Route path="/sample/checklist" element={<SampleChecklistPage />} />
+          <Route path="/sample/dashboard" element={<SampleDashboardPage />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </main>
