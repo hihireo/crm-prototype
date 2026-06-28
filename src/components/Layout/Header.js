@@ -51,7 +51,7 @@ const Header = ({ user, currentService, onLogout }) => {
         <div className="header-content">
           <div className="header-left">
             <Link to="/dashboard" className="logo">
-              TalkGate
+              <img src="/images/talkgate-logo-white.png" alt="TalkGate" className="logo-img" />
             </Link>
             {currentService && (
               <div className="header-service-info">

@@ -16,15 +16,38 @@ const CLIENT = {
 };
 
 const OPTIONS = [
-  { id: "rehabilitation", label: "개인회생",      score: 78, grade: "양호",
-    recommended: true,
-    reason: "가용 소득 존재 + 채무초과 상태 → 법원 변제계획 인가 가능성 높음" },
-  { id: "debtAdjustment", label: "채무조정(워크아웃)", score: 62, grade: "보통",
-    recommended: false,
-    reason: "총 채무 규모가 커 신용회복위원회 단독 조정은 한계 있음" },
-  { id: "bankruptcy",     label: "파산",          score: 45, grade: "낮음",
-    recommended: false,
-    reason: "월 가용 소득이 있어 파산보다 개인회생이 유리한 조건" },
+  {
+    id: "rehabilitation", label: "개인회생", score: 78, grade: "양호", recommended: true,
+    conditions: [
+      { type: "pass",    text: "월 가용 소득 45만원 확인 → 변제계획 수립 가능" },
+      { type: "pass",    text: "채무총액 3.1억원, 자산 1,500만원 → 채무초과 요건 충족" },
+      { type: "pass",    text: "연체 기간 6개월 → 지급 불능 상태 인정 가능" },
+      { type: "caution", text: "자영업 소득 → 매출장부·세금계산서 등 소득증빙 별도 준비 필요" },
+      { type: "caution", text: "사채 3,000만원 포함 → 불법 이자율 여부 확인 후 채권자 목록 정리 필요" },
+      { type: "risk",    text: "가용 소득 45만원이 최소 변제 기준에 근접 → 법원의 변제여력 판단에 따라 결과 변동 가능" },
+    ],
+  },
+  {
+    id: "debtAdjustment", label: "채무조정(워크아웃)", score: 62, grade: "보통", recommended: false,
+    conditions: [
+      { type: "pass",    text: "총 채무 3.1억원 → 신용회복위원회 신청 기준(15억 이하) 충족" },
+      { type: "pass",    text: "연체 기간 6개월 → 신청 자격 요건 충족" },
+      { type: "caution", text: "사채·캐피탈 채무는 워크아웃 대상 제외 가능 → 실질 감면 범위 사전 확인 필요" },
+      { type: "caution", text: "금리 조정 후에도 월 상환액이 가용 소득 초과 가능성 있음 → 상환 시뮬레이션 필요" },
+      { type: "risk",    text: "채무 대비 가용 소득 낮아 개인회생보다 채무 감면 폭 작을 가능성 높음" },
+      { type: "risk",    text: "자영업 소득 변동성이 높아 장기 상환계획 유지 어려울 수 있음" },
+    ],
+  },
+  {
+    id: "bankruptcy", label: "파산", score: 45, grade: "낮음", recommended: false,
+    conditions: [
+      { type: "pass",    text: "채무초과 상태로 파산 신청 요건 충족" },
+      { type: "pass",    text: "이전 파산·회생 신청 이력 없음 → 기본 면책 결격 사유 없음" },
+      { type: "caution", text: "자산 1,500만원 → 면책 심사 시 자산 처분 여부 검토 대상" },
+      { type: "risk",    text: "월 가용 소득 45만원 존재 → 변제 능력 있는 것으로 판단되어 파산보다 개인회생 권고" },
+      { type: "risk",    text: "파산 선고 시 일부 직종 취업 제한 및 신용 회복에 장기간 소요" },
+    ],
+  },
 ];
 
 const AI = { repaymentMonths: 84, repaymentAmount: 45 };
@@ -72,33 +95,33 @@ const Ring = ({ score, size = 130, strokeWidth = 7 }) => {
 const SampleDashboardPage = () => {
   const navigate = useNavigate();
   const [activeScript, setActiveScript] = useState(0);
+  const [selectedOption, setSelectedOption] = useState("rehabilitation");
 
   const totalRepayment = AI.repaymentAmount * AI.repaymentMonths;
   const exemptDebt = CLIENT.totalDebt - totalRepayment;
 
   return (
     <div className="sdp-page">
-      {/* 헤더 */}
-      <header className="sdp-header">
-        <button className="sdp-back" onClick={() => navigate("/sample/checklist")}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
-          </svg>
-        </button>
-        <div className="sdp-header-center">
-          <span className="sdp-header-title">AI 분석 결과</span>
-          <span className="sdp-header-date">2026.06.26 16:00</span>
-        </div>
-        <div className="sdp-header-right">
-          <div className="sdp-client-chip">
-            <div className="sdp-chip-dot" />
-            {CLIENT.name} · {CLIENT.age}세 · {CLIENT.job}
-          </div>
-          <button className="sdp-btn-ghost">출력</button>
-        </div>
-      </header>
 
       <div className="sdp-body">
+        {/* 상단 인라인 네비 */}
+        <div className="sdp-topnav">
+          <button className="sdp-topnav-back"
+            onClick={() => navigate("/checklist/form", { state: { fromResult: true } })}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M19 12H5M12 5l-7 7 7 7"/>
+            </svg>
+            정보 수정
+          </button>
+          <div className="sdp-topnav-center">
+            <div className="sdp-chip-dot" />
+            <span>{CLIENT.name} · {CLIENT.age}세 · {CLIENT.job}</span>
+          </div>
+          <div className="sdp-topnav-right">
+            <span className="sdp-topnav-date">2026.06.28 16:00</span>
+            <button className="sdp-btn-ghost sdp-print">출력</button>
+          </div>
+        </div>
 
         {/* ① 히어로: 추천 옵션 + 큰 링 */}
         <section className="sdp-hero">
@@ -121,9 +144,15 @@ const SampleDashboardPage = () => {
         {/* ② 옵션 비교 */}
         <section className="sdp-section">
           <p className="sdp-section-label">절차별 성공 가능성</p>
+
+          {/* 바 비교 — 클릭으로 선택 */}
           <div className="sdp-options">
             {OPTIONS.map((opt) => (
-              <div key={opt.id} className={`sdp-option-row ${opt.recommended ? "recommended" : ""}`}>
+              <div key={opt.id}
+                className={`sdp-option-row ${opt.recommended ? "recommended" : ""} ${selectedOption === opt.id ? "selected" : ""}`}
+                onClick={() => setSelectedOption(opt.id)}
+                role="button" tabIndex={0}
+                onKeyDown={(e) => e.key === "Enter" && setSelectedOption(opt.id)}>
                 <div className="sdp-option-name">
                   <span>{opt.label}</span>
                   {opt.recommended && <span className="sdp-option-tag">추천</span>}
@@ -141,14 +170,63 @@ const SampleDashboardPage = () => {
               </div>
             ))}
           </div>
-          <div className="sdp-option-reasons">
-            {OPTIONS.map((opt) => (
-              <p key={opt.id} className="sdp-option-reason">
-                <span className="sdp-reason-label">{opt.label}</span>
-                {opt.reason}
-              </p>
-            ))}
-          </div>
+
+          {/* 조건 상세 패널 */}
+          {(() => {
+            const opt = OPTIONS.find((o) => o.id === selectedOption);
+            const passItems    = opt.conditions.filter((c) => c.type === "pass");
+            const cautionItems = opt.conditions.filter((c) => c.type === "caution");
+            const riskItems    = opt.conditions.filter((c) => c.type === "risk");
+            return (
+              <div className="sdp-condition-panel">
+                <div className="sdp-condition-header">
+                  <span className="sdp-condition-title">{opt.label} 조건 분석</span>
+                  <div className="sdp-condition-legend">
+                    <span className="sdp-cond-badge pass">충족</span>
+                    <span className="sdp-cond-badge caution">보충 필요</span>
+                    <span className="sdp-cond-badge risk">위험 요소</span>
+                  </div>
+                </div>
+
+                <div className="sdp-condition-list">
+                  {passItems.map((c, i) => (
+                    <div key={`pass-${i}`} className="sdp-cond sdp-cond-pass">
+                      <div className="sdp-cond-icon">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                          <circle cx="8" cy="8" r="8" fill="#16a34a"/>
+                          <path d="M4.5 8l2.5 2.5 4.5-4.5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                      <span className="sdp-cond-text">{c.text}</span>
+                    </div>
+                  ))}
+                  {cautionItems.map((c, i) => (
+                    <div key={`caution-${i}`} className="sdp-cond sdp-cond-caution">
+                      <div className="sdp-cond-icon">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                          <path d="M8 1.5L14.5 13H1.5L8 1.5Z" fill="#d97706" stroke="#d97706" strokeWidth="0.5" strokeLinejoin="round"/>
+                          <path d="M8 6v3.5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"/>
+                          <circle cx="8" cy="11" r="0.9" fill="#fff"/>
+                        </svg>
+                      </div>
+                      <span className="sdp-cond-text">{c.text}</span>
+                    </div>
+                  ))}
+                  {riskItems.map((c, i) => (
+                    <div key={`risk-${i}`} className="sdp-cond sdp-cond-risk">
+                      <div className="sdp-cond-icon">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                          <circle cx="8" cy="8" r="8" fill="#dc2626"/>
+                          <path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"/>
+                        </svg>
+                      </div>
+                      <span className="sdp-cond-text">{c.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
         </section>
 
         <div className="sdp-cols2">
@@ -271,7 +349,8 @@ const SampleDashboardPage = () => {
 
         {/* ⑦ 하단 CTA */}
         <div className="sdp-cta-row">
-          <button className="sdp-btn-ghost" onClick={() => navigate("/sample/checklist")}>
+          <button className="sdp-btn-ghost"
+            onClick={() => navigate("/checklist/form", { state: { fromResult: true } })}>
             정보 수정
           </button>
           <button className="sdp-btn-ghost">보고서 저장</button>

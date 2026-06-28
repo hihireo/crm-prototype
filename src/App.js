@@ -200,8 +200,8 @@ function AppContent() {
             path="/instagram/callback"
             element={<InstagramCallbackPage />}
           />
-          <Route path="/sample/checklist" element={<SampleChecklistPage />} />
-          <Route path="/sample/dashboard" element={<SampleDashboardPage />} />
+          <Route path="/checklist/form" element={<SampleChecklistPage />} />
+          <Route path="/checklist/result" element={<SampleDashboardPage />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </main>

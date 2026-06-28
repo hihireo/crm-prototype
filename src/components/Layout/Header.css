@@ -1,86 +1,78 @@
 .header {
-  background: white;
-  border-bottom: 1px solid #e2e8f0;
+  background: #111;
+  border-bottom: none;
   position: sticky;
   top: 0;
   z-index: 100;
 }
 
-/* .header-container {
-  max-width: 1200px;
-  margin: 0 auto;
-} */
-
 .header-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
+  height: 44px;
+  padding: 0 24px;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 28px;
   flex: 1;
 }
 
 .logo {
-  font-size: 38px;
-  font-weight: 800;
-  color: #1e293b;
+  display: flex;
+  align-items: center;
   text-decoration: none;
+  flex-shrink: 0;
+}
+
+.logo-img {
+  height: 20px;
+  width: auto;
+  display: block;
 }
 
 .header-service-info {
   display: flex;
   align-items: center;
-  margin-left: -20px;
-  padding-top: 3px;
+  margin-left: -12px;
 }
 
 .service-name {
-  background: #eff6ff;
-  color: #475569;
-  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 3px 10px;
   border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  /* border: 1px solid #bfdbfe; */
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .nav {
   display: flex;
-  padding-top: 3px;
-  gap: 32px;
+  gap: 4px;
 }
 
 .nav-link {
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.55);
   text-decoration: none;
   font-weight: 500;
-  font-size: 14px;
-  transition: color 0.2s;
-  padding: 8px 0;
+  font-size: 13px;
+  transition: color 0.15s;
+  padding: 5px 9px;
+  border-radius: 6px;
+  letter-spacing: -0.01em;
 }
 
 .nav-link:hover {
-  color: #3b82f6;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .nav-link.active {
-  color: #3b82f6;
-  position: relative;
-}
-
-.nav-link.active::after {
-  content: "";
-  position: absolute;
-  bottom: -12px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: #3b82f6;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 /* 상담 메뉴 레드닷 */
@@ -90,10 +82,10 @@
 
 .consultation-red-dot {
   position: absolute;
-  top: 2px;
-  right: -8px;
-  width: 6px;
-  height: 6px;
+  top: 4px;
+  right: 2px;
+  width: 5px;
+  height: 5px;
   background: #ef4444;
   border-radius: 50%;
   display: block;
@@ -107,7 +99,7 @@
 .user-section {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 4px;
 }
 
 /* 알림 */
@@ -118,16 +110,23 @@
 .notification-btn {
   background: none;
   border: none;
-  font-size: 20px;
+  font-size: 15px;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
-  transition: background-color 0.2s;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background 0.15s;
   position: relative;
+  color: rgba(255,255,255,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
 }
 
 .notification-btn:hover {
-  background: #f1f5f9;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
 }
 
 .notification-badge {
@@ -137,51 +136,48 @@
   background: #ef4444;
   color: white;
   border-radius: 50%;
-  width: 18px;
-  height: 18px;
-  font-size: 11px;
-  font-weight: 600;
+  width: 15px;
+  height: 15px;
+  font-size: 9px;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid white;
+  border: 1.5px solid #111;
 }
 
 .notification-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   z-index: 99;
 }
 
 .notification-dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 8px);
   right: 0;
   width: 320px;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+  border: 1px solid #ebebeb;
   z-index: 101;
-  margin-top: 8px;
 }
 
 .notification-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #f1f5f9;
+  padding: 14px 18px;
+  border-bottom: 1px solid #f5f5f5;
 }
 
 .notification-header h4 {
   margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e293b;
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.01em;
 }
 
 .notification-header-actions {
@@ -191,134 +187,101 @@
 }
 
 .notification-count {
-  font-size: 12px;
-  color: #64748b;
-  background: #f1f5f9;
-  padding: 2px 8px;
-  border-radius: 12px;
+  font-size: 11px;
+  color: #888;
+  background: #f5f5f5;
+  padding: 2px 7px;
+  border-radius: 10px;
 }
 
 .header-mark-all-btn {
   background: none;
   border: none;
-  color: #3b82f6;
+  color: #555;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   padding: 2px 6px;
   border-radius: 4px;
-  transition: background-color 0.2s;
+  transition: background 0.12s;
 }
-
-.header-mark-all-btn:hover {
-  background: #f1f5f9;
-}
+.header-mark-all-btn:hover { background: #f5f5f5; }
 
 .notification-list {
-  max-height: 300px;
+  max-height: 280px;
   overflow-y: auto;
 }
 
 .notification-item {
   display: flex;
-  padding: 12px 16px;
-  border-bottom: 1px solid #f8fafc;
+  padding: 11px 16px;
+  border-bottom: 1px solid #f8f8f8;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background 0.12s;
   position: relative;
 }
-
-.notification-item:hover {
-  background: #f8fafc;
-}
-
-.notification-item.unread {
-  background: #fefce8;
-}
-
-.notification-item.unread:hover {
-  background: #fef3c7;
-}
+.notification-item:hover { background: #fafafa; }
+.notification-item.unread { background: #fafafa; }
 
 .notification-content {
-  flex: 1;
-  min-width: 0;
-  padding-right: 16px;
+  flex: 1; min-width: 0; padding-right: 14px;
 }
 
 .notification-content h5 {
-  margin: 0 0 2px 0;
+  margin: 0 0 3px 0;
   font-size: 13px;
   font-weight: 600;
-  color: #1e293b;
+  color: #111;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-}
-
-.notification-content p {
-  margin: 0;
-  font-size: 12px;
-  color: #64748b;
-  line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 
 .notification-desc {
   font-size: 12px;
-  color: #4a4a4a;
+  color: #777;
+  line-height: 1.4;
 }
 
 .notification-time {
   font-size: 10px;
-  color: #94a3b8;
+  color: #bbb;
   font-weight: 500;
   flex-shrink: 0;
 }
 
 .notification-dot {
-  width: 6px;
-  height: 6px;
-  background: #3b82f6;
+  width: 6px; height: 6px;
+  background: #111;
   border-radius: 50%;
   position: absolute;
-  top: 14px;
-  right: 16px;
+  top: 14px; right: 14px;
 }
 
 .notification-footer {
-  padding: 12px 20px;
-  border-top: 1px solid #f1f5f9;
+  padding: 10px 16px;
+  border-top: 1px solid #f5f5f5;
 }
 
 .view-all-btn {
   width: 100%;
   background: none;
   border: none;
-  color: #3b82f6;
+  color: #333;
   font-size: 13px;
-  font-weight: 500;
-  padding: 8px;
+  font-weight: 600;
+  padding: 7px;
   cursor: pointer;
   border-radius: 6px;
-  transition: background-color 0.2s;
+  transition: background 0.12s;
+  letter-spacing: -0.01em;
 }
+.view-all-btn:hover { background: #f5f5f5; }
 
-.view-all-btn:hover {
-  background: #f1f5f9;
-}
-
-/* 사용자 정보 */
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* 헤더 프로필 드롭다운 - hdr prefix */
-.hdr-profile-wrapper {
-  position: relative;
-}
+/* 프로필 */
+.hdr-profile-wrapper { position: relative; }
 
 .hdr-profile-btn {
   background: none;
@@ -326,213 +289,138 @@
   cursor: pointer;
   padding: 2px;
   border-radius: 50%;
-  transition: background-color 0.2s;
+  transition: opacity 0.15s;
   display: flex;
   align-items: center;
-  justify-content: center;
 }
-
-.hdr-profile-btn:hover {
-  background: #f1f5f9;
-}
+.hdr-profile-btn:hover { opacity: 0.85; }
 
 .hdr-profile-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   z-index: 99;
 }
 
 .hdr-profile-dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 8px);
   right: 0;
-  width: 280px;
+  width: 240px;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+  border: 1px solid #ebebeb;
   z-index: 101;
-  margin-top: 8px;
   overflow: hidden;
 }
 
 .hdr-profile-info {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 20px;
-  background: #f8fafc;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .hdr-profile-avatar {
-  width: 40px;
-  height: 40px;
+  width: 36px; height: 36px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: #111;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 16px;
+  font-weight: 700;
+  font-size: 15px;
 }
 
-.hdr-profile-details {
-  flex: 1;
-  min-width: 0;
-}
+.hdr-profile-details { flex: 1; min-width: 0; }
 
 .hdr-profile-email {
-  font-size: 14px;
-  font-weight: 500;
-  color: #1e293b;
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
   margin-bottom: 2px;
-  word-break: break-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
 }
 
 .hdr-profile-uid {
-  font-size: 12px;
-  color: #64748b;
+  font-size: 11px;
+  color: #aaa;
   font-family: monospace;
 }
 
-.hdr-profile-divider {
-  height: 1px;
-  background: #e2e8f0;
-}
+.hdr-profile-divider { display: none; }
 
-.hdr-profile-actions {
-  padding: 8px 0;
-}
+.hdr-profile-actions { padding: 6px 0; }
 
 .hdr-profile-action-btn {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 20px;
+  gap: 10px;
+  padding: 10px 16px;
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 14px;
-  color: #374151;
-  transition: background-color 0.2s;
+  font-size: 13px;
+  color: #333;
+  transition: background 0.12s;
   text-align: left;
+  letter-spacing: -0.01em;
+  font-weight: 500;
 }
+.hdr-profile-action-btn:hover { background: #f5f5f5; }
 
-.hdr-profile-action-btn:hover {
-  background: #f8fafc;
-}
-
-.hdr-logout-btn:hover {
-  background: #fef2f2;
-  color: #dc2626;
-}
+.hdr-logout-btn { color: #666; }
+.hdr-logout-btn:hover { background: #f5f5f5; color: #111; }
 
 .hdr-action-icon {
-  font-size: 16px;
-  width: 20px;
+  font-size: 14px;
+  width: 18px;
   text-align: center;
   flex-shrink: 0;
 }
 
+.user-section .notification-btn svg,
+.user-section .notification-btn {
+  color: rgba(255,255,255,0.7);
+}
+
 .user-avatar {
-  width: 36px;
-  height: 36px;
+  width: 28px; height: 28px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: rgba(255,255,255,0.15);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 700;
+  font-size: 12px;
+  border: 1px solid rgba(255,255,255,0.25);
 }
 
 .user-name {
   font-weight: 500;
-  color: #374151;
-  font-size: 15px;
-}
-
-.logout-btn {
+  color: rgba(255,255,255,0.8);
   font-size: 13px;
-  padding: 6px 12px;
 }
 
 @media (max-width: 1024px) {
-  .nav {
-    gap: 24px;
-  }
-
-  .nav-link {
-    font-size: 14px;
-  }
+  .nav { gap: 2px; }
+  .nav-link { font-size: 12px; }
 }
 
 @media (max-width: 768px) {
-  .nav {
-    display: none;
-  }
-
-  .header-left {
-    gap: 16px;
-  }
-
-  .logo {
-    font-size: 20px;
-  }
-
-  .service-name {
-    font-size: 11px;
-    padding: 4px 8px;
-  }
-
-  .user-section {
-    gap: 12px;
-  }
-
-  .user-name {
-    display: none;
-  }
-
-  .hdr-profile-dropdown {
-    width: 260px;
-    right: -20px;
-  }
-
-  .notification-dropdown {
-    width: 280px;
-    right: -40px;
-  }
-
-  .user-avatar {
-    width: 32px;
-    height: 32px;
-    font-size: 13px;
-  }
-
-  .logout-btn {
-    padding: 6px 10px;
-    font-size: 12px;
-  }
-
-  .hdr-profile-email {
-    font-size: 13px;
-  }
-
-  .hdr-profile-action-btn {
-    font-size: 13px;
-    padding: 10px 16px;
-  }
-
-  .consultation-red-dot {
-    top: 1px;
-    right: -6px;
-    width: 5px;
-    height: 5px;
-  }
+  .nav { display: none; }
+  .header-left { gap: 16px; }
+  .logo-img { height: 18px; }
+  .service-name { font-size: 11px; }
+  .user-avatar { width: 26px; height: 26px; font-size: 11px; }
+  .hdr-profile-dropdown { width: 220px; right: -10px; }
+  .notification-dropdown { width: 280px; right: -30px; }
 }
