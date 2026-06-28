@@ -732,7 +732,7 @@ const ApplicationsPage = () => {
 
   const handleNextPage = () => {
     const totalPages = Math.ceil(
-      getFilteredApplications().length / itemsPerPage
+      getFilteredApplications().length / itemsPerPage,
     );
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
@@ -743,7 +743,7 @@ const ApplicationsPage = () => {
   // 페이지 번호 생성
   const generatePageNumbers = () => {
     const totalPages = Math.ceil(
-      getFilteredApplications().length / itemsPerPage
+      getFilteredApplications().length / itemsPerPage,
     );
     const pages = [];
 
@@ -816,7 +816,7 @@ const ApplicationsPage = () => {
         !app.consultations?.some((consultation) =>
           consultation.content
             .toLowerCase()
-            .includes(appliedFilters.consultationContent.toLowerCase())
+            .includes(appliedFilters.consultationContent.toLowerCase()),
         )
       )
         return false;
@@ -848,7 +848,7 @@ const ApplicationsPage = () => {
       // 상담 카테고리 필터 (다중 선택)
       if (appliedFilters.consultationCategories.length > 0) {
         const hasMatchingCategory = app.consultations?.some((consultation) =>
-          appliedFilters.consultationCategories.includes(consultation.category)
+          appliedFilters.consultationCategories.includes(consultation.category),
         );
         if (!hasMatchingCategory) return false;
       }
@@ -934,7 +934,7 @@ const ApplicationsPage = () => {
         return {
           ...prev,
           consultationCategories: currentCategories.filter(
-            (c) => c !== category
+            (c) => c !== category,
           ),
         };
       } else {
@@ -951,7 +951,7 @@ const ApplicationsPage = () => {
     setFilters((prev) => ({
       ...prev,
       consultationCategories: prev.consultationCategories.filter(
-        (category) => category !== categoryToRemove
+        (category) => category !== categoryToRemove,
       ),
     }));
   };
@@ -1019,7 +1019,7 @@ const ApplicationsPage = () => {
         }));
       }
     },
-    [tooltipData.visible]
+    [tooltipData.visible],
   );
 
   // 마우스 이벤트 등록
@@ -1110,7 +1110,9 @@ const ApplicationsPage = () => {
     const fileExtension = file.name.substring(file.name.lastIndexOf("."));
 
     if (!validExtensions.includes(fileExtension.toLowerCase())) {
-      alert("지원하지 않는 파일 형식입니다.\n.xlsx, .xls, .csv 파일만 업로드 가능합니다.");
+      alert(
+        "지원하지 않는 파일 형식입니다.\n.xlsx, .xls, .csv 파일만 업로드 가능합니다.",
+      );
       return;
     }
 
@@ -1360,7 +1362,7 @@ const ApplicationsPage = () => {
                               <input
                                 type="checkbox"
                                 checked={filters.consultationCategories.includes(
-                                  category
+                                  category,
                                 )}
                                 onChange={() => {}} // 빈 함수로 설정하여 label onClick으로만 처리
                                 className="apcl-checkbox"
@@ -1691,8 +1693,8 @@ const ApplicationsPage = () => {
                 <h5>📋 업로드 안내</h5>
                 <ul className="guide-list">
                   <li>
-                    <strong>지원 형식:</strong> .xlsx, .xls, .csv 파일만
-                    업로드 가능합니다.
+                    <strong>지원 형식:</strong> .xlsx, .xls, .csv 파일만 업로드
+                    가능합니다.
                   </li>
                   <li>
                     <strong>양식 준수:</strong> 지정된 양식을 반드시 지켜주세요.
@@ -1763,8 +1765,8 @@ const ApplicationsPage = () => {
                   <div className="upload-placeholder">
                     <div className="upload-icon">📁</div>
                     <div className="upload-text">
-                      <strong>클릭하여 파일 선택</strong> 또는 파일을
-                      드래그하여 업로드
+                      <strong>클릭하여 파일 선택</strong> 또는 파일을 드래그하여
+                      업로드
                     </div>
                     <div className="upload-hint">
                       .xlsx, .xls, .csv 파일만 지원

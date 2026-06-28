@@ -129,7 +129,6 @@ const TreeNode = ({
 
   const hasChildren = node.children && node.children.length > 0;
   const isTeamNode = node.type === "team";
-  const isMemberNode = node.type === "member";
 
   // 드래그 중인 노드인지 확인
   const isDragging = draggedNode && draggedNode.id === node.id;

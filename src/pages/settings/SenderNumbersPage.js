@@ -36,7 +36,7 @@ const SenderNumbersPage = ({ service, user }) => {
     const [showAddProjectModal, setShowAddProjectModal] = useState(false);
     const [showAddPersonalModal, setShowAddPersonalModal] = useState(false);
     const [newNumber, setNewNumber] = useState("");
-    const [isVerifying, setIsVerifying] = useState(false);
+    const [, setIsVerifying] = useState(false);
 
     // 공통 발신번호 등록용 파일 상태
     const [projectFiles, setProjectFiles] = useState({

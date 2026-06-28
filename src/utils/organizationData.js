@@ -319,7 +319,7 @@ export const searchEmployeesByName = (
   );
 };
 
-export default {
+const organizationData = {
   organizationTreeData,
   findEmployeeById,
   findParentNode,
@@ -328,3 +328,5 @@ export default {
   getAllEmployees,
   searchEmployeesByName,
 };
+
+export default organizationData;
