@@ -5,6 +5,7 @@ import {
   Route,
   Navigate,
   useNavigate,
+  useLocation,
 } from "react-router-dom";
 import Header from "./components/Layout/Header";
 import LoginPage from "./pages/LoginPage";
@@ -23,8 +24,13 @@ import InstagramCallbackPage from "./pages/InstagramCallbackPage";
 import SampleChecklistPage from "./pages/sample/SampleChecklistPage";
 import SampleDashboardPage from "./pages/sample/SampleDashboardPage";
 
+/* 와이어프레임용 더미 데이터 — 미로그인 시 checklist 경로에서 사용 */
+const DEMO_USER    = { name: "데모 상담사", email: "demo@talkgate.kr" };
+const DEMO_SERVICE = "TalkGate Demo";
+
 function AppContent() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("user");
     return savedUser ? JSON.parse(savedUser) : null;
@@ -59,12 +65,16 @@ function AppContent() {
     navigate("/login");
   };
 
+  const isChecklistRoute = location.pathname.startsWith("/checklist");
+  const headerUser    = user    ?? (isChecklistRoute ? DEMO_USER    : null);
+  const headerService = currentService ?? (isChecklistRoute ? DEMO_SERVICE : null);
+
   return (
     <div className="App">
-      {user && currentService && (
+      {headerUser && headerService && (
         <Header
-          user={user}
-          currentService={currentService}
+          user={headerUser}
+          currentService={headerService}
           onLogout={handleLogout}
         />
       )}
