@@ -75,6 +75,9 @@ const Header = ({ user, currentService, onLogout }) => {
               <Link to="/attendance" className="nav-link">
                 근태
               </Link>
+              <Link to="/checklist" className="nav-link">
+                회생 상담
+              </Link>
               <Link to="/notice" className="nav-link">
                 공지사항
               </Link>

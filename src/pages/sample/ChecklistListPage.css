@@ -1,0 +1,456 @@
+/* ===== 회생 상담 목록 페이지 ===== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+.cll-page {
+  min-height: calc(100vh - 44px);
+  background: #f8f8f8;
+  font-family: -apple-system, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+  color: #111;
+}
+
+.cll-body {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── 페이지 헤더 ── */
+.cll-page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.cll-page-title {
+  font-size: 24px;
+  font-weight: 900;
+  color: #111;
+  letter-spacing: -0.04em;
+  margin: 0 0 4px;
+}
+
+.cll-page-sub {
+  font-size: 13px;
+  color: #aaa;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.cll-btn-primary {
+  padding: 10px 20px;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  transition: background 0.12s;
+}
+.cll-btn-primary:hover { background: #333; }
+
+/* ── 요약 통계 ── */
+.cll-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.cll-stat-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid #f0f0f0;
+}
+
+.cll-stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #aaa;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.cll-stat-val {
+  font-size: 32px;
+  font-weight: 900;
+  color: #111;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+.cll-stat-val em {
+  font-style: normal;
+  font-size: 14px;
+  font-weight: 400;
+  color: #bbb;
+  margin-left: 3px;
+  letter-spacing: 0;
+}
+
+.cll-stat-sub {
+  font-size: 12px;
+  color: #bbb;
+  letter-spacing: -0.01em;
+}
+
+.cll-stat-bar {
+  height: 4px;
+  background: #f0f0f0;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.cll-stat-bar-fill {
+  height: 100%;
+  background: #111;
+  border-radius: 2px;
+}
+
+/* 절차 분포 */
+.cll-dist { display: flex; flex-direction: column; gap: 8px; }
+
+.cll-dist-row {
+  display: grid;
+  grid-template-columns: 76px 1fr 32px;
+  align-items: center;
+  gap: 8px;
+}
+
+.cll-dist-bar-wrap { display: flex; align-items: center; }
+.cll-dist-bar {
+  width: 100%;
+  height: 4px;
+  background: #f0f0f0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.cll-dist-fill { height: 100%; background: #555; border-radius: 2px; }
+
+.cll-dist-cnt {
+  font-size: 11px;
+  font-weight: 700;
+  color: #888;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* 상태 현황 */
+.cll-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cll-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.cll-status-dot.done     { background: #111; }
+.cll-status-dot.ongoing  { background: #f59e0b; }
+.cll-status-dot.progress { background: #3b82f6; }
+
+.cll-status-label {
+  font-size: 13px;
+  color: #555;
+  flex: 1;
+  letter-spacing: -0.01em;
+}
+.cll-status-cnt {
+  font-size: 12px;
+  font-weight: 700;
+  color: #111;
+}
+
+/* ── 절차 태그 ── */
+.cll-proc-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.cll-proc-tag.rehab    { background: #f0fdf4; color: #15803d; }
+.cll-proc-tag.adjust   { background: #fef9c3; color: #a16207; }
+.cll-proc-tag.bankrupt { background: #fee2e2; color: #b91c1c; }
+
+/* ── 툴바 ── */
+.cll-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px 16px;
+  border: 1px solid #f0f0f0;
+}
+
+.cll-filter-chips {
+  display: flex;
+  gap: 6px;
+}
+
+.cll-filter-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 20px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+.cll-filter-chip:hover { border-color: #bbb; color: #333; }
+.cll-filter-chip.on    { background: #111; border-color: #111; color: #fff; font-weight: 700; }
+
+.cll-filter-cnt {
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(255,255,255,0.2);
+  padding: 0 5px;
+  border-radius: 8px;
+}
+.cll-filter-chip:not(.on) .cll-filter-cnt {
+  background: #f0f0f0;
+  color: #888;
+}
+
+.cll-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.cll-search-icon {
+  position: absolute;
+  left: 10px;
+  pointer-events: none;
+}
+.cll-search {
+  padding: 8px 12px 8px 32px;
+  background: #f6f6f6;
+  border: 1.5px solid transparent;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #111;
+  width: 220px;
+  outline: none;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  transition: background 0.15s, border-color 0.15s;
+}
+.cll-search:focus { background: #fff; border-color: #111; }
+.cll-search::placeholder { color: #ccc; }
+
+/* ── 테이블 ── */
+.cll-table-wrap {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #f0f0f0;
+  overflow: hidden;
+}
+
+/* grid 9열: 고객정보 / 지역 / 채무 / 가용소득 / 절차 / 성공률 / 상태 / 날짜 / 액션 */
+.cll-table-head,
+.cll-row {
+  display: grid;
+  grid-template-columns: 200px 90px 90px 90px 100px 160px 80px 60px 90px;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+}
+
+.cll-table-head {
+  height: 40px;
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 11px;
+  font-weight: 700;
+  color: #bbb;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.cll-th-btn {
+  background: none;
+  border: none;
+  font-size: 11px;
+  font-weight: 700;
+  color: #bbb;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  transition: color 0.12s;
+}
+.cll-th-btn:hover { color: #666; }
+
+.cll-sort-icon {
+  font-style: normal;
+  color: #ddd;
+  font-size: 11px;
+}
+.cll-sort-icon.active { color: #111; }
+
+.cll-row {
+  height: 64px;
+  border-bottom: 1px solid #f8f8f8;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.cll-row:last-child { border-bottom: none; }
+.cll-row:hover { background: #fafafa; }
+
+.cll-cell-client {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cll-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #111;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.cll-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+
+.cll-meta {
+  font-size: 11px;
+  color: #bbb;
+  margin-top: 2px;
+  letter-spacing: -0.01em;
+}
+
+.cll-cell {
+  font-size: 13px;
+  color: #555;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.cll-debt {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.03em;
+}
+.cll-debt em {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 400;
+  color: #bbb;
+  margin-left: 1px;
+}
+
+.cll-disposable { font-weight: 600; color: #333; }
+.cll-disposable.neg { color: #dc2626; }
+
+.cll-date { color: #bbb; }
+
+.cll-action { display: flex; justify-content: flex-end; }
+
+.cll-view-btn {
+  padding: 6px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 7px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  color: #444;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+.cll-view-btn:hover { background: #111; color: #fff; border-color: #111; }
+
+/* ── 성공 가능성 바 ── */
+.cll-score-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cll-score-bar {
+  flex: 1;
+  height: 5px;
+  background: #f0f0f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.cll-score-fill {
+  height: 100%;
+  background: #111;
+  border-radius: 3px;
+}
+
+.cll-score-num {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+  width: 22px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ── 상태 뱃지 ── */
+.cll-status-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+.cll-status-badge.done     { background: #f5f5f5; color: #666; }
+.cll-status-badge.ongoing  { background: #fef9c3; color: #a16207; }
+.cll-status-badge.progress { background: #eff6ff; color: #1d4ed8; }
+
+.cll-empty {
+  padding: 48px;
+  text-align: center;
+  color: #bbb;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+}
+
+@media (max-width: 1100px) {
+  .cll-stats { grid-template-columns: repeat(2, 1fr); }
+}

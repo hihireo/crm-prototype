@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./SampleDashboardPage.css";
 
@@ -63,6 +63,32 @@ const SCRIPTS = [
     text: "채무 증명서류와 소득증빙 서류를 준비해 주시면 됩니다. 오늘 상담 내용을 바탕으로 신청서 초안을 작성해 드리고, 법원 제출까지 함께 진행할 수 있습니다." },
 ];
 
+const AI_QUICK = [
+  "사채가 있으면 개인회생이 어렵나요?",
+  "월 가용소득이 줄어들면 어떻게 되나요?",
+  "변제 기간을 단축할 수 있나요?",
+  "신청 후 직장에 영향이 있나요?",
+  "배우자 소득도 변제액에 포함되나요?",
+];
+
+const AI_ANSWERS = {
+  "사채가 있으면 개인회생이 어렵나요?":
+    "사채는 개인회생 채권자 목록에 포함시킬 수 있습니다. 다만 불법 고금리 사채라면 이자 부분이 무효 처리될 수 있어 원금만 인정됩니다. 김민수 고객의 경우 사채 3,000만원에 대해 이자율 확인 후 실 채무를 재산정하면 성공 가능성이 더 높아질 수 있습니다.",
+  "월 가용소득이 줄어들면 어떻게 되나요?":
+    "현재 월 가용소득 45만원은 최소 변제 기준에 근접한 수준입니다. 만약 30만원 이하로 떨어지면 법원이 변제여력 없음으로 판단해 파산으로 전환해야 할 가능성이 높습니다. 소득 감소가 예상된다면 현시점에서 조속히 신청하는 것이 유리합니다.",
+  "변제 기간을 단축할 수 있나요?":
+    "법원이 인가한 변제계획 기준(최대 84개월)보다 빨리 갚으면 조기 종결이 가능합니다. 단, 변제계획 변경 신청이 필요하며 법원 허가를 받아야 합니다. 고객의 소득이 향후 개선된다면 조기 변제를 적극 검토할 수 있습니다.",
+  "신청 후 직장에 영향이 있나요?":
+    "일반 사기업 직원의 경우 개인회생·파산은 원칙적으로 해고 사유가 되지 않습니다. 다만 금융기관·공무원·일부 자격증 보유 직종은 결격 사유가 될 수 있습니다. 자영업자인 김민수 고객은 사업자 폐업 없이도 신청 가능하나, 세금 체납이 있다면 사전 정리가 필요합니다.",
+  "배우자 소득도 변제액에 포함되나요?":
+    "배우자 소득은 직접 변제 대상은 아니지만, 가계 전체 생활비 산정 시 반영됩니다. 배우자 소득이 있으면 신청인의 생활비 인정액이 줄어들어 가용소득(변제액)이 늘어날 수 있습니다. 현재 고객 정보에서는 배우자 소득이 없는 것으로 입력되어 있습니다.",
+};
+
+const INITIAL_AI_MSG = {
+  role: "ai",
+  text: `김민수 고객의 분석이 완료됐습니다. 총 채무 3.1억원, 월 가용소득 45만원 기준으로 **개인회생** 신청 가능성이 가장 높게 평가됐습니다 (78/100). 추가로 궁금하신 사항을 질문해 주세요.`,
+};
+
 const STEPS = [
   { n: 1, label: "서류 준비",      desc: "채권자 목록 · 소득 증빙 · 재산 목록",    period: "1–2주" },
   { n: 2, label: "신청서 작성",    desc: "변제계획안 및 신청서 초안 작성",          period: "3–5일" },
@@ -97,6 +123,29 @@ const SampleDashboardPage = () => {
   const [activeScript, setActiveScript] = useState(0);
   const [selectedOption, setSelectedOption] = useState("rehabilitation");
 
+  const [chatMessages, setChatMessages] = useState([INITIAL_AI_MSG]);
+  const [chatInput, setChatInput] = useState("");
+  const [isAiTyping, setIsAiTyping] = useState(false);
+  const chatEndRef = useRef(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages, isAiTyping]);
+
+  const sendMessage = (text) => {
+    if (!text.trim() || isAiTyping) return;
+    const userMsg = { role: "user", text };
+    setChatMessages((prev) => [...prev, userMsg]);
+    setChatInput("");
+    setIsAiTyping(true);
+    setTimeout(() => {
+      const answer = AI_ANSWERS[text] ||
+        "분석 결과를 바탕으로 답변드리겠습니다. 해당 질문은 구체적인 법률 검토가 필요한 사안입니다. 담당 법무사 또는 변호사와의 상담을 권장합니다.";
+      setChatMessages((prev) => [...prev, { role: "ai", text: answer }]);
+      setIsAiTyping(false);
+    }, 1000);
+  };
+
   const totalRepayment = AI.repaymentAmount * AI.repaymentMonths;
   const exemptDebt = CLIENT.totalDebt - totalRepayment;
 
@@ -106,14 +155,7 @@ const SampleDashboardPage = () => {
       <div className="sdp-body">
         {/* 상단 인라인 네비 */}
         <div className="sdp-topnav">
-          <button className="sdp-topnav-back"
-            onClick={() => navigate("/checklist/form", { state: { fromResult: true } })}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <path d="M19 12H5M12 5l-7 7 7 7"/>
-            </svg>
-            정보 수정
-          </button>
-          <div className="sdp-topnav-center">
+          <div className="sdp-topnav-client">
             <div className="sdp-chip-dot" />
             <span>{CLIENT.name} · {CLIENT.age}세 · {CLIENT.job}</span>
           </div>
@@ -325,7 +367,84 @@ const SampleDashboardPage = () => {
           </div>
         </section>
 
-        {/* ⑥ 절차 안내 */}
+        {/* ⑥ AI 추가 질문 */}
+        <section className="sdp-section sdp-chat-section">
+          <div className="sdp-chat-section-header">
+            {/* AI 스파클 아이콘 */}
+            <svg className="sdp-sparkle-icon" width="22" height="22" viewBox="0 0 24 24" fill="none">
+              {/* 큰 4각별 */}
+              <path d="M10 3 L11.6 8.4 L17 10 L11.6 11.6 L10 17 L8.4 11.6 L3 10 L8.4 8.4 Z" fill="#111"/>
+              {/* 작은 4각별 */}
+              <path d="M19.5 2 L20.4 4.6 L23 5.5 L20.4 6.4 L19.5 9 L18.6 6.4 L16 5.5 L18.6 4.6 Z" fill="#111"/>
+              {/* 점 */}
+              <circle cx="5" cy="19" r="1.3" fill="#111"/>
+            </svg>
+            <p className="sdp-section-label" style={{ margin: 0 }}>AI 추가 질문</p>
+          </div>
+
+          {/* 빠른 질문 칩 */}
+          <div className="sdp-chat-quick">
+            {AI_QUICK.map((q) => (
+              <button key={q} className="sdp-chat-quick-btn"
+                onClick={() => sendMessage(q)}
+                disabled={isAiTyping}>
+                {q}
+              </button>
+            ))}
+          </div>
+
+          {/* 메시지 목록 */}
+          <div className="sdp-chat-messages">
+            {chatMessages.map((m, i) => (
+              <div key={i} className={`sdp-chat-msg ${m.role}`}>
+                {m.role === "ai" && (
+                  <div className="sdp-chat-ai-icon">
+                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                      <circle cx="10" cy="10" r="10" fill="#111"/>
+                      <path d="M6 10.5l2.5 2.5L14 7" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                )}
+                <div className="sdp-chat-bubble">{m.text}</div>
+              </div>
+            ))}
+            {isAiTyping && (
+              <div className="sdp-chat-msg ai">
+                <div className="sdp-chat-ai-icon">
+                  <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                    <circle cx="10" cy="10" r="10" fill="#111"/>
+                    <path d="M6 10.5l2.5 2.5L14 7" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div className="sdp-chat-bubble sdp-chat-typing">
+                  <span /><span /><span />
+                </div>
+              </div>
+            )}
+            <div ref={chatEndRef} />
+          </div>
+
+          {/* 입력 */}
+          <div className="sdp-chat-input-row">
+            <input
+              className="sdp-chat-input"
+              placeholder="AI에게 추가 질문을 입력하세요"
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && sendMessage(chatInput)}
+              disabled={isAiTyping}
+            />
+            <button className="sdp-chat-send"
+              onClick={() => sendMessage(chatInput)}
+              disabled={!chatInput.trim() || isAiTyping}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </section>
+
+        {/* ⑦ 절차 안내 */}
         <section className="sdp-section">
           <p className="sdp-section-label">개인회생 절차</p>
           <div className="sdp-steps">
