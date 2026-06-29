@@ -105,6 +105,18 @@ const Ring = ({ score, size = 130, strokeWidth = 7 }) => {
   const circ = 2 * Math.PI * r;
   const offset = circ * (1 - score / 100);
   const c = size / 2;
+  /*
+   * 순서: 성공 가능성(상단) → 78(중앙 크게) → /100(하단)
+   * SVG text.y = baseline 기준, cap height ≈ fontSize×0.72
+   * 3줄 블록 전체 시각 중심이 c가 되도록 y 계산
+   *   yL = c - s×0.14   (레이블 baseline)
+   *   yS = c + s×0.09   (점수 baseline)
+   *   yD = c + s×0.20   (/100 baseline)
+   * 검증(s=150): top≈44.8, bottom≈106 → center≈75.4 ✓
+   */
+  const yL = c - size * 0.15;
+  const yS = c + size * 0.10;
+  const yD = c + size * 0.21;
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ display: "block" }}>
       <circle cx={c} cy={c} r={r} fill="none" stroke="#f0f0f0" strokeWidth={strokeWidth} />
@@ -112,8 +124,9 @@ const Ring = ({ score, size = 130, strokeWidth = 7 }) => {
         strokeDasharray={circ} strokeDashoffset={offset}
         strokeLinecap="round" transform={`rotate(-90 ${c} ${c})`}
         style={{ transition: "stroke-dashoffset 1s ease" }} />
-      <text x={c} y={c - 4}  textAnchor="middle" fontSize={size * 0.27} fontWeight="800" fill="#111" letterSpacing="-1">{score}</text>
-      <text x={c} y={c + 16} textAnchor="middle" fontSize={size * 0.1}  fill="#bbb">/100</text>
+      <text x={c} y={yL} textAnchor="middle" fontSize={size * 0.085} fill="#999" letterSpacing="0.3">성공 가능성</text>
+      <text x={c} y={yS} textAnchor="middle" fontSize={size * 0.26}  fontWeight="800" fill="#111" letterSpacing="-1">{score}</text>
+      <text x={c} y={yD} textAnchor="middle" fontSize={size * 0.09}  fill="#bbb">/100</text>
     </svg>
   );
 };
@@ -129,7 +142,9 @@ const SampleDashboardPage = () => {
   const chatEndRef = useRef(null);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatMessages.length > 1) {
+      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [chatMessages, isAiTyping]);
 
   const sendMessage = (text) => {
@@ -161,7 +176,37 @@ const SampleDashboardPage = () => {
           </div>
           <div className="sdp-topnav-right">
             <span className="sdp-topnav-date">2026.06.28 16:00</span>
-            <button className="sdp-btn-ghost sdp-print">출력</button>
+            {/* 아이콘 액션 버튼들 */}
+            <button
+              className="sdp-icon-btn"
+              title="정보 수정"
+              onClick={() => navigate("/checklist/form", { state: { fromResult: true } })}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M11.5 2.5L13.5 4.5L5 13H3V11L11.5 2.5Z" stroke="#444" strokeWidth="1.4" strokeLinejoin="round"/>
+                <path d="M10 4L12 6" stroke="#444" strokeWidth="1.4"/>
+              </svg>
+              <span>정보 수정</span>
+            </button>
+            <button
+              className="sdp-icon-btn"
+              title="목록"
+              onClick={() => navigate("/checklist")}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect x="2" y="3.5" width="12" height="1.4" rx="0.7" fill="#444"/>
+                <rect x="2" y="7.3" width="12" height="1.4" rx="0.7" fill="#444"/>
+                <rect x="2" y="11.1" width="12" height="1.4" rx="0.7" fill="#444"/>
+              </svg>
+              <span>목록</span>
+            </button>
+            <button className="sdp-icon-btn sdp-icon-btn--primary" title="저장하기">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 2V10M8 10L5 7M8 10L11 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2 12H14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              <span>저장하기</span>
+            </button>
           </div>
         </div>
 
@@ -179,7 +224,6 @@ const SampleDashboardPage = () => {
           </div>
           <div className="sdp-hero-right">
             <Ring score={78} size={150} strokeWidth={8} />
-            <p className="sdp-hero-score-label">성공 가능성</p>
           </div>
         </section>
 
@@ -466,15 +510,6 @@ const SampleDashboardPage = () => {
           </div>
         </section>
 
-        {/* ⑦ 하단 CTA */}
-        <div className="sdp-cta-row">
-          <button className="sdp-btn-ghost"
-            onClick={() => navigate("/checklist/form", { state: { fromResult: true } })}>
-            정보 수정
-          </button>
-          <button className="sdp-btn-ghost">보고서 저장</button>
-          <button className="sdp-btn-primary">개인회생 신청 진행</button>
-        </div>
 
       </div>
     </div>

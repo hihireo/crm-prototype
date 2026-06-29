@@ -36,8 +36,8 @@
 
 /* ── Sidebar ── */
 .scl-sidebar {
-  background: #fafafa;
-  border-right: 1px solid #f0f0f0;
+  background: #f5f5f7;
+  border-right: 1.5px solid #e8e8e8;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -48,7 +48,7 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 24px 16px 0;
+  padding: 24px 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -84,7 +84,7 @@
 .scl-kpi-val em { font-style: normal; font-size: 10px; font-weight: 400; color: #bbb; margin-left: 2px; }
 
 /* Steps nav */
-.scl-steps { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.scl-steps { display: flex; flex-direction: column; gap: 2px; }
 
 .scl-step-item {
   display: flex; align-items: center; gap: 9px;
@@ -107,35 +107,75 @@
 
 .scl-step-label { font-size: 12px; color: #444; letter-spacing: -0.01em; }
 
-/* 사이드바 하단 액션 — 항상 보이는 고정 영역 */
-.scl-sidebar-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px 16px;
-  border-top: 1px solid #f0f0f0;
-  flex-shrink: 0;
-  background: #fafafa;
+/* 분析하기 버튼 래퍼 */
+.scl-analyze-wrap {
+  padding: 14px 0 4px;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 4px;
+}
+
+/* 데스크탑: sidebar-body 안 — 항상 표시 */
+.scl-analyze-desktop { display: block; }
+
+/* 모바일: sidebar 직계 자식 — 기본 숨김, 모바일에서만 표시 */
+.scl-analyze-mobile { display: none; }
+
+/* 레인보우 테두리를 위한 CSS custom property 애니메이션 */
+@property --scl-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes scl-rainbow-spin {
+  to { --scl-angle: 360deg; }
 }
 
 .scl-analyze-btn {
   width: 100%;
-  padding: 11px 0;
-  background: #111; color: #fff; border: none;
-  border-radius: 10px; font-size: 13px; font-weight: 700;
-  cursor: pointer; letter-spacing: -0.01em; transition: background 0.12s;
+  padding: 12px 0;
+  color: #111;
+  border-radius: 12px;
+  font-size: 13px; font-weight: 700;
+  cursor: pointer; letter-spacing: -0.01em;
+  display: flex; align-items: center; justify-content: center;
+  /* 흰 배경 + 파스텔 레인보우 테두리 (은은하게) */
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    conic-gradient(from var(--scl-angle), #ddd6fe, #bfdbfe, #a5f3d0, #fde68a, #fecaca, #f5d0fe, #ddd6fe) border-box;
+  border: 1.5px solid transparent;
+  animation: scl-rainbow-spin 10s linear infinite;
+  box-shadow: 0 1px 6px rgba(139,92,246,0.08);
+  transition: box-shadow 0.2s;
 }
-.scl-analyze-btn:hover { background: #333; }
+.scl-analyze-btn:hover {
+  background:
+    linear-gradient(#f8f7ff, #f8f7ff) padding-box,
+    conic-gradient(from var(--scl-angle), #ddd6fe, #bfdbfe, #a5f3d0, #fde68a, #fecaca, #f5d0fe, #ddd6fe) border-box;
+  border: 1.5px solid transparent;
+  box-shadow: 0 3px 14px rgba(139,92,246,0.14);
+}
 
-.scl-back-result-btn {
-  width: 100%;
-  padding: 9px 0;
-  background: transparent; color: #666;
-  border: 1px solid #e0e0e0;
-  border-radius: 10px; font-size: 12px; font-weight: 500;
-  cursor: pointer; letter-spacing: -0.01em; transition: all 0.12s;
+/* X 닫기 버튼 — 정보 수정 모드 */
+.scl-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  transition: color 0.12s;
+  z-index: 10;
 }
-.scl-back-result-btn:hover { background: #f5f5f5; color: #111; }
+.scl-close-btn:hover {
+  color: #111;
+}
 
 /* ── Main ── */
 .scl-main {
@@ -143,6 +183,7 @@
   display: flex;
   justify-content: center;
   padding: 40px 24px;
+  position: relative;
 }
 
 /* 콘텐츠 너비 — 전체 사용 */
@@ -339,6 +380,176 @@
   40%           { background: #111; transform: scale(1.3); }
 }
 
+/* ─── 모바일 전용 사이드바 상단 바 (데스크탑에서 숨김) ─── */
+.scl-mobile-topbar { display: none; }
+
+/* ═══════════════════════════════════
+   MOBILE  (max-width: 768px)
+═══════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* 페이지: 고정 높이 + 내부만 스크롤 */
+  .scl-page {
+    height: calc(100vh - 44px);
+    overflow: hidden;
+  }
+
+  /* 로딩 화면 */
+  .scl-analyzing {
+    height: calc(100vh - 44px);
+  }
+
+  /* 레이아웃: grid → flex 전환 (사이드바 높이 자연 계산) */
+  .scl-layout {
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  /* 사이드바: 내용 높이만큼만 차지 */
+  .scl-sidebar {
+    flex-shrink: 0;
+    border-right: none;
+    border-bottom: 1px solid #f0f0f0;
+    overflow: visible;
+  }
+
+  /* 모바일 탑바: 단계 정보(좌) + 분석하기 버튼(우) + 화살표(하단 중앙) */
+  .scl-mobile-topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 14px 18px; /* 하단 여백: 화살표 공간 */
+    background: #fafafa;
+    position: relative;
+  }
+
+  .scl-mobile-step-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .scl-mobile-step-fraction {
+    font-size: 11px;
+    font-weight: 700;
+    color: #aaa;
+    background: #f0f0f0;
+    padding: 2px 7px;
+    border-radius: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .scl-mobile-step-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111;
+    letter-spacing: -0.02em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* 탑바 내 분석하기 버튼 */
+  .scl-mobile-analyze-btn {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 6px 12px;
+    background:
+      linear-gradient(#fff, #fff) padding-box,
+      conic-gradient(from var(--scl-angle), #ddd6fe, #bfdbfe, #a5f3d0, #fde68a, #fecaca, #f5d0fe, #ddd6fe) border-box;
+    border: 1.5px solid transparent;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #111;
+    cursor: pointer;
+    letter-spacing: -0.01em;
+    animation: scl-rainbow-spin 10s linear infinite;
+  }
+
+  /* 열고 닫기 화살표 — 하단 중앙 절대 위치 */
+  .scl-mobile-toggle {
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #bbb;
+    padding: 2px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s;
+  }
+  .scl-mobile-toggle:hover { color: #888; }
+  .scl-mobile-toggle.open svg { transform: rotate(180deg); }
+  .scl-mobile-toggle svg { transition: transform 0.2s; }
+
+  /* 사이드바 본문: 기본 숨김, 열렸을 때 표시 */
+  .scl-sidebar-body {
+    display: none;
+    padding: 14px 16px 16px;
+  }
+  .scl-sidebar.mobile-open .scl-sidebar-body { display: flex; }
+
+  /* 분석하기 버튼: 탑바 내부로 통합됐으므로 기존 외부 영역 숨김 */
+  .scl-analyze-desktop { display: none; }
+  .scl-analyze-mobile { display: none; }
+
+  /* X 버튼: 모바일 위치 */
+  .scl-close-btn {
+    top: 12px;
+    right: 12px;
+  }
+
+  /* 메인 폼 영역: flex:1 + 내부 스크롤 */
+  .scl-main {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0 16px;
+    justify-content: flex-start;
+  }
+
+  /* 섹션 제목 숨김 — 상단 바에 이미 단계명 표시됨 */
+  .scl-section-head { display: none; }
+
+  /* 폼 래퍼: 컨테이너 높이만큼 늘려서 nav가 항상 하단에 위치 */
+  .scl-form-wrap { min-height: 100%; }
+
+  /* 폼 상단 여백 */
+  .scl-form { padding-top: 20px; }
+
+  /* 그리드 행: 단일 열 */
+  .scl-row-2,
+  .scl-row-3 { grid-template-columns: 1fr; }
+
+  /* 칩 줄바꿈 */
+  .scl-chips { flex-wrap: wrap; }
+
+  /* 하단 버튼: sticky로 항상 화면 하단에 표시 */
+  .scl-nav-btns {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    border-top: 1px solid #f0f0f0;
+    padding: 10px 0 16px;
+    margin-top: 16px;
+  }
+  .scl-btn-prev,
+  .scl-btn-next { flex: 1; text-align: center; padding: 14px; }
+}
+
 /* Bottom nav */
 .scl-nav-btns {
   display: flex; gap: 8px; justify-content: flex-end;
@@ -352,8 +563,11 @@
 .scl-btn-prev:hover { background: #f5f5f5; }
 
 .scl-btn-next {
-  padding: 12px 28px; background: #111; color: #fff; border: none;
+  padding: 12px 28px;
+  background: #111; color: #fff; border: none;
   border-radius: 10px; font-size: 13px; font-weight: 700;
-  cursor: pointer; letter-spacing: -0.01em; transition: background 0.12s;
+  cursor: pointer; letter-spacing: -0.01em;
+  transition: background 0.12s;
 }
 .scl-btn-next:hover { background: #333; }
+

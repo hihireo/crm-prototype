@@ -37,16 +37,47 @@
 }
 
 .sdp-topnav-right {
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; gap: 6px;
 }
 
 .sdp-topnav-date {
-  font-size: 12px; color: #bbb;
+  font-size: 12px; color: #bbb; margin-right: 4px;
 }
 
 .sdp-print {
   padding: 6px 12px !important;
   font-size: 12px !important;
+}
+
+/* ── 아이콘 버튼 ── */
+.sdp-icon-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: background 0.12s, border-color 0.12s;
+  white-space: nowrap;
+}
+.sdp-icon-btn:hover {
+  background: #f5f5f5;
+  border-color: #d0d0d0;
+}
+.sdp-icon-btn--primary {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+.sdp-icon-btn--primary:hover {
+  background: #333;
+  border-color: #333;
 }
 
 /* ── Shared section label ── */
@@ -689,7 +720,90 @@
 .sdp-chat-send:hover:not(:disabled) { background: #333; }
 .sdp-chat-send:disabled { background: #e0e0e0; cursor: not-allowed; }
 
-.sdp-cta-row {
-  display: flex; justify-content: flex-end; gap: 8px;
-  padding: 32px 0 0;
+
+/* ═══════════════════════════════════
+   MOBILE  (max-width: 768px)
+═══════════════════════════════════ */
+@media (max-width: 768px) {
+
+  .sdp-body {
+    padding: 0 16px 48px;
+  }
+
+  /* 탑 네비 */
+  .sdp-topnav {
+    padding: 12px 0 8px;
+  }
+  .sdp-topnav-date { display: none; }
+  .sdp-print { padding: 5px 10px !important; font-size: 11px !important; }
+  .sdp-icon-btn span { display: none; }
+  .sdp-icon-btn { padding: 7px 9px; }
+  .sdp-topnav-right { gap: 4px; }
+
+  /* ① 히어로: 가로 유지 (텍스트 좌 + 링 우) */
+  .sdp-hero {
+    flex-direction: row;
+    align-items: center;
+    padding: 20px 0;
+    gap: 16px;
+  }
+  .sdp-hero-left { flex: 1; min-width: 0; }
+  .sdp-hero-right {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 0;
+  }
+  .sdp-hero-right > svg {
+    width: 110px !important;
+    height: 110px !important;
+  }
+  .sdp-hero-h1 { font-size: 24px; }
+  .sdp-hero-sub { font-size: 12px; line-height: 1.5; }
+
+  /* ② 옵션 행 */
+  .sdp-option-row {
+    grid-template-columns: 1fr 80px 50px;
+    gap: 10px;
+  }
+  .sdp-option-row .sdp-option-bar-wrap { display: none; }
+
+  /* 조건 패널 */
+  .sdp-condition-panel { margin-top: 10px; }
+  .sdp-condition-header { flex-wrap: wrap; gap: 8px; }
+  .sdp-condition-legend { gap: 6px; }
+  .sdp-chat-bubble { max-width: 85%; }
+
+  /* 2컬럼 → 단일 열 */
+  .sdp-cols2 {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .sdp-cols2 .sdp-section:first-child {
+    border-right: none;
+    padding-right: 0;
+    border-bottom: 1px solid #f5f5f5;
+  }
+
+  /* 채무 바 */
+  .sdp-bar-row {
+    grid-template-columns: 60px 1fr 28px 70px;
+    gap: 6px;
+  }
+
+  /* 스크립트 탭 */
+  .sdp-script-tabs { gap: 5px; }
+  .sdp-script-tab { font-size: 12px; padding: 6px 11px; }
+
+  /* AI 챗 섹션 */
+  .sdp-chat-section {
+    padding: 20px 16px 24px;
+    margin: 0;
+  }
+  .sdp-chat-quick { gap: 6px; }
+  .sdp-chat-quick-btn { font-size: 11px; padding: 6px 11px; }
+  .sdp-chat-messages { max-height: 280px; padding: 14px; }
+  .sdp-chat-bubble { font-size: 12px; padding: 10px 13px; }
+
 }

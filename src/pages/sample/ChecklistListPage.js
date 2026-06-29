@@ -417,25 +417,25 @@ const ChecklistListPage = () => {
                     </div>
                   </div>
                 </div>
-                <span className="cll-cell">{c.region}</span>
+                <span className="cll-cell cll-cell-region">{c.region}</span>
                 <span className="cll-cell cll-debt">
                   {(c.totalDebt / 10000).toFixed(1)}억<em>원</em>
                 </span>
                 <span
-                  className={`cll-cell cll-disposable ${c.disposable < 0 ? "neg" : ""}`}
+                  className={`cll-cell cll-disposable cll-cell-disposable ${c.disposable < 0 ? "neg" : ""}`}
                 >
                   {c.disposable >= 0 ? "+" : ""}
                   {c.disposable}만원
                 </span>
-                <span className="cll-cell">
+                <span className="cll-cell cll-cell-proc">
                   <span className={`cll-proc-tag ${PROC_COLOR[c.recommended]}`}>
                     {c.recommended}
                   </span>
                 </span>
-                <div className="cll-cell">
+                <div className="cll-cell cll-cell-score">
                   <ScoreBar score={c.score} />
                 </div>
-                <span className="cll-cell">
+                <span className="cll-cell cll-cell-status">
                   <span
                     className={`cll-status-badge ${STATUS_COLOR[c.status]}`}
                   >
