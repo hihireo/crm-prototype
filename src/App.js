@@ -214,6 +214,7 @@ function AppContent() {
           <Route path="/checklist" element={<ChecklistListPage />} />
           <Route path="/checklist/form" element={<SampleChecklistPage />} />
           <Route path="/checklist/result" element={<SampleDashboardPage />} />
+          <Route path="/checklist/result-external" element={<SampleDashboardPage />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </main>
