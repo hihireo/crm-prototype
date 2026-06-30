@@ -985,6 +985,29 @@ const SampleDashboardPage = () => {
             setProcCurrentStep(stepId);
             localStorage.setItem(procStorageKey(1, selectedOption), String(stepId));
           };
+          const buildStepSmsText = (step) => {
+            const { details } = step;
+            const lines = [
+              `[${label}] ${step.id}단계. ${step.title}`,
+              `예상 기간: ${step.durationLabel}`,
+              "",
+              details.desc,
+            ];
+            if (details.items?.length) {
+              lines.push("", "■ 주요 내용");
+              details.items.forEach((item) => lines.push(`• ${item}`));
+            }
+            if (details.note) {
+              lines.push("", `※ ${details.note}`);
+            }
+            if (details.example) {
+              lines.push("", `📌 예시`, details.example);
+            }
+            if (details.caution) {
+              lines.push("", `⚠ 주의사항`, details.caution);
+            }
+            return lines.join("\n");
+          };
           const toggleStep = (stepId) => {
             setProcOpenSteps((prev) => {
               const next = new Set(prev);
@@ -1013,7 +1036,7 @@ const SampleDashboardPage = () => {
                     const { details } = step;
                     return (
                       <div key={step.id} className={`sdp-pstep ${isCurrent ? "current" : ""} ${isDone ? "done" : ""}`}>
-                        <button className="sdp-pstep-hd" onClick={() => toggleStep(step.id)}>
+                        <div className="sdp-pstep-hd" onClick={() => toggleStep(step.id)}>
                           <span className={`sdp-pstep-num ${isCurrent ? "current" : isDone ? "done" : ""}`}>
                             {isDone ? "✓" : step.id}
                           </span>
@@ -1023,9 +1046,29 @@ const SampleDashboardPage = () => {
                           </div>
                           <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: "auto", flexShrink: 0 }}>
                             {isCurrent && <span className="sdp-pstep-badge">진행중</span>}
+                            <button
+                              className="sdp-pstep-sms-btn"
+                              title="이 단계 내용 문자 전송"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSmsModal({ id: "step", label: `${step.id}단계. ${step.title}`, icon: (
+                                  <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                                    <path d="M2 3.5C2 2.67 2.67 2 3.5 2h13C17.33 2 18 2.67 18 3.5v9c0 .83-.67 1.5-1.5 1.5H6l-4 4V3.5z" stroke="#555" strokeWidth="1.4" strokeLinejoin="round" />
+                                    <path d="M6 7h8M6 10.5h5" stroke="#555" strokeWidth="1.3" strokeLinecap="round" />
+                                  </svg>
+                                )});
+                                setSmsText(buildStepSmsText(step));
+                              }}
+                            >
+                              <svg width="13" height="13" viewBox="0 0 20 20" fill="none">
+                                <path d="M2 3.5C2 2.67 2.67 2 3.5 2h13C17.33 2 18 2.67 18 3.5v9c0 .83-.67 1.5-1.5 1.5H6l-4 4V3.5z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+                                <path d="M6 7h8M6 10.5h5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                              </svg>
+                              문자
+                            </button>
                             <span className={`sdp-pstep-chevron ${isOpen ? "open" : ""}`}>›</span>
                           </div>
-                        </button>
+                        </div>
 
                         {isOpen && (
                           <div className="sdp-pstep-body">

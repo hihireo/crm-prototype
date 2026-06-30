@@ -17,6 +17,7 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
     age: "",
     job: "",
     gender: "",
+    category: "일반",
   });
 
   // 메신저 계정 정보 상태
@@ -111,10 +112,17 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
     ]
   );
   const [newConsultation, setNewConsultation] = useState({
-    category: "일반",
     content: "",
   });
   const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
+  const [showReminderPopup, setShowReminderPopup] = useState(false);
+  const [reminderDirectInput, setReminderDirectInput] = useState(false);
+  const [reminderSchedule, setReminderSchedule] = useState({
+    date: "",
+    ampm: "오전",
+    hour: "",
+    minute: "",
+  });
 
   // 유효성 검사 상태
   const [validationErrors, setValidationErrors] = useState({
@@ -296,13 +304,93 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
     }
   };
 
+  // 현재 시간 기준 n분 후 날짜/시간 계산 (10분 단위 올림)
+  const calcFutureTime = (addMinutes) => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + addMinutes);
+    const remainder = now.getMinutes() % 10;
+    if (remainder !== 0) {
+      now.setMinutes(now.getMinutes() + (10 - remainder));
+    }
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, "0");
+    const day = now.getDate().toString().padStart(2, "0");
+    const hours = now.getHours();
+    const mins = now.getMinutes() % 60;
+    const ampm = hours >= 12 ? "오후" : "오전";
+    const hour12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+    return {
+      date: `${year}-${month}-${day}`,
+      ampm,
+      hour: hour12.toString().padStart(2, "0"),
+      hour24: hours.toString().padStart(2, "0"),
+      minute: mins.toString().padStart(2, "0"),
+    };
+  };
+
+  // 고객 카테고리 변경 핸들러
+  const handleCategoryChange = (newCategory) => {
+    setCustomerInfo((prev) => ({ ...prev, category: newCategory }));
+    setShowReminderPopup(true);
+    setReminderDirectInput(false);
+    setReminderSchedule({ date: "", ampm: "오전", hour: "", minute: "" });
+  };
+
+  // 리마인드 퀵 버튼 핸들러
+  const handleReminderQuick = (addMinutes) => {
+    const t = calcFutureTime(addMinutes);
+    const schedule = {
+      id: Date.now(),
+      date: t.date,
+      hour: t.hour24,
+      minute: t.minute,
+      content: `리마인드 - ${customerInfo.name}`,
+    };
+    setSchedules((prev) => [schedule, ...prev]);
+    setShowReminderPopup(false);
+    setReminderDirectInput(false);
+  };
+
+  // 리마인드 직접 입력 확인 핸들러
+  const handleReminderDirectConfirm = () => {
+    if (
+      !reminderSchedule.date ||
+      !reminderSchedule.hour ||
+      !reminderSchedule.minute
+    )
+      return;
+    const schedule = {
+      id: Date.now(),
+      date: reminderSchedule.date,
+      hour: convertTo24Hour(reminderSchedule.ampm, reminderSchedule.hour),
+      minute: reminderSchedule.minute,
+      content: `리마인드 - ${customerInfo.name}`,
+    };
+    setSchedules((prev) => [schedule, ...prev]);
+    setShowReminderPopup(false);
+    setReminderDirectInput(false);
+    setReminderSchedule({ date: "", ampm: "오전", hour: "", minute: "" });
+  };
+
+  // 일정 관리 퀵 버튼 핸들러
+  const handleScheduleQuick = (addMinutes) => {
+    const t = calcFutureTime(addMinutes);
+    setNewSchedule((prev) => ({
+      ...prev,
+      date: t.date,
+      ampm: t.ampm,
+      hour: t.hour,
+      minute: t.minute,
+    }));
+    setValidationErrors((prev) => ({ ...prev, schedule: {} }));
+  };
+
   // 상담 내용 추가
   const handleAddConsultation = () => {
     if (newConsultation.content.trim()) {
       const consultation = {
         id: Date.now(),
         author: "박직원",
-        category: newConsultation.category,
         content: newConsultation.content.trim(),
         timestamp: new Date()
           .toLocaleString("ko-KR", {
@@ -317,7 +405,7 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
           .replace(/, /, " "),
       };
       setConsultations((prev) => [consultation, ...prev]);
-      setNewConsultation({ category: "일반", content: "" });
+      setNewConsultation({ content: "" });
     }
   };
 
@@ -431,7 +519,10 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
       minute: "",
       content: "",
     });
-    setNewConsultation({ category: "일반", content: "" });
+    setNewConsultation({ content: "" });
+    setShowReminderPopup(false);
+    setReminderDirectInput(false);
+    setReminderSchedule({ date: "", ampm: "오전", hour: "", minute: "" });
 
     // 유효성 검사 에러 초기화
     setValidationErrors({
@@ -523,6 +614,30 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
                       }
                       className="cim-input"
                     />
+                  </div>
+
+                  <div className="cim-field">
+                    <label>고객 카테고리</label>
+                    <div className="cim-category-input-row">
+                      <select
+                        value={customerInfo.category}
+                        onChange={(e) => handleCategoryChange(e.target.value)}
+                        className="cim-select"
+                      >
+                        {consultationCategories.map((cat) => (
+                          <option key={cat} value={cat}>
+                            {cat}
+                          </option>
+                        ))}
+                      </select>
+                      <span
+                        className={`cim-consultation-category-badge ${getCategoryClass(
+                          customerInfo.category
+                        )}`}
+                      >
+                        {customerInfo.category}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="cim-field cim-phone-field">
@@ -751,6 +866,152 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
                   </div>
                 </div>
               </div>
+
+              {/* 리마인드 알림 설정 팝업 */}
+              {showReminderPopup && (
+                <div className="cim-reminder-popup">
+                  <div className="cim-reminder-popup-header">
+                    <span className="cim-reminder-icon">⏰</span>
+                    <span className="cim-reminder-title">리마인드 알림 설정</span>
+                    <button
+                      className="cim-reminder-close-btn"
+                      onClick={() => {
+                        setShowReminderPopup(false);
+                        setReminderDirectInput(false);
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <p className="cim-reminder-desc">
+                    카테고리를{" "}
+                    <span
+                      className={`cim-consultation-category-badge ${getCategoryClass(
+                        customerInfo.category
+                      )}`}
+                    >
+                      {customerInfo.category}
+                    </span>
+                    으로 변경했습니다. 리마인드 일정을 등록하시겠습니까?
+                  </p>
+                  <div className="cim-reminder-quick-btns">
+                    <button
+                      className="cim-reminder-quick-btn"
+                      onClick={() => handleReminderQuick(10)}
+                    >
+                      10분 후
+                    </button>
+                    <button
+                      className="cim-reminder-quick-btn"
+                      onClick={() => handleReminderQuick(30)}
+                    >
+                      30분 후
+                    </button>
+                    <button
+                      className="cim-reminder-quick-btn"
+                      onClick={() => handleReminderQuick(60)}
+                    >
+                      1시간 후
+                    </button>
+                    <button
+                      className="cim-reminder-quick-btn"
+                      onClick={() => handleReminderQuick(180)}
+                    >
+                      3시간 후
+                    </button>
+                    <button
+                      className={`cim-reminder-quick-btn cim-reminder-direct-btn${
+                        reminderDirectInput ? " active" : ""
+                      }`}
+                      onClick={() => setReminderDirectInput(!reminderDirectInput)}
+                    >
+                      직접 입력
+                    </button>
+                  </div>
+                  {reminderDirectInput && (
+                    <div className="cim-reminder-direct-input">
+                      <input
+                        type="date"
+                        value={reminderSchedule.date}
+                        onChange={(e) =>
+                          setReminderSchedule((prev) => ({
+                            ...prev,
+                            date: e.target.value,
+                          }))
+                        }
+                        className="cim-input cim-date-input"
+                      />
+                      <div className="cim-time-picker-v2">
+                        <select
+                          value={reminderSchedule.ampm}
+                          onChange={(e) =>
+                            setReminderSchedule((prev) => ({
+                              ...prev,
+                              ampm: e.target.value,
+                            }))
+                          }
+                          className="cim-select cim-ampm-select"
+                        >
+                          <option value="오전">오전</option>
+                          <option value="오후">오후</option>
+                        </select>
+                        <select
+                          value={reminderSchedule.hour}
+                          onChange={(e) =>
+                            setReminderSchedule((prev) => ({
+                              ...prev,
+                              hour: e.target.value,
+                            }))
+                          }
+                          className="cim-select cim-time-select"
+                        >
+                          <option value="">시</option>
+                          {generateHourOptions().map((hour) => (
+                            <option key={hour} value={hour}>
+                              {hour}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="cim-time-separator">:</span>
+                        <select
+                          value={reminderSchedule.minute}
+                          onChange={(e) =>
+                            setReminderSchedule((prev) => ({
+                              ...prev,
+                              minute: e.target.value,
+                            }))
+                          }
+                          className="cim-select cim-time-select"
+                        >
+                          <option value="">분</option>
+                          {generateMinuteOptions().map((minute) => (
+                            <option key={minute} value={minute}>
+                              {minute}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <button
+                        className="cim-btn cim-btn-primary cim-btn-sm"
+                        onClick={handleReminderDirectConfirm}
+                      >
+                        등록
+                      </button>
+                    </div>
+                  )}
+                  <div className="cim-reminder-footer">
+                    <button
+                      className="cim-btn cim-btn-secondary cim-btn-sm"
+                      onClick={() => {
+                        setShowReminderPopup(false);
+                        setReminderDirectInput(false);
+                      }}
+                    >
+                      설정 안함
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* 데이터 정보 영역 */}
               <div className="cim-section">
@@ -1005,6 +1266,30 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
                 {/* 일정 추가 */}
                 <div className="cim-subsection">
                   <h4 className="cim-subsection-title">일정 관리</h4>
+                  <div className="cim-schedule-quick-btns">
+                    <span className="cim-quick-label">빠른 설정:</span>
+                    <button
+                      type="button"
+                      className="cim-quick-btn"
+                      onClick={() => handleScheduleQuick(10)}
+                    >
+                      10분 후
+                    </button>
+                    <button
+                      type="button"
+                      className="cim-quick-btn"
+                      onClick={() => handleScheduleQuick(30)}
+                    >
+                      30분 후
+                    </button>
+                    <button
+                      type="button"
+                      className="cim-quick-btn"
+                      onClick={() => handleScheduleQuick(60)}
+                    >
+                      1시간 후
+                    </button>
+                  </div>
                   <div className="cim-schedule-input">
                     <input
                       type="date"
@@ -1147,22 +1432,21 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
                 <h3 className="cim-section-title">상담 내용 기록</h3>
                 <div className="cim-consultation-input">
                   <div className="cim-consultation-input-row">
-                    <select
-                      value={newConsultation.category}
+                    <input
+                      type="text"
+                      value={newConsultation.content}
                       onChange={(e) =>
                         setNewConsultation((prev) => ({
                           ...prev,
-                          category: e.target.value,
+                          content: e.target.value,
                         }))
                       }
-                      className="cim-select cim-consultation-category"
-                    >
-                      {consultationCategories.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                    </select>
+                      className="cim-input"
+                      placeholder="상담 내용을 입력하세요..."
+                      onKeyPress={(e) =>
+                        e.key === "Enter" && handleAddConsultation()
+                      }
+                    />
                     <button
                       onClick={handleAddConsultation}
                       className="cim-btn cim-btn-primary cim-btn-sm"
@@ -1170,21 +1454,6 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
                       추가
                     </button>
                   </div>
-                  <input
-                    type="text"
-                    value={newConsultation.content}
-                    onChange={(e) =>
-                      setNewConsultation((prev) => ({
-                        ...prev,
-                        content: e.target.value,
-                      }))
-                    }
-                    className="cim-input"
-                    placeholder="상담 내용을 입력하세요..."
-                    onKeyPress={(e) =>
-                      e.key === "Enter" && handleAddConsultation()
-                    }
-                  />
                 </div>
                 <div className="cim-consultation-list cim-consultation-list-full">
                   {consultations.map((consultation) => (
