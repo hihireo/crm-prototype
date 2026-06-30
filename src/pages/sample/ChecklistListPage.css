@@ -55,6 +55,21 @@
 }
 .cll-btn-primary:hover { background: #333; }
 
+.cll-btn-secondary {
+  padding: 10px 20px;
+  background: #fff;
+  color: #111;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  transition: all 0.12s;
+}
+.cll-btn-secondary:hover { border-color: #aaa; background: #f8f8f8; }
+
 /* ── 요약 통계 ── */
 .cll-stats {
   display: grid;

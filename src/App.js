@@ -24,6 +24,7 @@ import InstagramCallbackPage from "./pages/InstagramCallbackPage";
 import SampleChecklistPage from "./pages/sample/SampleChecklistPage";
 import SampleDashboardPage from "./pages/sample/SampleDashboardPage";
 import ChecklistListPage from "./pages/sample/ChecklistListPage";
+import ProcedureGuidePage from "./pages/sample/ProcedureGuidePage";
 
 /* 와이어프레임용 더미 데이터 — 미로그인 시 checklist 경로에서 사용 */
 const DEMO_USER    = { name: "데모 상담사", email: "demo@talkgate.kr" };
@@ -215,6 +216,7 @@ function AppContent() {
           <Route path="/checklist/form" element={<SampleChecklistPage />} />
           <Route path="/checklist/result" element={<SampleDashboardPage />} />
           <Route path="/checklist/result-external" element={<SampleDashboardPage />} />
+          <Route path="/checklist/procedure" element={<ProcedureGuidePage />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </main>

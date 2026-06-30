@@ -265,12 +265,20 @@ const ChecklistListPage = () => {
               총 {totalCount}건 · 이번 달 {thisMonth}건 상담
             </p>
           </div>
-          <button
-            className="cll-btn-primary"
-            onClick={() => navigate("/checklist/form")}
-          >
-            + 새 분석 시작
-          </button>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              className="cll-btn-secondary"
+              onClick={() => navigate("/checklist/procedure")}
+            >
+              절차 안내
+            </button>
+            <button
+              className="cll-btn-primary"
+              onClick={() => navigate("/checklist/form")}
+            >
+              + 새 분석 시작
+            </button>
+          </div>
         </div>
 
         {/* 요약 통계 */}

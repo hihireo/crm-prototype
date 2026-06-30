@@ -1,0 +1,656 @@
+/* ===== 절차 안내 페이지 ===== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+.pgd-page {
+  min-height: calc(100vh - 44px);
+  background: #f8f8f8;
+  font-family: -apple-system, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+  color: #111;
+}
+
+.pgd-body {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── 페이지 헤더 ── */
+.pgd-page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pgd-page-title {
+  font-size: 24px;
+  font-weight: 900;
+  color: #111;
+  letter-spacing: -0.04em;
+  margin: 0 0 4px;
+}
+
+.pgd-page-sub {
+  font-size: 13px;
+  color: #aaa;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.pgd-back-btn {
+  padding: 9px 16px;
+  background: #fff;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.12s;
+}
+.pgd-back-btn:hover {
+  border-color: #aaa;
+  color: #111;
+}
+
+/* ── 고객 선택 바 ── */
+.pgd-client-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 14px;
+  padding: 14px 20px;
+}
+
+.pgd-client-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #555;
+  white-space: nowrap;
+}
+
+.pgd-client-select {
+  padding: 8px 14px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  background: #f8f8f8;
+  cursor: pointer;
+  min-width: 220px;
+  outline: none;
+  transition: border-color 0.12s;
+}
+.pgd-client-select:focus {
+  border-color: #111;
+}
+
+.pgd-client-hint {
+  font-size: 12px;
+  color: #bbb;
+  letter-spacing: -0.01em;
+}
+
+/* ── 절차 탭 ── */
+.pgd-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.pgd-tab {
+  padding: 10px 22px;
+  background: #fff;
+  border: 2px solid #e8e8e8;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #999;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: -0.02em;
+}
+.pgd-tab:hover {
+  border-color: #ccc;
+  color: #444;
+}
+.pgd-tab.active {
+  background: #fff;
+  font-weight: 800;
+}
+
+/* ── 메인 2컬럼 레이아웃 ── */
+.pgd-content {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+  align-items: start;
+}
+
+/* ── 아코디언 컬럼 ── */
+.pgd-accordion-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pgd-col-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pgd-col-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.pgd-col-step-count {
+  font-size: 13px;
+  color: #aaa;
+  font-weight: 500;
+}
+
+.pgd-steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── 단계 카드 ── */
+.pgd-step-card {
+  background: #fff;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.pgd-step-card:hover {
+  border-color: #d0d0d0;
+}
+.pgd-step-card.current {
+  border-color: #111;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+.pgd-step-card.completed {
+  opacity: 0.7;
+}
+
+.pgd-step-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: 12px;
+}
+
+.pgd-step-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pgd-step-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  color: #888;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.pgd-step-num.current {
+  background: #111;
+  color: #fff;
+}
+.pgd-step-num.done {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.pgd-step-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pgd-step-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+.pgd-step-card.completed .pgd-step-title {
+  color: #888;
+}
+
+.pgd-step-duration {
+  font-size: 12px;
+  color: #bbb;
+  font-weight: 500;
+}
+
+.pgd-step-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.pgd-current-badge {
+  padding: 3px 9px;
+  background: #111;
+  color: #fff;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.pgd-chevron {
+  font-size: 20px;
+  color: #bbb;
+  transform: rotate(90deg);
+  transition: transform 0.2s;
+  line-height: 1;
+}
+.pgd-chevron.open {
+  transform: rotate(-90deg);
+}
+
+/* ── 단계 상세 내용 ── */
+.pgd-step-body {
+  padding: 0 18px 20px;
+  border-top: 1.5px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pgd-step-desc {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.7;
+  margin: 14px 0 0;
+  letter-spacing: -0.01em;
+}
+
+.pgd-step-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pgd-step-list li {
+  font-size: 13px;
+  color: #444;
+  padding-left: 16px;
+  position: relative;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+}
+.pgd-step-list li::before {
+  content: "·";
+  position: absolute;
+  left: 4px;
+  color: #aaa;
+  font-weight: 700;
+}
+
+.pgd-step-note {
+  font-size: 12px;
+  color: #888;
+  background: #f8f8f8;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 0;
+  letter-spacing: -0.01em;
+  line-height: 1.6;
+}
+
+.pgd-step-example {
+  background: #f0f4ff;
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pgd-example-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #2563eb;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.pgd-step-example p {
+  font-size: 13px;
+  color: #1e3a8a;
+  margin: 0;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+}
+
+.pgd-step-caution {
+  display: flex;
+  gap: 8px;
+  background: #fff8f0;
+  border: 1px solid #ffe0b2;
+  border-radius: 10px;
+  padding: 12px 14px;
+  align-items: flex-start;
+}
+.pgd-caution-icon {
+  font-size: 14px;
+  color: #f57c00;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.pgd-step-caution p {
+  font-size: 12px;
+  color: #e65100;
+  margin: 0;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+}
+
+.pgd-set-current-btn {
+  align-self: flex-start;
+  padding: 8px 16px;
+  background: #f5f5f5;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.12s;
+  letter-spacing: -0.01em;
+}
+.pgd-set-current-btn:hover {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+.pgd-set-current-btn.active {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
+/* ── 타임라인 패널 ── */
+.pgd-timeline-col {
+  position: sticky;
+  top: 24px;
+}
+
+.pgd-timeline-panel {
+  background: #fff;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 16px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pgd-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pgd-panel-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #111;
+  margin: 0;
+  letter-spacing: -0.03em;
+}
+
+.pgd-panel-client {
+  font-size: 12px;
+  font-weight: 700;
+  color: #555;
+  background: #f0f0f0;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.pgd-current-info {
+  background: #f8f8f8;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.pgd-current-step-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #aaa;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.pgd-current-step-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.03em;
+}
+
+.pgd-remaining-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pgd-remaining-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pgd-remaining-value {
+  font-size: 22px;
+  font-weight: 900;
+  color: #111;
+  letter-spacing: -0.04em;
+}
+
+.pgd-total-label {
+  font-size: 12px;
+  color: #bbb;
+  letter-spacing: -0.01em;
+}
+
+/* ── 타임라인 ── */
+.pgd-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.pgd-tl-item {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.pgd-tl-track {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+.pgd-tl-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #e0e0e0;
+  background: #fff;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.pgd-tl-dot.done {
+  background: #2e7d32;
+  border-color: #2e7d32;
+}
+.pgd-tl-dot.current {
+  width: 16px;
+  height: 16px;
+  border-width: 3px;
+}
+.pgd-tl-dot.pending {
+  background: #f5f5f5;
+  border-color: #e0e0e0;
+}
+
+.pgd-tl-line {
+  width: 2px;
+  flex: 1;
+  background: #f0f0f0;
+  min-height: 20px;
+  transition: background 0.15s;
+}
+.pgd-tl-line.done {
+  background: #a5d6a7;
+}
+
+.pgd-tl-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 0 18px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pgd-tl-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ccc;
+  letter-spacing: -0.02em;
+  line-height: 1.4;
+  transition: color 0.15s;
+}
+.pgd-tl-content.done .pgd-tl-title {
+  color: #888;
+}
+.pgd-tl-content.current .pgd-tl-title {
+  color: #111;
+  font-weight: 800;
+}
+
+.pgd-tl-dur {
+  font-size: 11px;
+  color: #ddd;
+  letter-spacing: -0.01em;
+}
+.pgd-tl-content.done .pgd-tl-dur {
+  color: #bbb;
+}
+.pgd-tl-content.current .pgd-tl-dur {
+  color: #888;
+}
+
+/* ── 진행률 바 ── */
+.pgd-progress-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pgd-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+}
+
+.pgd-progress-bg {
+  width: 100%;
+  height: 6px;
+  background: #f0f0f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.pgd-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+/* ── 반응형 ── */
+@media (max-width: 900px) {
+  .pgd-content {
+    grid-template-columns: 1fr;
+  }
+
+  .pgd-timeline-col {
+    position: static;
+    order: -1;
+  }
+
+  .pgd-timeline-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .pgd-panel-header { grid-column: 1 / -1; }
+  .pgd-timeline { grid-column: 1 / -1; }
+  .pgd-progress-bar-wrap { grid-column: 1 / -1; }
+}
+
+@media (max-width: 600px) {
+  .pgd-body {
+    padding: 20px 16px 60px;
+  }
+
+  .pgd-page-title { font-size: 20px; }
+
+  .pgd-tabs {
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .pgd-timeline-panel {
+    display: flex;
+  }
+}
