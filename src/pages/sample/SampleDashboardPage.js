@@ -252,24 +252,151 @@ const PROCEDURES = {
     color: "#2563eb",
     totalMonths: "42~54개월",
     steps: [
-      { id: 1, title: "신청 전 상담", durationLabel: "—", durationWeeks: 0,
-        details: { desc: "법원 신청 전 개인회생 요건 해당 여부를 검토하는 단계입니다.", items: ["채무 총액 확인 (무담보 10억 이하 / 담보 15억 이하)", "월 가용 소득 존재 여부 확인", "연체 현황 및 압류·소송 확인", "기존 파산·회생 이력 확인"], caution: null } },
-      { id: 2, title: "신청서 작성 및 접수", durationLabel: "1~2주", durationWeeks: 1.5,
-        details: { desc: "법원에 개인회생 신청서와 첨부 서류를 제출하고 사건번호를 부여받는 단계입니다.", items: ["개인회생 신청서", "채권자 목록", "재산 목록", "수입·지출 목록", "변제계획안", "소득 증빙자료 (급여명세서, 세금계산서 등)"], note: "접수 후 법원 사건번호가 부여됩니다.", caution: null } },
-      { id: 3, title: "금지명령·중지명령", durationLabel: "신청 후 1~4주", durationWeeks: 2,
-        details: { desc: "신청 후 법원 판단에 따라 채권자의 강제집행 등을 막는 명령이 내려질 수 있습니다.", items: ["채권자의 전화·서면 독촉 중지", "급여·통장 압류 중지", "강제집행 정지"], caution: "금지명령은 모든 사건에서 자동으로 인정되는 것은 아닙니다. 법원의 재량에 따라 발령 여부가 결정됩니다." } },
-      { id: 4, title: "보정권고·보정명령", durationLabel: "1~3개월", durationWeeks: 8,
-        details: { desc: "법원이 서류를 검토하면서 추가 자료를 요구하는 단계로, 실무에서 가장 중요한 단계입니다.", items: ["최근 대출 사용처 소명", "카드 사용내역 제출", "재산 관계 확인 자료", "소득 확인 서류 (추가)", "배우자 재산 관련 자료"], caution: "보정 기한을 놓치면 사건이 기각될 수 있으므로 기한 관리가 매우 중요합니다." } },
-      { id: 5, title: "개시결정", durationLabel: "1개월 내외", durationWeeks: 4,
-        details: { desc: "법원이 개인회생 절차를 진행하기로 결정하는 단계입니다.", items: ["정식 회생 절차 시작", "채권자 이의기간 진행", "개시결정 공고"], caution: null } },
-      { id: 6, title: "채권자집회", durationLabel: "1~2개월", durationWeeks: 6,
-        details: { desc: "채권자가 변제계획에 의견을 내는 절차입니다. 대부분 형식적으로 진행됩니다.", items: ["채무 발생 경위 설명", "현재 소득·재산 현황 확인", "재산 은닉 여부 검토"], caution: "채무 발생 과정이 불명확하거나 재산 은닉 의심이 있는 경우 이의가 제기될 수 있습니다." } },
-      { id: 7, title: "인가결정", durationLabel: "1개월 내외", durationWeeks: 4,
-        details: { desc: "법원이 변제계획을 최종 승인하는 단계입니다.", items: ["변제계획 내용 확정", "인가 후 계획대로 변제 의무 발생"], example: "예) 채무 1억 5천만원 → 월 변제금 100만원 × 36개월 = 3,600만원 변제 후 나머지 면책 대상", caution: null } },
-      { id: 8, title: "변제 수행", durationLabel: "36개월 (경우에 따라 60개월)", durationWeeks: 156,
-        details: { desc: "인가된 변제계획대로 매월 납부하는 단계입니다.", items: ["매월 정해진 금액 변제", "소득 변동 시 변제계획 변경 신청 가능", "정해진 기간 동안 성실히 납부"], caution: "변제를 중단하거나 미납이 누적되면 인가취소로 이어질 수 있습니다." } },
-      { id: 9, title: "면책결정", durationLabel: "변제 완료 후 1~2개월", durationWeeks: 6,
-        details: { desc: "변제 완료 후 법원이 면책을 결정하면 남은 채무가 면제됩니다.", items: ["변제 완료 보고서 제출", "법원 면책 심사", "면책결정 시 잔여 채무 면제"], caution: "파산·면책 이력은 신용정보에 기록되며 일정 기간 금융 활동에 제한이 있을 수 있습니다." } },
+      {
+        id: 1,
+        title: "신청 전 상담",
+        durationLabel: "—",
+        durationWeeks: 0,
+        details: {
+          desc: "법원 신청 전 개인회생 요건 해당 여부를 검토하는 단계입니다.",
+          items: [
+            "채무 총액 확인 (무담보 10억 이하 / 담보 15억 이하)",
+            "월 가용 소득 존재 여부 확인",
+            "연체 현황 및 압류·소송 확인",
+            "기존 파산·회생 이력 확인",
+          ],
+          caution: null,
+        },
+      },
+      {
+        id: 2,
+        title: "신청서 작성 및 접수",
+        durationLabel: "1~2주",
+        durationWeeks: 1.5,
+        details: {
+          desc: "법원에 개인회생 신청서와 첨부 서류를 제출하고 사건번호를 부여받는 단계입니다.",
+          items: [
+            "개인회생 신청서",
+            "채권자 목록",
+            "재산 목록",
+            "수입·지출 목록",
+            "변제계획안",
+            "소득 증빙자료 (급여명세서, 세금계산서 등)",
+          ],
+          note: "접수 후 법원 사건번호가 부여됩니다.",
+          caution: null,
+        },
+      },
+      {
+        id: 3,
+        title: "금지명령·중지명령",
+        durationLabel: "신청 후 1~4주",
+        durationWeeks: 2,
+        details: {
+          desc: "신청 후 법원 판단에 따라 채권자의 강제집행 등을 막는 명령이 내려질 수 있습니다.",
+          items: [
+            "채권자의 전화·서면 독촉 중지",
+            "급여·통장 압류 중지",
+            "강제집행 정지",
+          ],
+          caution:
+            "금지명령은 모든 사건에서 자동으로 인정되는 것은 아닙니다. 법원의 재량에 따라 발령 여부가 결정됩니다.",
+        },
+      },
+      {
+        id: 4,
+        title: "보정권고·보정명령",
+        durationLabel: "1~3개월",
+        durationWeeks: 8,
+        details: {
+          desc: "법원이 서류를 검토하면서 추가 자료를 요구하는 단계로, 실무에서 가장 중요한 단계입니다.",
+          items: [
+            "최근 대출 사용처 소명",
+            "카드 사용내역 제출",
+            "재산 관계 확인 자료",
+            "소득 확인 서류 (추가)",
+            "배우자 재산 관련 자료",
+          ],
+          caution:
+            "보정 기한을 놓치면 사건이 기각될 수 있으므로 기한 관리가 매우 중요합니다.",
+        },
+      },
+      {
+        id: 5,
+        title: "개시결정",
+        durationLabel: "1개월 내외",
+        durationWeeks: 4,
+        details: {
+          desc: "법원이 개인회생 절차를 진행하기로 결정하는 단계입니다.",
+          items: [
+            "정식 회생 절차 시작",
+            "채권자 이의기간 진행",
+            "개시결정 공고",
+          ],
+          caution: null,
+        },
+      },
+      {
+        id: 6,
+        title: "채권자집회",
+        durationLabel: "1~2개월",
+        durationWeeks: 6,
+        details: {
+          desc: "채권자가 변제계획에 의견을 내는 절차입니다. 대부분 형식적으로 진행됩니다.",
+          items: [
+            "채무 발생 경위 설명",
+            "현재 소득·재산 현황 확인",
+            "재산 은닉 여부 검토",
+          ],
+          caution:
+            "채무 발생 과정이 불명확하거나 재산 은닉 의심이 있는 경우 이의가 제기될 수 있습니다.",
+        },
+      },
+      {
+        id: 7,
+        title: "인가결정",
+        durationLabel: "1개월 내외",
+        durationWeeks: 4,
+        details: {
+          desc: "법원이 변제계획을 최종 승인하는 단계입니다.",
+          items: ["변제계획 내용 확정", "인가 후 계획대로 변제 의무 발생"],
+          example:
+            "예) 채무 1억 5천만원 → 월 변제금 100만원 × 36개월 = 3,600만원 변제 후 나머지 면책 대상",
+          caution: null,
+        },
+      },
+      {
+        id: 8,
+        title: "변제 수행",
+        durationLabel: "36개월 (경우에 따라 60개월)",
+        durationWeeks: 156,
+        details: {
+          desc: "인가된 변제계획대로 매월 납부하는 단계입니다.",
+          items: [
+            "매월 정해진 금액 변제",
+            "소득 변동 시 변제계획 변경 신청 가능",
+            "정해진 기간 동안 성실히 납부",
+          ],
+          caution:
+            "변제를 중단하거나 미납이 누적되면 인가취소로 이어질 수 있습니다.",
+        },
+      },
+      {
+        id: 9,
+        title: "면책결정",
+        durationLabel: "변제 완료 후 1~2개월",
+        durationWeeks: 6,
+        details: {
+          desc: "변제 완료 후 법원이 면책을 결정하면 남은 채무가 면제됩니다.",
+          items: [
+            "변제 완료 보고서 제출",
+            "법원 면책 심사",
+            "면책결정 시 잔여 채무 면제",
+          ],
+          caution:
+            "파산·면책 이력은 신용정보에 기록되며 일정 기간 금융 활동에 제한이 있을 수 있습니다.",
+        },
+      },
     ],
   },
   debtAdjustment: {
@@ -278,18 +405,95 @@ const PROCEDURES = {
     color: "#059669",
     totalMonths: "최대 120개월",
     steps: [
-      { id: 1, title: "신청 자격 확인", durationLabel: "—", durationWeeks: 0,
-        details: { desc: "신용회복위원회 채무조정 신청이 가능한 요건을 사전 확인하는 단계입니다.", items: ["연체 3개월 이상 또는 연체 우려", "총 채무액 15억원 이하 (담보 포함)", "채권금융기관이 협약기관에 해당", "이전 채무조정 이력 확인"], caution: null } },
-      { id: 2, title: "신청서 접수", durationLabel: "1~2주", durationWeeks: 1.5,
-        details: { desc: "신용회복위원회에 채무조정 신청서 및 관련 서류를 제출하는 단계입니다.", items: ["채무조정 신청서", "소득 증빙자료", "채무 내역 확인서", "가계수지 현황표"], note: "온라인(신복위 홈페이지) 또는 방문 신청 가능", caution: null } },
-      { id: 3, title: "채권자 동의 절차", durationLabel: "1~2개월", durationWeeks: 6,
-        details: { desc: "신용회복위원회가 각 채권 금융기관에 조정안을 통보하고 동의를 받는 단계입니다.", items: ["채권기관별 조정안 검토", "채권기관 동의 여부 통보", "동의율 미달 시 조정 불가"], caution: "전체 채권기관의 과반수 이상이 동의해야 조정이 확정됩니다." } },
-      { id: 4, title: "조정 확정", durationLabel: "2~4주", durationWeeks: 3,
-        details: { desc: "채권자 동의를 받아 채무조정 조건이 최종 확정되는 단계입니다.", items: ["이자율 감면 (최대 0%)", "상환기간 연장 (최대 10년)", "원금 일부 감면 (신용대출 최대 80%)"], caution: null } },
-      { id: 5, title: "분할상환 시작", durationLabel: "확정 조건에 따라 (최대 120개월)", durationWeeks: 480,
-        details: { desc: "확정된 조건에 따라 매월 분할 납부하는 단계입니다.", items: ["매월 정해진 금액 납부", "납부 중 소득 변동 시 재조정 신청 가능", "성실 납부 시 신용 회복 효과"], caution: "2회 이상 미납 시 조정 취소될 수 있습니다." } },
-      { id: 6, title: "조정 완료", durationLabel: "—", durationWeeks: 0,
-        details: { desc: "모든 분할상환이 완료되고 채무조정 절차가 종료되는 단계입니다.", items: ["완납 확인서 수령", "신용정보 회복 신청", "채무 소멸 확인"], caution: null } },
+      {
+        id: 1,
+        title: "신청 자격 확인",
+        durationLabel: "—",
+        durationWeeks: 0,
+        details: {
+          desc: "신용회복위원회 채무조정 신청이 가능한 요건을 사전 확인하는 단계입니다.",
+          items: [
+            "연체 3개월 이상 또는 연체 우려",
+            "총 채무액 15억원 이하 (담보 포함)",
+            "채권금융기관이 협약기관에 해당",
+            "이전 채무조정 이력 확인",
+          ],
+          caution: null,
+        },
+      },
+      {
+        id: 2,
+        title: "신청서 접수",
+        durationLabel: "1~2주",
+        durationWeeks: 1.5,
+        details: {
+          desc: "신용회복위원회에 채무조정 신청서 및 관련 서류를 제출하는 단계입니다.",
+          items: [
+            "채무조정 신청서",
+            "소득 증빙자료",
+            "채무 내역 확인서",
+            "가계수지 현황표",
+          ],
+          note: "온라인(신복위 홈페이지) 또는 방문 신청 가능",
+          caution: null,
+        },
+      },
+      {
+        id: 3,
+        title: "채권자 동의 절차",
+        durationLabel: "1~2개월",
+        durationWeeks: 6,
+        details: {
+          desc: "신용회복위원회가 각 채권 금융기관에 조정안을 통보하고 동의를 받는 단계입니다.",
+          items: [
+            "채권기관별 조정안 검토",
+            "채권기관 동의 여부 통보",
+            "동의율 미달 시 조정 불가",
+          ],
+          caution: "전체 채권기관의 과반수 이상이 동의해야 조정이 확정됩니다.",
+        },
+      },
+      {
+        id: 4,
+        title: "조정 확정",
+        durationLabel: "2~4주",
+        durationWeeks: 3,
+        details: {
+          desc: "채권자 동의를 받아 채무조정 조건이 최종 확정되는 단계입니다.",
+          items: [
+            "이자율 감면 (최대 0%)",
+            "상환기간 연장 (최대 10년)",
+            "원금 일부 감면 (신용대출 최대 80%)",
+          ],
+          caution: null,
+        },
+      },
+      {
+        id: 5,
+        title: "분할상환 시작",
+        durationLabel: "확정 조건에 따라 (최대 120개월)",
+        durationWeeks: 480,
+        details: {
+          desc: "확정된 조건에 따라 매월 분할 납부하는 단계입니다.",
+          items: [
+            "매월 정해진 금액 납부",
+            "납부 중 소득 변동 시 재조정 신청 가능",
+            "성실 납부 시 신용 회복 효과",
+          ],
+          caution: "2회 이상 미납 시 조정 취소될 수 있습니다.",
+        },
+      },
+      {
+        id: 6,
+        title: "조정 완료",
+        durationLabel: "—",
+        durationWeeks: 0,
+        details: {
+          desc: "모든 분할상환이 완료되고 채무조정 절차가 종료되는 단계입니다.",
+          items: ["완납 확인서 수령", "신용정보 회복 신청", "채무 소멸 확인"],
+          caution: null,
+        },
+      },
     ],
   },
   bankruptcy: {
@@ -298,21 +502,158 @@ const PROCEDURES = {
     color: "#dc2626",
     totalMonths: "6~18개월",
     steps: [
-      { id: 1, title: "신청 전 상담", durationLabel: "—", durationWeeks: 0,
-        details: { desc: "파산·면책 신청 전 요건 해당 여부를 검토하는 단계입니다.", items: ["지급불능 상태 확인 (채무 > 자산, 소득으로 변제 불가)", "재산 현황 파악", "면책 불허가 사유 검토 (사기, 낭비 등)", "소득 유무에 따른 개인회생과의 비교 검토"], caution: null } },
-      { id: 2, title: "신청서 작성·접수", durationLabel: "1~2주", durationWeeks: 1.5,
-        details: { desc: "법원에 파산 및 면책 신청서와 첨부 서류를 제출하는 단계입니다.", items: ["파산·면책 신청서", "채권자 목록", "재산 목록", "수입·지출 목록", "진술서 (채무 발생 경위 등)"], note: "파산신청과 면책신청을 동시에 제출하는 것이 일반적입니다.", caution: null } },
-      { id: 3, title: "파산선고", durationLabel: "1~3개월", durationWeeks: 8,
-        details: { desc: "법원이 파산을 선고하는 단계로, 이후 재산관리 권한이 파산관재인에게 넘어갑니다.", items: ["법원의 파산 요건 심사", "파산선고 결정", "파산관재인 선임"], caution: null } },
-      { id: 4, title: "파산관재인 조사", durationLabel: "1~3개월", durationWeeks: 8,
-        details: { desc: "파산관재인이 재산 현황을 조사하고 채권자에게 배당하는 단계입니다.", items: ["재산 조사 및 목록 작성", "채권자 신고 접수", "배당 가능 재산 환가", "채권자에게 배당 (자산이 적으면 배당 없이 종결)"], caution: "이 기간 동안 재산 처분이 제한됩니다." } },
-      { id: 5, title: "면책 심문", durationLabel: "1~2개월", durationWeeks: 6,
-        details: { desc: "법원이 면책 허가 여부를 판단하는 단계입니다.", items: ["면책 불허가 사유 검토", "채무자 심문 (필요 시 출석)", "채권자 이의 여부 확인"], caution: "도박, 낭비, 사기 등으로 채무가 발생한 경우 면책이 불허가될 수 있습니다." } },
-      { id: 6, title: "면책결정", durationLabel: "—", durationWeeks: 0,
-        details: { desc: "법원이 면책을 결정하면 파산절차가 완료되고 채무가 면제됩니다.", items: ["면책결정 확정", "모든 채무 면제 (면책 제외 채무 제외)", "신용정보 기록 (일정 기간)"], caution: "면책 제외 채무: 세금, 양육비, 벌금, 고의·과실 손해배상채무 등은 면책되지 않습니다." } },
+      {
+        id: 1,
+        title: "신청 전 상담",
+        durationLabel: "—",
+        durationWeeks: 0,
+        details: {
+          desc: "파산·면책 신청 전 요건 해당 여부를 검토하는 단계입니다.",
+          items: [
+            "지급불능 상태 확인 (채무 > 자산, 소득으로 변제 불가)",
+            "재산 현황 파악",
+            "면책 불허가 사유 검토 (사기, 낭비 등)",
+            "소득 유무에 따른 개인회생과의 비교 검토",
+          ],
+          caution: null,
+        },
+      },
+      {
+        id: 2,
+        title: "신청서 작성·접수",
+        durationLabel: "1~2주",
+        durationWeeks: 1.5,
+        details: {
+          desc: "법원에 파산 및 면책 신청서와 첨부 서류를 제출하는 단계입니다.",
+          items: [
+            "파산·면책 신청서",
+            "채권자 목록",
+            "재산 목록",
+            "수입·지출 목록",
+            "진술서 (채무 발생 경위 등)",
+          ],
+          note: "파산신청과 면책신청을 동시에 제출하는 것이 일반적입니다.",
+          caution: null,
+        },
+      },
+      {
+        id: 3,
+        title: "파산선고",
+        durationLabel: "1~3개월",
+        durationWeeks: 8,
+        details: {
+          desc: "법원이 파산을 선고하는 단계로, 이후 재산관리 권한이 파산관재인에게 넘어갑니다.",
+          items: ["법원의 파산 요건 심사", "파산선고 결정", "파산관재인 선임"],
+          caution: null,
+        },
+      },
+      {
+        id: 4,
+        title: "파산관재인 조사",
+        durationLabel: "1~3개월",
+        durationWeeks: 8,
+        details: {
+          desc: "파산관재인이 재산 현황을 조사하고 채권자에게 배당하는 단계입니다.",
+          items: [
+            "재산 조사 및 목록 작성",
+            "채권자 신고 접수",
+            "배당 가능 재산 환가",
+            "채권자에게 배당 (자산이 적으면 배당 없이 종결)",
+          ],
+          caution: "이 기간 동안 재산 처분이 제한됩니다.",
+        },
+      },
+      {
+        id: 5,
+        title: "면책 심문",
+        durationLabel: "1~2개월",
+        durationWeeks: 6,
+        details: {
+          desc: "법원이 면책 허가 여부를 판단하는 단계입니다.",
+          items: [
+            "면책 불허가 사유 검토",
+            "채무자 심문 (필요 시 출석)",
+            "채권자 이의 여부 확인",
+          ],
+          caution:
+            "도박, 낭비, 사기 등으로 채무가 발생한 경우 면책이 불허가될 수 있습니다.",
+        },
+      },
+      {
+        id: 6,
+        title: "면책결정",
+        durationLabel: "—",
+        durationWeeks: 0,
+        details: {
+          desc: "법원이 면책을 결정하면 파산절차가 완료되고 채무가 면제됩니다.",
+          items: [
+            "면책결정 확정",
+            "모든 채무 면제 (면책 제외 채무 제외)",
+            "신용정보 기록 (일정 기간)",
+          ],
+          caution:
+            "면책 제외 채무: 세금, 양육비, 벌금, 고의·과실 손해배상채무 등은 면책되지 않습니다.",
+        },
+      },
     ],
   },
 };
+
+/* ── 출장담당자 전용 데이터 ── */
+const FIELD_DOCS = {
+  rehabilitation: [
+    { id: "d1", text: "주민등록등본 1부" },
+    { id: "d2", text: "소득 증빙 서류 (급여명세서 또는 사업자 매출장부·세금계산서)" },
+    { id: "d3", text: "각 금융기관 대출 잔액증명서" },
+    { id: "d4", text: "가족관계증명서 1부" },
+    { id: "d5", text: "무재산 확인서 (부동산·차량 없는 경우)" },
+    { id: "d6", text: "금융거래 확인서 (최근 1년)" },
+    { id: "d7", text: "신분증 사본" },
+  ],
+  debtAdjustment: [
+    { id: "d1", text: "신분증 사본" },
+    { id: "d2", text: "주민등록등본 1부" },
+    { id: "d3", text: "소득 증빙 서류 (급여명세서 또는 사업소득 확인서)" },
+    { id: "d4", text: "각 금융기관 채무 내역 확인서" },
+    { id: "d5", text: "가계수지 현황표 (수입·지출 내역)" },
+  ],
+  bankruptcy: [
+    { id: "d1", text: "주민등록등본 1부" },
+    { id: "d2", text: "신분증 사본" },
+    { id: "d3", text: "각 금융기관 채무 내역 확인서" },
+    { id: "d4", text: "재산 관련 서류 (부동산 등기부등본, 차량 등록증 등)" },
+    { id: "d5", text: "가족관계증명서 1부" },
+    { id: "d6", text: "소득 증빙 서류 (없을 경우 무소득 확인서)" },
+    { id: "d7", text: "금융거래 확인서 (최근 1년)" },
+  ],
+};
+
+const FIELD_REASONS = {
+  rehabilitation: [
+    { icon: "✅", title: "변제 여력이 있습니다", desc: "월 45만원의 가용 소득이 확인되어 법원에 변제 계획을 제출할 수 있습니다." },
+    { icon: "✅", title: "채무 감면 효과가 큽니다", desc: "채무 3.1억원 중 약 2.7억원이 면책 대상이 될 수 있습니다. 실질적으로 88% 감면 효과입니다." },
+    { icon: "✅", title: "신청 즉시 추심이 중단됩니다", desc: "법원에 접수하는 순간 채권자의 전화·압류·강제집행이 법적으로 금지됩니다." },
+  ],
+  debtAdjustment: [
+    { icon: "✅", title: "이자를 0%로 낮출 수 있습니다", desc: "신용회복위원회를 통해 이자율을 최대 0%까지 감면받을 수 있습니다." },
+    { icon: "✅", title: "상환 기간을 늘려 월 부담을 줄입니다", desc: "최대 10년(120개월)에 걸쳐 분할 상환하여 매월 납부액을 크게 줄일 수 있습니다." },
+    { icon: "✅", title: "법원 절차 없이 진행됩니다", desc: "신용회복위원회를 통한 채무조정은 법원에 가지 않아도 됩니다." },
+  ],
+  bankruptcy: [
+    { icon: "✅", title: "모든 채무가 면제됩니다", desc: "파산·면책 결정 후 세금·양육비 등 일부를 제외한 모든 채무가 법적으로 사라집니다." },
+    { icon: "✅", title: "6~18개월 내 정리됩니다", desc: "개인회생보다 절차가 짧고 월 변제 의무가 없습니다." },
+    { icon: "✅", title: "소득이 없어도 신청 가능합니다", desc: "변제 여력이 없는 상태라면 파산이 가장 현실적인 해결 방법입니다." },
+  ],
+};
+
+const FIELD_FAQ = [
+  { q: "신청하면 직장에 영향이 있나요?", a: "일반 사기업 직원의 경우 개인회생·파산은 원칙적으로 해고 사유가 되지 않습니다. 단, 금융기관·공무원·일부 자격증 직종은 별도 확인이 필요합니다." },
+  { q: "신청 후 카드 사용이 안 되나요?", a: "신청 이후 신용카드 사용은 어렵습니다. 변제 기간 중에는 체크카드·현금 위주로 생활하셔야 합니다. 변제 완료 후 신용 회복이 시작됩니다." },
+  { q: "집과 차는 어떻게 되나요?", a: "전월세 거주 중이라면 주거지는 보호됩니다. 자가 주택이나 차량이 있는 경우 재산 처분 여부는 법원 판단에 따라 달라집니다." },
+  { q: "가족에게 영향이 가나요?", a: "본인의 채무이므로 가족에게 직접적인 법적 책임은 없습니다. 다만 배우자의 소득은 가용소득 산정 시 일부 반영될 수 있습니다." },
+  { q: "얼마나 걸리나요?", a: "신청부터 면책까지 통상 3~5년이 소요됩니다. 서류 준비(1~2주) → 법원 접수 → 개시결정(1~3개월) → 변제(36~60개월) → 면책 순서로 진행됩니다." },
+  { q: "지금 당장 추심을 멈출 수 있나요?", a: "법원 접수 후 금지명령이 발령되면 채권자의 전화·압류·강제집행이 즉시 중지됩니다. 신청 전에도 내용증명 발송으로 일시 대응이 가능합니다." },
+];
 
 const calcRemainingWeeks = (steps, currentStepId) => {
   const idx = steps.findIndex((s) => s.id === currentStepId);
@@ -423,6 +764,10 @@ const SampleDashboardPage = () => {
     return saved ? parseInt(saved) : null;
   });
 
+  /* 출장담당자 전용 상태 */
+  const [checkedDocs, setCheckedDocs] = useState(new Set());
+  const [openFaq, setOpenFaq] = useState(null);
+
   const [chatMessages, setChatMessages] = useState([INITIAL_AI_MSG]);
   const [chatInput, setChatInput] = useState("");
   const [isAiTyping, setIsAiTyping] = useState(false);
@@ -457,6 +802,230 @@ const SampleDashboardPage = () => {
 
   const totalRepayment = AI.repaymentAmount * AI.repaymentMonths;
   const exemptDebt = CLIENT.totalDebt - totalRepayment;
+
+  /* ── 출장담당자 전용 뷰 ── */
+  if (isExternal) {
+    const proc = PROCEDURES[selectedOption];
+    const { steps, color, label, totalMonths } = proc;
+    const currentIdx = steps.findIndex((s) => s.id === procCurrentStep);
+    const completedIds = new Set(procCurrentStep ? steps.filter((s) => s.id < procCurrentStep).map((s) => s.id) : []);
+    const remainingWeeks = calcRemainingWeeks(steps, procCurrentStep);
+    const progressPct = currentIdx >= 0 ? Math.round((currentIdx / (steps.length - 1)) * 100) : 0;
+    const fieldDocs = FIELD_DOCS[selectedOption] || FIELD_DOCS.rehabilitation;
+    const fieldReasons = FIELD_REASONS[selectedOption] || FIELD_REASONS.rehabilitation;
+    const toggleDoc = (id) => setCheckedDocs((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+    const handleSetCurrent = (stepId) => { setProcCurrentStep(stepId); localStorage.setItem(procStorageKey(1, selectedOption), String(stepId)); };
+    const checkedCount = fieldDocs.filter((d) => checkedDocs.has(d.id)).length;
+
+    return (
+      <div className="sdp-page">
+        <div className="sdp-body">
+          {/* 상단 네비 */}
+          <div className="sdp-topnav">
+            <div className="sdp-topnav-client">
+              <div className="sdp-chip-dot" />
+              <span>{CLIENT.name} · {CLIENT.age}세 · {CLIENT.job}</span>
+            </div>
+            <div className="sdp-topnav-right">
+              <button
+                className="sdp-view-toggle-btn"
+                onClick={() => navigate("/checklist/result")}
+              >
+                내부용
+              </button>
+              <span className="sdp-topnav-date">2026.06.28 16:00</span>
+              <button className="sdp-icon-btn" onClick={() => navigate("/checklist")}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <rect x="2" y="3.5" width="12" height="1.4" rx="0.7" fill="#444" />
+                  <rect x="2" y="7.3" width="12" height="1.4" rx="0.7" fill="#444" />
+                  <rect x="2" y="11.1" width="12" height="1.4" rx="0.7" fill="#444" />
+                </svg>
+                <span>목록</span>
+              </button>
+            </div>
+          </div>
+
+          {/* ① 요약 히어로 */}
+          <section className="fv-hero">
+            <div className="fv-hero-top">
+              <span className="fv-hero-eyebrow">추천 절차</span>
+              <div className="fv-proc-tabs">
+                {Object.values(PROCEDURES).map((p) => (
+                  <button
+                    key={p.id}
+                    className={`fv-proc-tab ${selectedOption === p.id ? "active" : ""}`}
+                    style={selectedOption === p.id ? { borderColor: p.color, color: p.color } : {}}
+                    onClick={() => { setSelectedOption(p.id); setCheckedDocs(new Set()); }}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <h1 className="fv-hero-title" style={{ color }}>{label}</h1>
+            <div className="fv-hero-cards">
+              <div className="fv-kcard">
+                <span className="fv-kcard-label">월 납부 예상액</span>
+                <span className="fv-kcard-val">{AI.repaymentAmount}<em>만원</em></span>
+              </div>
+              <div className="fv-kcard">
+                <span className="fv-kcard-label">납부 기간</span>
+                <span className="fv-kcard-val">{AI.repaymentMonths}<em>개월</em></span>
+              </div>
+              <div className="fv-kcard fv-kcard--accent">
+                <span className="fv-kcard-label">예상 면책 채무</span>
+                <span className="fv-kcard-val">약 {exemptDebt.toLocaleString()}<em>만원</em></span>
+              </div>
+            </div>
+          </section>
+
+          {/* ② 왜 이 절차인가 */}
+          <section className="sdp-section">
+            <p className="sdp-section-label">이 방법을 권하는 이유</p>
+            <div className="fv-reasons">
+              {fieldReasons.map((r, i) => (
+                <div key={i} className="fv-reason">
+                  <span className="fv-reason-icon">{r.icon}</span>
+                  <div>
+                    <p className="fv-reason-title">{r.title}</p>
+                    <p className="fv-reason-desc">{r.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ③ 절차 로드맵 */}
+          <section className="sdp-section">
+            <div className="sdp-proc-header">
+              <p className="sdp-section-label" style={{ margin: 0 }}>절차 로드맵</p>
+              <span className="sdp-proc-badge" style={{ background: color + "18", color }}>{label} · {steps.length}단계</span>
+              <span className="sdp-proc-total">{totalMonths}</span>
+            </div>
+            <div className="fv-roadmap">
+              {/* 좌: 타임라인 (더 크게) */}
+              <div className="fv-roadmap-tl">
+                {steps.map((step, idx) => {
+                  const isDone = completedIds.has(step.id);
+                  const isCur = step.id === procCurrentStep;
+                  return (
+                    <div key={step.id} className="fv-tl-item">
+                      <div className="fv-tl-track">
+                        <div
+                          className={`fv-tl-dot ${isCur ? "current" : isDone ? "done" : "pending"}`}
+                          style={isCur ? { background: color, borderColor: color } : {}}
+                        />
+                        {idx < steps.length - 1 && <div className={`fv-tl-line ${isDone ? "done" : ""}`} />}
+                      </div>
+                      <div
+                        className={`fv-tl-content ${isCur ? "current" : isDone ? "done" : ""}`}
+                        onClick={() => handleSetCurrent(step.id)}
+                        title="현재 단계로 설정"
+                      >
+                        <div className="fv-tl-title-row">
+                          <span className="fv-tl-step-title">{step.id}단계. {step.title}</span>
+                          {isCur && <span className="fv-tl-cur-badge" style={{ background: color }}>현재</span>}
+                        </div>
+                        <span className="fv-tl-dur">{step.durationLabel}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {/* 우: 현황 카드 */}
+              <div className="fv-roadmap-info">
+                <div className="fv-info-card">
+                  <span className="fv-info-label">현재 단계</span>
+                  <span className="fv-info-val">
+                    {procCurrentStep ? `${procCurrentStep}단계. ${steps.find((s) => s.id === procCurrentStep)?.title}` : "단계를 클릭해서 설정하세요"}
+                  </span>
+                </div>
+                <div className="fv-info-card">
+                  <span className="fv-info-label">예상 남은 기간</span>
+                  <span className="fv-info-val fv-info-big">{weeksToLabel(remainingWeeks)}</span>
+                  <span className="fv-info-sub">전체 {totalMonths}</span>
+                </div>
+                <div className="fv-progress-wrap">
+                  <div className="fv-progress-labels">
+                    <span>진행률</span><span>{progressPct}%</span>
+                  </div>
+                  <div className="fv-progress-bg">
+                    <div className="fv-progress-fill" style={{ width: `${progressPct}%`, background: color }} />
+                  </div>
+                </div>
+                <p className="fv-roadmap-hint">각 단계를 클릭하면 현재 단계로 설정됩니다</p>
+              </div>
+            </div>
+          </section>
+
+          {/* ④ 재무 요약 */}
+          <section className="sdp-section">
+            <p className="sdp-section-label">재무 현황 요약</p>
+            <div className="fv-finance-grid">
+              <div className="fv-fin-item">
+                <span className="fv-fin-label">총 채무</span>
+                <span className="fv-fin-val">{CLIENT.totalDebt.toLocaleString()}<em>만원</em></span>
+              </div>
+              <div className="fv-fin-item">
+                <span className="fv-fin-label">총 자산</span>
+                <span className="fv-fin-val">{CLIENT.totalAsset.toLocaleString()}<em>만원</em></span>
+              </div>
+              <div className="fv-fin-item">
+                <span className="fv-fin-label">월 가용 소득</span>
+                <span className="fv-fin-val">+{CLIENT.disposableIncome}<em>만원</em></span>
+              </div>
+              <div className="fv-fin-item">
+                <span className="fv-fin-label">연체 기간</span>
+                <span className="fv-fin-val">{CLIENT.overduePeriod}<em>개월</em></span>
+              </div>
+            </div>
+          </section>
+
+          {/* ⑤ 서류 체크리스트 */}
+          <section className="sdp-section">
+            <div className="fv-doc-header">
+              <p className="sdp-section-label" style={{ margin: 0 }}>준비 서류 확인</p>
+              <span className="fv-doc-count">{checkedCount} / {fieldDocs.length}</span>
+            </div>
+            <p className="fv-doc-sub">오늘 지참하셨거나 준비 가능한 서류에 체크해주세요</p>
+            <div className="fv-doc-list">
+              {fieldDocs.map((doc) => {
+                const checked = checkedDocs.has(doc.id);
+                return (
+                  <label key={doc.id} className={`fv-doc-item ${checked ? "checked" : ""}`}>
+                    <input type="checkbox" checked={checked} onChange={() => toggleDoc(doc.id)} className="fv-doc-cb" />
+                    <span className={`fv-doc-box ${checked ? "checked" : ""}`}>
+                      {checked && <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                    </span>
+                    <span className="fv-doc-text">{doc.text}</span>
+                  </label>
+                );
+              })}
+            </div>
+            {checkedCount === fieldDocs.length && fieldDocs.length > 0 && (
+              <div className="fv-doc-complete">모든 서류가 확인되었습니다 ✓</div>
+            )}
+          </section>
+
+          {/* ⑥ 자주 묻는 질문 */}
+          <section className="sdp-section" style={{ borderBottom: "none" }}>
+            <p className="sdp-section-label">자주 묻는 질문</p>
+            <div className="fv-faq-list">
+              {FIELD_FAQ.map((item, i) => (
+                <div key={i} className={`fv-faq-item ${openFaq === i ? "open" : ""}`}>
+                  <button className="fv-faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
+                    <span>{item.q}</span>
+                    <span className={`fv-faq-chevron ${openFaq === i ? "open" : ""}`}>›</span>
+                  </button>
+                  {openFaq === i && <p className="fv-faq-a">{item.a}</p>}
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="sdp-page">
@@ -977,13 +1546,23 @@ const SampleDashboardPage = () => {
           const proc = PROCEDURES[selectedOption];
           const { steps, color, label, totalMonths } = proc;
           const currentIdx = steps.findIndex((s) => s.id === procCurrentStep);
-          const completedIds = new Set(procCurrentStep ? steps.filter((s) => s.id < procCurrentStep).map((s) => s.id) : []);
+          const completedIds = new Set(
+            procCurrentStep
+              ? steps.filter((s) => s.id < procCurrentStep).map((s) => s.id)
+              : [],
+          );
           const remainingWeeks = calcRemainingWeeks(steps, procCurrentStep);
-          const progressPct = currentIdx >= 0 ? Math.round((currentIdx / (steps.length - 1)) * 100) : 0;
+          const progressPct =
+            currentIdx >= 0
+              ? Math.round((currentIdx / (steps.length - 1)) * 100)
+              : 0;
 
           const handleSetCurrent = (stepId) => {
             setProcCurrentStep(stepId);
-            localStorage.setItem(procStorageKey(1, selectedOption), String(stepId));
+            localStorage.setItem(
+              procStorageKey(1, selectedOption),
+              String(stepId),
+            );
           };
           const buildStepSmsText = (step) => {
             const { details } = step;
@@ -1011,7 +1590,8 @@ const SampleDashboardPage = () => {
           const toggleStep = (stepId) => {
             setProcOpenSteps((prev) => {
               const next = new Set(prev);
-              if (next.has(stepId)) next.delete(stepId); else next.add(stepId);
+              if (next.has(stepId)) next.delete(stepId);
+              else next.add(stepId);
               return next;
             });
           };
@@ -1019,8 +1599,13 @@ const SampleDashboardPage = () => {
           return (
             <section className="sdp-section">
               <div className="sdp-proc-header">
-                <p className="sdp-section-label" style={{ margin: 0 }}>절차 안내</p>
-                <span className="sdp-proc-badge" style={{ background: color + "18", color }}>
+                <p className="sdp-section-label" style={{ margin: 0 }}>
+                  절차 안내
+                </p>
+                <span
+                  className="sdp-proc-badge"
+                  style={{ background: color + "18", color }}
+                >
                   {label} · {steps.length}단계
                 </span>
                 <span className="sdp-proc-total">{totalMonths}</span>
@@ -1035,38 +1620,98 @@ const SampleDashboardPage = () => {
                     const isDone = completedIds.has(step.id);
                     const { details } = step;
                     return (
-                      <div key={step.id} className={`sdp-pstep ${isCurrent ? "current" : ""} ${isDone ? "done" : ""}`}>
-                        <div className="sdp-pstep-hd" onClick={() => toggleStep(step.id)}>
-                          <span className={`sdp-pstep-num ${isCurrent ? "current" : isDone ? "done" : ""}`}>
+                      <div
+                        key={step.id}
+                        className={`sdp-pstep ${isCurrent ? "current" : ""} ${isDone ? "done" : ""}`}
+                      >
+                        <div
+                          className="sdp-pstep-hd"
+                          onClick={() => toggleStep(step.id)}
+                        >
+                          <span
+                            className={`sdp-pstep-num ${isCurrent ? "current" : isDone ? "done" : ""}`}
+                          >
                             {isDone ? "✓" : step.id}
                           </span>
                           <div className="sdp-pstep-title-wrap">
-                            <span className="sdp-pstep-title">{step.id}단계. {step.title}</span>
-                            <span className="sdp-pstep-dur">{step.durationLabel}</span>
+                            <span className="sdp-pstep-title">
+                              {step.id}단계. {step.title}
+                            </span>
+                            <span className="sdp-pstep-dur">
+                              {step.durationLabel}
+                            </span>
                           </div>
-                          <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: "auto", flexShrink: 0 }}>
-                            {isCurrent && <span className="sdp-pstep-badge">진행중</span>}
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 6,
+                              marginLeft: "auto",
+                              flexShrink: 0,
+                            }}
+                          >
+                            {isCurrent && (
+                              <span className="sdp-pstep-badge">진행중</span>
+                            )}
                             <button
                               className="sdp-pstep-sms-btn"
                               title="이 단계 내용 문자 전송"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setSmsModal({ id: "step", label: `${step.id}단계. ${step.title}`, icon: (
-                                  <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-                                    <path d="M2 3.5C2 2.67 2.67 2 3.5 2h13C17.33 2 18 2.67 18 3.5v9c0 .83-.67 1.5-1.5 1.5H6l-4 4V3.5z" stroke="#555" strokeWidth="1.4" strokeLinejoin="round" />
-                                    <path d="M6 7h8M6 10.5h5" stroke="#555" strokeWidth="1.3" strokeLinecap="round" />
-                                  </svg>
-                                )});
+                                setSmsModal({
+                                  id: "step",
+                                  label: `${step.id}단계. ${step.title}`,
+                                  icon: (
+                                    <svg
+                                      width="14"
+                                      height="14"
+                                      viewBox="0 0 20 20"
+                                      fill="none"
+                                    >
+                                      <path
+                                        d="M2 3.5C2 2.67 2.67 2 3.5 2h13C17.33 2 18 2.67 18 3.5v9c0 .83-.67 1.5-1.5 1.5H6l-4 4V3.5z"
+                                        stroke="#555"
+                                        strokeWidth="1.4"
+                                        strokeLinejoin="round"
+                                      />
+                                      <path
+                                        d="M6 7h8M6 10.5h5"
+                                        stroke="#555"
+                                        strokeWidth="1.3"
+                                        strokeLinecap="round"
+                                      />
+                                    </svg>
+                                  ),
+                                });
                                 setSmsText(buildStepSmsText(step));
                               }}
                             >
-                              <svg width="13" height="13" viewBox="0 0 20 20" fill="none">
-                                <path d="M2 3.5C2 2.67 2.67 2 3.5 2h13C17.33 2 18 2.67 18 3.5v9c0 .83-.67 1.5-1.5 1.5H6l-4 4V3.5z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-                                <path d="M6 7h8M6 10.5h5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                              <svg
+                                width="13"
+                                height="13"
+                                viewBox="0 0 20 20"
+                                fill="none"
+                              >
+                                <path
+                                  d="M2 3.5C2 2.67 2.67 2 3.5 2h13C17.33 2 18 2.67 18 3.5v9c0 .83-.67 1.5-1.5 1.5H6l-4 4V3.5z"
+                                  stroke="currentColor"
+                                  strokeWidth="1.6"
+                                  strokeLinejoin="round"
+                                />
+                                <path
+                                  d="M6 7h8M6 10.5h5"
+                                  stroke="currentColor"
+                                  strokeWidth="1.4"
+                                  strokeLinecap="round"
+                                />
                               </svg>
                               문자
                             </button>
-                            <span className={`sdp-pstep-chevron ${isOpen ? "open" : ""}`}>›</span>
+                            <span
+                              className={`sdp-pstep-chevron ${isOpen ? "open" : ""}`}
+                            >
+                              ›
+                            </span>
                           </div>
                         </div>
 
@@ -1075,10 +1720,14 @@ const SampleDashboardPage = () => {
                             <p className="sdp-pstep-desc">{details.desc}</p>
                             {details.items?.length > 0 && (
                               <ul className="sdp-pstep-list">
-                                {details.items.map((item, i) => <li key={i}>{item}</li>)}
+                                {details.items.map((item, i) => (
+                                  <li key={i}>{item}</li>
+                                ))}
                               </ul>
                             )}
-                            {details.note && <p className="sdp-pstep-note">{details.note}</p>}
+                            {details.note && (
+                              <p className="sdp-pstep-note">{details.note}</p>
+                            )}
                             {details.example && (
                               <div className="sdp-pstep-example">
                                 <span className="sdp-pstep-ex-label">예시</span>
@@ -1093,7 +1742,10 @@ const SampleDashboardPage = () => {
                             )}
                             <button
                               className={`sdp-pstep-set-btn ${isCurrent ? "active" : ""}`}
-                              onClick={(e) => { e.stopPropagation(); handleSetCurrent(step.id); }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSetCurrent(step.id);
+                              }}
                             >
                               {isCurrent ? "✓ 현재 단계" : "현재 단계로 설정"}
                             </button>
@@ -1116,8 +1768,12 @@ const SampleDashboardPage = () => {
                   </div>
                   <div className="sdp-proc-tl-remain">
                     <span className="sdp-proc-tl-rlabel">예상 남은 기간</span>
-                    <span className="sdp-proc-tl-rval">{weeksToLabel(remainingWeeks)}</span>
-                    <span className="sdp-proc-tl-rtotal">전체 {totalMonths}</span>
+                    <span className="sdp-proc-tl-rval">
+                      {weeksToLabel(remainingWeeks)}
+                    </span>
+                    <span className="sdp-proc-tl-rtotal">
+                      전체 {totalMonths}
+                    </span>
                   </div>
 
                   <div className="sdp-proc-tl-list">
@@ -1129,15 +1785,27 @@ const SampleDashboardPage = () => {
                           <div className="sdp-proc-tl-track">
                             <div
                               className={`sdp-proc-tl-dot ${isCur2 ? "current" : isDone2 ? "done" : "pending"}`}
-                              style={isCur2 ? { background: color, borderColor: color } : {}}
+                              style={
+                                isCur2
+                                  ? { background: color, borderColor: color }
+                                  : {}
+                              }
                             />
                             {idx < steps.length - 1 && (
-                              <div className={`sdp-proc-tl-line ${isDone2 ? "done" : ""}`} />
+                              <div
+                                className={`sdp-proc-tl-line ${isDone2 ? "done" : ""}`}
+                              />
                             )}
                           </div>
-                          <div className={`sdp-proc-tl-txt ${isCur2 ? "current" : isDone2 ? "done" : ""}`}>
-                            <span className="sdp-proc-tl-ttitle">{step.id}단계. {step.title}</span>
-                            <span className="sdp-proc-tl-tdur">{step.durationLabel}</span>
+                          <div
+                            className={`sdp-proc-tl-txt ${isCur2 ? "current" : isDone2 ? "done" : ""}`}
+                          >
+                            <span className="sdp-proc-tl-ttitle">
+                              {step.id}단계. {step.title}
+                            </span>
+                            <span className="sdp-proc-tl-tdur">
+                              {step.durationLabel}
+                            </span>
                           </div>
                         </div>
                       );
@@ -1146,10 +1814,14 @@ const SampleDashboardPage = () => {
 
                   <div className="sdp-proc-tl-prog">
                     <div className="sdp-proc-tl-prog-labels">
-                      <span>진행률</span><span>{progressPct}%</span>
+                      <span>진행률</span>
+                      <span>{progressPct}%</span>
                     </div>
                     <div className="sdp-proc-tl-prog-bg">
-                      <div className="sdp-proc-tl-prog-fill" style={{ width: `${progressPct}%`, background: color }} />
+                      <div
+                        className="sdp-proc-tl-prog-fill"
+                        style={{ width: `${progressPct}%`, background: color }}
+                      />
                     </div>
                   </div>
                 </div>
