@@ -603,7 +603,10 @@ const PROCEDURES = {
 const FIELD_DOCS = {
   rehabilitation: [
     { id: "d1", text: "주민등록등본 1부" },
-    { id: "d2", text: "소득 증빙 서류 (급여명세서 또는 사업자 매출장부·세금계산서)" },
+    {
+      id: "d2",
+      text: "소득 증빙 서류 (급여명세서 또는 사업자 매출장부·세금계산서)",
+    },
     { id: "d3", text: "각 금융기관 대출 잔액증명서" },
     { id: "d4", text: "가족관계증명서 1부" },
     { id: "d5", text: "무재산 확인서 (부동산·차량 없는 경우)" },
@@ -628,32 +631,35 @@ const FIELD_DOCS = {
   ],
 };
 
-const FIELD_REASONS = {
-  rehabilitation: [
-    { icon: "✅", title: "변제 여력이 있습니다", desc: "월 45만원의 가용 소득이 확인되어 법원에 변제 계획을 제출할 수 있습니다." },
-    { icon: "✅", title: "채무 감면 효과가 큽니다", desc: "채무 3.1억원 중 약 2.7억원이 면책 대상이 될 수 있습니다. 실질적으로 88% 감면 효과입니다." },
-    { icon: "✅", title: "신청 즉시 추심이 중단됩니다", desc: "법원에 접수하는 순간 채권자의 전화·압류·강제집행이 법적으로 금지됩니다." },
-  ],
-  debtAdjustment: [
-    { icon: "✅", title: "이자를 0%로 낮출 수 있습니다", desc: "신용회복위원회를 통해 이자율을 최대 0%까지 감면받을 수 있습니다." },
-    { icon: "✅", title: "상환 기간을 늘려 월 부담을 줄입니다", desc: "최대 10년(120개월)에 걸쳐 분할 상환하여 매월 납부액을 크게 줄일 수 있습니다." },
-    { icon: "✅", title: "법원 절차 없이 진행됩니다", desc: "신용회복위원회를 통한 채무조정은 법원에 가지 않아도 됩니다." },
-  ],
-  bankruptcy: [
-    { icon: "✅", title: "모든 채무가 면제됩니다", desc: "파산·면책 결정 후 세금·양육비 등 일부를 제외한 모든 채무가 법적으로 사라집니다." },
-    { icon: "✅", title: "6~18개월 내 정리됩니다", desc: "개인회생보다 절차가 짧고 월 변제 의무가 없습니다." },
-    { icon: "✅", title: "소득이 없어도 신청 가능합니다", desc: "변제 여력이 없는 상태라면 파산이 가장 현실적인 해결 방법입니다." },
-  ],
-};
 
 const FIELD_FAQ = [
-  { q: "신청하면 직장에 영향이 있나요?", a: "일반 사기업 직원의 경우 개인회생·파산은 원칙적으로 해고 사유가 되지 않습니다. 단, 금융기관·공무원·일부 자격증 직종은 별도 확인이 필요합니다." },
-  { q: "신청 후 카드 사용이 안 되나요?", a: "신청 이후 신용카드 사용은 어렵습니다. 변제 기간 중에는 체크카드·현금 위주로 생활하셔야 합니다. 변제 완료 후 신용 회복이 시작됩니다." },
-  { q: "집과 차는 어떻게 되나요?", a: "전월세 거주 중이라면 주거지는 보호됩니다. 자가 주택이나 차량이 있는 경우 재산 처분 여부는 법원 판단에 따라 달라집니다." },
-  { q: "가족에게 영향이 가나요?", a: "본인의 채무이므로 가족에게 직접적인 법적 책임은 없습니다. 다만 배우자의 소득은 가용소득 산정 시 일부 반영될 수 있습니다." },
-  { q: "얼마나 걸리나요?", a: "신청부터 면책까지 통상 3~5년이 소요됩니다. 서류 준비(1~2주) → 법원 접수 → 개시결정(1~3개월) → 변제(36~60개월) → 면책 순서로 진행됩니다." },
-  { q: "지금 당장 추심을 멈출 수 있나요?", a: "법원 접수 후 금지명령이 발령되면 채권자의 전화·압류·강제집행이 즉시 중지됩니다. 신청 전에도 내용증명 발송으로 일시 대응이 가능합니다." },
+  {
+    q: "신청하면 직장에 영향이 있나요?",
+    a: "일반 사기업 직원의 경우 개인회생·파산은 원칙적으로 해고 사유가 되지 않습니다. 단, 금융기관·공무원·일부 자격증 직종은 별도 확인이 필요합니다.",
+  },
+  {
+    q: "신청 후 카드 사용이 안 되나요?",
+    a: "신청 이후 신용카드 사용은 어렵습니다. 변제 기간 중에는 체크카드·현금 위주로 생활하셔야 합니다. 변제 완료 후 신용 회복이 시작됩니다.",
+  },
+  {
+    q: "집과 차는 어떻게 되나요?",
+    a: "전월세 거주 중이라면 주거지는 보호됩니다. 자가 주택이나 차량이 있는 경우 재산 처분 여부는 법원 판단에 따라 달라집니다.",
+  },
+  {
+    q: "가족에게 영향이 가나요?",
+    a: "본인의 채무이므로 가족에게 직접적인 법적 책임은 없습니다. 다만 배우자의 소득은 가용소득 산정 시 일부 반영될 수 있습니다.",
+  },
+  {
+    q: "얼마나 걸리나요?",
+    a: "신청부터 면책까지 통상 3~5년이 소요됩니다. 서류 준비(1~2주) → 법원 접수 → 개시결정(1~3개월) → 변제(36~60개월) → 면책 순서로 진행됩니다.",
+  },
+  {
+    q: "지금 당장 추심을 멈출 수 있나요?",
+    a: "법원 접수 후 금지명령이 발령되면 채권자의 전화·압류·강제집행이 즉시 중지됩니다. 신청 전에도 내용증명 발송으로 일시 대응이 가능합니다.",
+  },
 ];
+
+const RECOMMENDED_PROC = OPTIONS.find((o) => o.recommended)?.id ?? "rehabilitation";
 
 const calcRemainingWeeks = (steps, currentStepId) => {
   const idx = steps.findIndex((s) => s.id === currentStepId);
@@ -808,13 +814,26 @@ const SampleDashboardPage = () => {
     const proc = PROCEDURES[selectedOption];
     const { steps, color, label, totalMonths } = proc;
     const currentIdx = steps.findIndex((s) => s.id === procCurrentStep);
-    const completedIds = new Set(procCurrentStep ? steps.filter((s) => s.id < procCurrentStep).map((s) => s.id) : []);
+    const completedIds = new Set(
+      procCurrentStep
+        ? steps.filter((s) => s.id < procCurrentStep).map((s) => s.id)
+        : [],
+    );
     const remainingWeeks = calcRemainingWeeks(steps, procCurrentStep);
-    const progressPct = currentIdx >= 0 ? Math.round((currentIdx / (steps.length - 1)) * 100) : 0;
+    const progressPct =
+      currentIdx >= 0 ? Math.round((currentIdx / (steps.length - 1)) * 100) : 0;
     const fieldDocs = FIELD_DOCS[selectedOption] || FIELD_DOCS.rehabilitation;
-    const fieldReasons = FIELD_REASONS[selectedOption] || FIELD_REASONS.rehabilitation;
-    const toggleDoc = (id) => setCheckedDocs((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
-    const handleSetCurrent = (stepId) => { setProcCurrentStep(stepId); localStorage.setItem(procStorageKey(1, selectedOption), String(stepId)); };
+    const isRecommended = selectedOption === RECOMMENDED_PROC;
+    const toggleDoc = (id) =>
+      setCheckedDocs((prev) => {
+        const n = new Set(prev);
+        n.has(id) ? n.delete(id) : n.add(id);
+        return n;
+      });
+    const handleSetCurrent = (stepId) => {
+      setProcCurrentStep(stepId);
+      localStorage.setItem(procStorageKey(1, selectedOption), String(stepId));
+    };
     const checkedCount = fieldDocs.filter((d) => checkedDocs.has(d.id)).length;
 
     return (
@@ -824,7 +843,9 @@ const SampleDashboardPage = () => {
           <div className="sdp-topnav">
             <div className="sdp-topnav-client">
               <div className="sdp-chip-dot" />
-              <span>{CLIENT.name} · {CLIENT.age}세 · {CLIENT.job}</span>
+              <span>
+                {CLIENT.name} · {CLIENT.age}세 · {CLIENT.job}
+              </span>
             </div>
             <div className="sdp-topnav-right">
               <button
@@ -834,11 +855,35 @@ const SampleDashboardPage = () => {
                 내부용
               </button>
               <span className="sdp-topnav-date">2026.06.28 16:00</span>
-              <button className="sdp-icon-btn" onClick={() => navigate("/checklist")}>
+              <button
+                className="sdp-icon-btn"
+                onClick={() => navigate("/checklist")}
+              >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <rect x="2" y="3.5" width="12" height="1.4" rx="0.7" fill="#444" />
-                  <rect x="2" y="7.3" width="12" height="1.4" rx="0.7" fill="#444" />
-                  <rect x="2" y="11.1" width="12" height="1.4" rx="0.7" fill="#444" />
+                  <rect
+                    x="2"
+                    y="3.5"
+                    width="12"
+                    height="1.4"
+                    rx="0.7"
+                    fill="#444"
+                  />
+                  <rect
+                    x="2"
+                    y="7.3"
+                    width="12"
+                    height="1.4"
+                    rx="0.7"
+                    fill="#444"
+                  />
+                  <rect
+                    x="2"
+                    y="11.1"
+                    width="12"
+                    height="1.4"
+                    rx="0.7"
+                    fill="#444"
+                  />
                 </svg>
                 <span>목록</span>
               </button>
@@ -854,52 +899,125 @@ const SampleDashboardPage = () => {
                   <button
                     key={p.id}
                     className={`fv-proc-tab ${selectedOption === p.id ? "active" : ""}`}
-                    style={selectedOption === p.id ? { borderColor: p.color, color: p.color } : {}}
-                    onClick={() => { setSelectedOption(p.id); setCheckedDocs(new Set()); }}
+                    style={
+                      selectedOption === p.id
+                        ? { borderColor: p.color, color: p.color }
+                        : {}
+                    }
+                    onClick={() => {
+                      setSelectedOption(p.id);
+                      setCheckedDocs(new Set());
+                    }}
                   >
                     {p.label}
                   </button>
                 ))}
               </div>
             </div>
-            <h1 className="fv-hero-title" style={{ color }}>{label}</h1>
+            <h1 className="fv-hero-title" style={{ color }}>
+              {label}
+            </h1>
             <div className="fv-hero-cards">
               <div className="fv-kcard">
                 <span className="fv-kcard-label">월 납부 예상액</span>
-                <span className="fv-kcard-val">{AI.repaymentAmount}<em>만원</em></span>
+                <span className="fv-kcard-val">
+                  {AI.repaymentAmount}
+                  <em>만원</em>
+                </span>
               </div>
               <div className="fv-kcard">
                 <span className="fv-kcard-label">납부 기간</span>
-                <span className="fv-kcard-val">{AI.repaymentMonths}<em>개월</em></span>
+                <span className="fv-kcard-val">
+                  {AI.repaymentMonths}
+                  <em>개월</em>
+                </span>
               </div>
               <div className="fv-kcard fv-kcard--accent">
                 <span className="fv-kcard-label">예상 면책 채무</span>
-                <span className="fv-kcard-val">약 {exemptDebt.toLocaleString()}<em>만원</em></span>
+                <span className="fv-kcard-val">
+                  약 {exemptDebt.toLocaleString()}
+                  <em>만원</em>
+                </span>
               </div>
             </div>
           </section>
 
-          {/* ② 왜 이 절차인가 */}
-          <section className="sdp-section">
-            <p className="sdp-section-label">이 방법을 권하는 이유</p>
-            <div className="fv-reasons">
-              {fieldReasons.map((r, i) => (
-                <div key={i} className="fv-reason">
-                  <span className="fv-reason-icon">{r.icon}</span>
-                  <div>
-                    <p className="fv-reason-title">{r.title}</p>
-                    <p className="fv-reason-desc">{r.desc}</p>
+          {/* ② 조건 분석 */}
+          {(() => {
+            const opt = OPTIONS.find((o) => o.id === selectedOption);
+            const passItems    = opt.conditions.filter((c) => c.type === "pass");
+            const cautionItems = opt.conditions.filter((c) => c.type === "caution");
+            const riskItems    = opt.conditions.filter((c) => c.type === "risk");
+            return (
+              <section className="sdp-section">
+                <div className="fv-eval-header">
+                  <p className="sdp-section-label" style={{ margin: 0 }}>조건 분석</p>
+                  <div className="fv-cond-legend">
+                    <span className="sdp-cond-badge pass">충족 {passItems.length}</span>
+                    <span className="sdp-cond-badge caution">보충 필요 {cautionItems.length}</span>
+                    <span className="sdp-cond-badge risk">위험 요소 {riskItems.length}</span>
                   </div>
+                  {isRecommended ? (
+                    <span className="fv-eval-badge recommended">추천</span>
+                  ) : (
+                    <span className="fv-eval-badge not-recommended">
+                      비권장 — {PROCEDURES[RECOMMENDED_PROC].label} 우선 권장
+                    </span>
+                  )}
                 </div>
-              ))}
-            </div>
-          </section>
+
+                <div className="fv-cond-list">
+                  {passItems.map((c, i) => (
+                    <div key={`pass-${i}`} className="fv-cond fv-cond-pass">
+                      <div className="fv-cond-icon">
+                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+                          <circle cx="8" cy="8" r="8" fill="#16a34a" />
+                          <path d="M4.5 8l2.5 2.5 4.5-4.5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      <span className="fv-cond-text">{c.text}</span>
+                    </div>
+                  ))}
+                  {cautionItems.map((c, i) => (
+                    <div key={`caution-${i}`} className="fv-cond fv-cond-caution">
+                      <div className="fv-cond-icon">
+                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+                          <path d="M8 1.5L14.5 13H1.5L8 1.5Z" fill="#d97706" strokeLinejoin="round" />
+                          <path d="M8 6v3.5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" />
+                          <circle cx="8" cy="11" r="0.9" fill="#fff" />
+                        </svg>
+                      </div>
+                      <span className="fv-cond-text">{c.text}</span>
+                    </div>
+                  ))}
+                  {riskItems.map((c, i) => (
+                    <div key={`risk-${i}`} className="fv-cond fv-cond-risk">
+                      <div className="fv-cond-icon">
+                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+                          <circle cx="8" cy="8" r="8" fill="#dc2626" />
+                          <path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" />
+                        </svg>
+                      </div>
+                      <span className="fv-cond-text">{c.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            );
+          })()}
 
           {/* ③ 절차 로드맵 */}
           <section className="sdp-section">
             <div className="sdp-proc-header">
-              <p className="sdp-section-label" style={{ margin: 0 }}>절차 로드맵</p>
-              <span className="sdp-proc-badge" style={{ background: color + "18", color }}>{label} · {steps.length}단계</span>
+              <p className="sdp-section-label" style={{ margin: 0 }}>
+                절차 로드맵
+              </p>
+              <span
+                className="sdp-proc-badge"
+                style={{ background: color + "18", color }}
+              >
+                {label} · {steps.length}단계
+              </span>
               <span className="sdp-proc-total">{totalMonths}</span>
             </div>
             <div className="fv-roadmap">
@@ -913,9 +1031,17 @@ const SampleDashboardPage = () => {
                       <div className="fv-tl-track">
                         <div
                           className={`fv-tl-dot ${isCur ? "current" : isDone ? "done" : "pending"}`}
-                          style={isCur ? { background: color, borderColor: color } : {}}
+                          style={
+                            isCur
+                              ? { background: color, borderColor: color }
+                              : {}
+                          }
                         />
-                        {idx < steps.length - 1 && <div className={`fv-tl-line ${isDone ? "done" : ""}`} />}
+                        {idx < steps.length - 1 && (
+                          <div
+                            className={`fv-tl-line ${isDone ? "done" : ""}`}
+                          />
+                        )}
                       </div>
                       <div
                         className={`fv-tl-content ${isCur ? "current" : isDone ? "done" : ""}`}
@@ -923,8 +1049,17 @@ const SampleDashboardPage = () => {
                         title="현재 단계로 설정"
                       >
                         <div className="fv-tl-title-row">
-                          <span className="fv-tl-step-title">{step.id}단계. {step.title}</span>
-                          {isCur && <span className="fv-tl-cur-badge" style={{ background: color }}>현재</span>}
+                          <span className="fv-tl-step-title">
+                            {step.id}단계. {step.title}
+                          </span>
+                          {isCur && (
+                            <span
+                              className="fv-tl-cur-badge"
+                              style={{ background: color }}
+                            >
+                              현재
+                            </span>
+                          )}
                         </div>
                         <span className="fv-tl-dur">{step.durationLabel}</span>
                       </div>
@@ -937,23 +1072,33 @@ const SampleDashboardPage = () => {
                 <div className="fv-info-card">
                   <span className="fv-info-label">현재 단계</span>
                   <span className="fv-info-val">
-                    {procCurrentStep ? `${procCurrentStep}단계. ${steps.find((s) => s.id === procCurrentStep)?.title}` : "단계를 클릭해서 설정하세요"}
+                    {procCurrentStep
+                      ? `${procCurrentStep}단계. ${steps.find((s) => s.id === procCurrentStep)?.title}`
+                      : "단계를 클릭해서 설정하세요"}
                   </span>
                 </div>
                 <div className="fv-info-card">
                   <span className="fv-info-label">예상 남은 기간</span>
-                  <span className="fv-info-val fv-info-big">{weeksToLabel(remainingWeeks)}</span>
+                  <span className="fv-info-val fv-info-big">
+                    {weeksToLabel(remainingWeeks)}
+                  </span>
                   <span className="fv-info-sub">전체 {totalMonths}</span>
                 </div>
                 <div className="fv-progress-wrap">
                   <div className="fv-progress-labels">
-                    <span>진행률</span><span>{progressPct}%</span>
+                    <span>진행률</span>
+                    <span>{progressPct}%</span>
                   </div>
                   <div className="fv-progress-bg">
-                    <div className="fv-progress-fill" style={{ width: `${progressPct}%`, background: color }} />
+                    <div
+                      className="fv-progress-fill"
+                      style={{ width: `${progressPct}%`, background: color }}
+                    />
                   </div>
                 </div>
-                <p className="fv-roadmap-hint">각 단계를 클릭하면 현재 단계로 설정됩니다</p>
+                <p className="fv-roadmap-hint">
+                  각 단계를 클릭하면 현재 단계로 설정됩니다
+                </p>
               </div>
             </div>
           </section>
@@ -964,19 +1109,31 @@ const SampleDashboardPage = () => {
             <div className="fv-finance-grid">
               <div className="fv-fin-item">
                 <span className="fv-fin-label">총 채무</span>
-                <span className="fv-fin-val">{CLIENT.totalDebt.toLocaleString()}<em>만원</em></span>
+                <span className="fv-fin-val">
+                  {CLIENT.totalDebt.toLocaleString()}
+                  <em>만원</em>
+                </span>
               </div>
               <div className="fv-fin-item">
                 <span className="fv-fin-label">총 자산</span>
-                <span className="fv-fin-val">{CLIENT.totalAsset.toLocaleString()}<em>만원</em></span>
+                <span className="fv-fin-val">
+                  {CLIENT.totalAsset.toLocaleString()}
+                  <em>만원</em>
+                </span>
               </div>
               <div className="fv-fin-item">
                 <span className="fv-fin-label">월 가용 소득</span>
-                <span className="fv-fin-val">+{CLIENT.disposableIncome}<em>만원</em></span>
+                <span className="fv-fin-val">
+                  +{CLIENT.disposableIncome}
+                  <em>만원</em>
+                </span>
               </div>
               <div className="fv-fin-item">
                 <span className="fv-fin-label">연체 기간</span>
-                <span className="fv-fin-val">{CLIENT.overduePeriod}<em>개월</em></span>
+                <span className="fv-fin-val">
+                  {CLIENT.overduePeriod}
+                  <em>개월</em>
+                </span>
               </div>
             </div>
           </section>
@@ -984,18 +1141,47 @@ const SampleDashboardPage = () => {
           {/* ⑤ 서류 체크리스트 */}
           <section className="sdp-section">
             <div className="fv-doc-header">
-              <p className="sdp-section-label" style={{ margin: 0 }}>준비 서류 확인</p>
-              <span className="fv-doc-count">{checkedCount} / {fieldDocs.length}</span>
+              <p className="sdp-section-label" style={{ margin: 0 }}>
+                준비 서류 확인
+              </p>
+              <span className="fv-doc-count">
+                {checkedCount} / {fieldDocs.length}
+              </span>
             </div>
-            <p className="fv-doc-sub">오늘 지참하셨거나 준비 가능한 서류에 체크해주세요</p>
+            <p className="fv-doc-sub">
+              오늘 지참하셨거나 준비 가능한 서류에 체크해주세요
+            </p>
             <div className="fv-doc-list">
               {fieldDocs.map((doc) => {
                 const checked = checkedDocs.has(doc.id);
                 return (
-                  <label key={doc.id} className={`fv-doc-item ${checked ? "checked" : ""}`}>
-                    <input type="checkbox" checked={checked} onChange={() => toggleDoc(doc.id)} className="fv-doc-cb" />
+                  <label
+                    key={doc.id}
+                    className={`fv-doc-item ${checked ? "checked" : ""}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleDoc(doc.id)}
+                      className="fv-doc-cb"
+                    />
                     <span className={`fv-doc-box ${checked ? "checked" : ""}`}>
-                      {checked && <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                      {checked && (
+                        <svg
+                          width="11"
+                          height="11"
+                          viewBox="0 0 12 12"
+                          fill="none"
+                        >
+                          <path
+                            d="M2 6l3 3 5-5"
+                            stroke="#fff"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      )}
                     </span>
                     <span className="fv-doc-text">{doc.text}</span>
                   </label>
@@ -1003,7 +1189,9 @@ const SampleDashboardPage = () => {
               })}
             </div>
             {checkedCount === fieldDocs.length && fieldDocs.length > 0 && (
-              <div className="fv-doc-complete">모든 서류가 확인되었습니다 ✓</div>
+              <div className="fv-doc-complete">
+                모든 서류가 확인되었습니다 ✓
+              </div>
             )}
           </section>
 
@@ -1012,10 +1200,20 @@ const SampleDashboardPage = () => {
             <p className="sdp-section-label">자주 묻는 질문</p>
             <div className="fv-faq-list">
               {FIELD_FAQ.map((item, i) => (
-                <div key={i} className={`fv-faq-item ${openFaq === i ? "open" : ""}`}>
-                  <button className="fv-faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
+                <div
+                  key={i}
+                  className={`fv-faq-item ${openFaq === i ? "open" : ""}`}
+                >
+                  <button
+                    className="fv-faq-q"
+                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  >
                     <span>{item.q}</span>
-                    <span className={`fv-faq-chevron ${openFaq === i ? "open" : ""}`}>›</span>
+                    <span
+                      className={`fv-faq-chevron ${openFaq === i ? "open" : ""}`}
+                    >
+                      ›
+                    </span>
                   </button>
                   {openFaq === i && <p className="fv-faq-a">{item.a}</p>}
                 </div>
