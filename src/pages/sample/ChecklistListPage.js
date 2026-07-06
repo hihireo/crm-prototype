@@ -260,7 +260,7 @@ const ChecklistListPage = () => {
         {/* 페이지 헤더 */}
         <div className="cll-page-header">
           <div>
-            <h1 className="cll-page-title">분석 목록</h1>
+            <h1 className="cll-page-title">회생·파산 진단 목록</h1>
             <p className="cll-page-sub">
               총 {totalCount}건 · 이번 달 {thisMonth}건 상담
             </p>
@@ -276,7 +276,7 @@ const ChecklistListPage = () => {
               className="cll-btn-primary"
               onClick={() => navigate("/checklist/form")}
             >
-              + 새 분석 시작
+              + 새 진단 시작
             </button>
           </div>
         </div>

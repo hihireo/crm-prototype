@@ -76,7 +76,7 @@ const Header = ({ user, currentService, onLogout }) => {
                 근태
               </Link>
               <Link to="/checklist" className="nav-link">
-                회생 상담
+                회생·파산
               </Link>
               <Link to="/notice" className="nav-link">
                 공지사항
