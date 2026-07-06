@@ -266,12 +266,12 @@ const ChecklistListPage = () => {
             </p>
           </div>
           <div style={{ display: "flex", gap: "8px" }}>
-            <button
+            {/* <button
               className="cll-btn-secondary"
               onClick={() => navigate("/checklist/procedure")}
             >
               절차 안내
-            </button>
+            </button> */}
             <button
               className="cll-btn-primary"
               onClick={() => navigate("/checklist/form")}
