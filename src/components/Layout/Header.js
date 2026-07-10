@@ -1,11 +1,33 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import "./Header.css";
+
+const NavAiIcon = () => (
+  <svg
+    className="nav-ai-icon"
+    width="10"
+    height="10"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden
+  >
+    <path
+      d="M10 3 L11.6 8.4 L17 10 L11.6 11.6 L10 17 L8.4 11.6 L3 10 L8.4 8.4 Z"
+      fill="currentColor"
+    />
+    <path
+      d="M19.5 2 L20.4 4.6 L23 5.5 L20.4 6.4 L19.5 9 L18.6 6.4 L16 5.5 L18.6 4.6 Z"
+      fill="currentColor"
+    />
+  </svg>
+);
 
 const Header = ({ user, currentService, onLogout }) => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isDiagnosisActive = location.pathname.startsWith("/checklist");
 
   // 샘플 알림 데이터
   const notifications = [
@@ -51,7 +73,11 @@ const Header = ({ user, currentService, onLogout }) => {
         <div className="header-content">
           <div className="header-left">
             <Link to="/dashboard" className="logo">
-              <img src="/images/talkgate-logo-white.png" alt="TalkGate" className="logo-img" />
+              <img
+                src="/images/talkgate-logo-white.png"
+                alt="TalkGate"
+                className="logo-img"
+              />
             </Link>
             {currentService && (
               <div className="header-service-info">
@@ -75,9 +101,21 @@ const Header = ({ user, currentService, onLogout }) => {
               <Link to="/attendance" className="nav-link">
                 근태
               </Link>
-              <Link to="/checklist" className="nav-link">
-                회생·파산
-              </Link>
+              <div
+                className={`nav-dropdown ${isDiagnosisActive ? "active" : ""}`}
+              >
+                <button type="button" className="nav-link nav-dropdown-trigger">
+                  <span className="nav-dropdown-label">
+                    고객진단
+                    <NavAiIcon />
+                  </span>
+                </button>
+                <div className="nav-dropdown-menu">
+                  <Link to="/checklist" className="nav-dropdown-item">
+                    회생·파산
+                  </Link>
+                </div>
+              </div>
               <Link to="/notice" className="nav-link">
                 공지사항
               </Link>

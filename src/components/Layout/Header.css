@@ -75,6 +75,89 @@
   background: rgba(255, 255, 255, 0.12);
 }
 
+/* 고객진단 드롭다운 */
+.nav-dropdown {
+  position: relative;
+}
+
+.nav-dropdown-trigger {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+}
+
+.nav-dropdown-label {
+  position: relative;
+  display: inline-block;
+  padding-right: 4px;
+}
+
+.nav-ai-icon {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  color: rgba(255, 255, 255, 0.75);
+  pointer-events: none;
+}
+
+.nav-dropdown:hover .nav-dropdown-trigger,
+.nav-dropdown.active .nav-dropdown-trigger {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.nav-dropdown.active .nav-dropdown-trigger {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 140px;
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition:
+    opacity 0.15s,
+    transform 0.15s,
+    visibility 0.15s;
+  z-index: 200;
+}
+
+.nav-dropdown:hover .nav-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.nav-dropdown-item {
+  display: block;
+  padding: 9px 12px;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 7px;
+  letter-spacing: -0.01em;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+
+.nav-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
 /* 상담 메뉴 레드닷 */
 .consultation-link {
   position: relative;

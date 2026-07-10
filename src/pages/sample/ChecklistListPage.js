@@ -2,6 +2,42 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ChecklistListPage.css";
 
+const STAGE_NAMES = {
+  개인회생: [
+    "신청 전 상담",
+    "신청서 접수",
+    "금지명령·중지명령",
+    "보정권고·보정명령",
+    "개시결정",
+    "채권자집회",
+    "인가결정",
+    "변제 수행",
+    "면책결정",
+  ],
+  채무조정: [
+    "신청 자격 확인",
+    "신청서 접수",
+    "채권자 동의 절차",
+    "조정 확정",
+    "분할상환 시작",
+    "조정 완료",
+  ],
+  파산: [
+    "신청 전 상담",
+    "신청서 작성·접수",
+    "파산선고",
+    "파산관재인 조사",
+    "면책 심문",
+    "면책결정",
+  ],
+};
+
+const SALES_REPS = [
+  { name: "박지훈", branch: "강남영업점", thumb: "/images/thumb_sample1.png" },
+  { name: "김서연", branch: "홍대영업점", thumb: "/images/thumb_sample2.png" },
+  { name: "이도윤", branch: "경기영업점", thumb: "/images/thumb_sample3.png" },
+];
+
 const CLIENTS = [
   {
     id: 1,
@@ -15,8 +51,9 @@ const CLIENTS = [
     disposable: 45,
     recommended: "개인회생",
     score: 78,
-    status: "검토완료",
+    stageIndex: 4,
     date: "2026-06-28",
+    salesRep: SALES_REPS[0],
   },
   {
     id: 2,
@@ -30,8 +67,9 @@ const CLIENTS = [
     disposable: 120,
     recommended: "채무조정",
     score: 65,
-    status: "상담중",
+    stageIndex: 0,
     date: "2026-06-27",
+    salesRep: SALES_REPS[1],
   },
   {
     id: 3,
@@ -45,8 +83,9 @@ const CLIENTS = [
     disposable: -20,
     recommended: "파산",
     score: 42,
-    status: "검토완료",
+    stageIndex: 4,
     date: "2026-06-26",
+    salesRep: SALES_REPS[2],
   },
   {
     id: 4,
@@ -60,8 +99,9 @@ const CLIENTS = [
     disposable: 80,
     recommended: "채무조정",
     score: 71,
-    status: "검토완료",
+    stageIndex: 4,
     date: "2026-06-25",
+    salesRep: SALES_REPS[0],
   },
   {
     id: 5,
@@ -75,8 +115,9 @@ const CLIENTS = [
     disposable: 90,
     recommended: "개인회생",
     score: 82,
-    status: "진행중",
+    stageIndex: 5,
     date: "2026-06-24",
+    salesRep: SALES_REPS[1],
   },
   {
     id: 6,
@@ -90,8 +131,9 @@ const CLIENTS = [
     disposable: 140,
     recommended: "개인회생",
     score: 85,
-    status: "진행중",
+    stageIndex: 3,
     date: "2026-06-23",
+    salesRep: SALES_REPS[2],
   },
   {
     id: 7,
@@ -105,8 +147,9 @@ const CLIENTS = [
     disposable: 30,
     recommended: "개인회생",
     score: 61,
-    status: "검토완료",
+    stageIndex: 6,
     date: "2026-06-22",
+    salesRep: SALES_REPS[0],
   },
   {
     id: 8,
@@ -120,8 +163,9 @@ const CLIENTS = [
     disposable: 55,
     recommended: "채무조정",
     score: 68,
-    status: "상담중",
+    stageIndex: 1,
     date: "2026-06-21",
+    salesRep: SALES_REPS[1],
   },
   {
     id: 9,
@@ -135,8 +179,9 @@ const CLIENTS = [
     disposable: -30,
     recommended: "파산",
     score: 38,
-    status: "검토완료",
+    stageIndex: 3,
     date: "2026-06-20",
+    salesRep: SALES_REPS[2],
   },
   {
     id: 10,
@@ -150,8 +195,9 @@ const CLIENTS = [
     disposable: 15,
     recommended: "개인회생",
     score: 55,
-    status: "검토완료",
+    stageIndex: 7,
     date: "2026-06-19",
+    salesRep: SALES_REPS[0],
   },
   {
     id: 11,
@@ -165,8 +211,9 @@ const CLIENTS = [
     disposable: 70,
     recommended: "개인회생",
     score: 74,
-    status: "상담중",
+    stageIndex: 1,
     date: "2026-06-18",
+    salesRep: SALES_REPS[1],
   },
   {
     id: 12,
@@ -180,31 +227,18 @@ const CLIENTS = [
     disposable: 95,
     recommended: "개인회생",
     score: 79,
-    status: "검토완료",
+    stageIndex: 5,
     date: "2026-06-17",
+    salesRep: SALES_REPS[2],
   },
 ];
 
 const PROC_FILTERS = ["전체", "개인회생", "채무조정", "파산"];
-const STATUS_COLOR = {
-  검토완료: "done",
-  상담중: "ongoing",
-  진행중: "progress",
-};
 const PROC_COLOR = {
   개인회생: "rehab",
   채무조정: "adjust",
   파산: "bankrupt",
 };
-
-const ScoreBar = ({ score }) => (
-  <div className="cll-score-wrap">
-    <div className="cll-score-bar">
-      <div className="cll-score-fill" style={{ width: `${score}%` }} />
-    </div>
-    <span className="cll-score-num">{score}</span>
-  </div>
-);
 
 const ChecklistListPage = () => {
   const navigate = useNavigate();
@@ -326,12 +360,19 @@ const ChecklistListPage = () => {
             </div>
           </div>
           <div className="cll-stat-card">
-            <span className="cll-stat-label">상태 현황</span>
-            {["검토완료", "상담중", "진행중"].map((s) => {
-              const cnt = CLIENTS.filter((c) => c.status === s).length;
+            <span className="cll-stat-label">진행단계 현황</span>
+            {["초기 단계", "중간 단계", "후기 단계"].map((s, i) => {
+              const cnt = CLIENTS.filter((c) => {
+                const pct =
+                  (c.stageIndex + 1) / STAGE_NAMES[c.recommended].length;
+                if (i === 0) return pct <= 1 / 3;
+                if (i === 1) return pct > 1 / 3 && pct <= 2 / 3;
+                return pct > 2 / 3;
+              }).length;
+              const dotClass = ["ongoing", "progress", "done"][i];
               return (
                 <div key={s} className="cll-status-row">
-                  <span className={`cll-status-dot ${STATUS_COLOR[s]}`} />
+                  <span className={`cll-status-dot ${dotClass}`} />
                   <span className="cll-status-label">{s}</span>
                   <span className="cll-status-cnt">{cnt}건</span>
                 </div>
@@ -400,72 +441,88 @@ const ChecklistListPage = () => {
             <button className="cll-th-btn" onClick={() => handleSort("score")}>
               성공 가능성 <SortIcon col="score" />
             </button>
-            <span>상태</span>
+            <span>진행단계</span>
             <button className="cll-th-btn" onClick={() => handleSort("date")}>
               상담일 <SortIcon col="date" />
             </button>
-            <span />
+            <span>영업담당자</span>
           </div>
 
           {/* 행 */}
           {sorted.length === 0 ? (
             <div className="cll-empty">검색 결과가 없습니다.</div>
           ) : (
-            sorted.map((c) => (
-              <div
-                key={c.id}
-                className="cll-row"
-                onClick={() => navigate("/checklist/result")}
-              >
-                <div className="cll-cell-client">
-                  <div>
-                    <div className="cll-name">{c.name}</div>
-                    <div className="cll-meta">
-                      {c.age}세 · {c.gender} · {c.job}
+            sorted.map((c) => {
+              const stages = STAGE_NAMES[c.recommended];
+              const stagePct = Math.round(
+                ((c.stageIndex + 1) / stages.length) * 100,
+              );
+              return (
+                <div
+                  key={c.id}
+                  className="cll-row"
+                  onClick={() => navigate("/checklist/result-external")}
+                >
+                  <div className="cll-cell-client">
+                    <div>
+                      <div className="cll-name">{c.name}</div>
+                      <div className="cll-meta">
+                        {c.age}세 · {c.gender} · {c.job}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="cll-cell cll-cell-region">{c.region}</span>
+                  <span className="cll-cell cll-debt">
+                    {(c.totalDebt / 10000).toFixed(1)}억<em>원</em>
+                  </span>
+                  <span
+                    className={`cll-cell cll-disposable cll-cell-disposable ${c.disposable < 0 ? "neg" : ""}`}
+                  >
+                    {c.disposable >= 0 ? "+" : ""}
+                    {c.disposable}만원
+                  </span>
+                  <span className="cll-cell cll-cell-proc">
+                    <span
+                      className={`cll-proc-tag ${PROC_COLOR[c.recommended]}`}
+                    >
+                      {c.recommended}
+                    </span>
+                  </span>
+                  <span className="cll-cell cll-cell-score">
+                    <strong className="cll-score-num">{c.score}</strong>
+                    <span className="cll-score-total">/100</span>
+                  </span>
+                  <div className="cll-cell cll-cell-stage">
+                    <span className="cll-stage-label">
+                      {c.stageIndex + 1}/{stages.length} ·{" "}
+                      {stages[c.stageIndex]}
+                    </span>
+                    <div className="cll-stage-bar">
+                      <div
+                        className="cll-stage-fill"
+                        style={{ width: `${stagePct}%` }}
+                      />
+                    </div>
+                  </div>
+                  <span className="cll-cell cll-date">
+                    {c.date.slice(5).replace("-", "/")}
+                  </span>
+                  <div className="cll-cell cll-cell-sales">
+                    <img
+                      src={c.salesRep.thumb}
+                      alt=""
+                      className="cll-sales-thumb"
+                    />
+                    <div className="cll-sales-info">
+                      <span className="cll-sales-branch">
+                        {c.salesRep.branch}
+                      </span>
+                      <span className="cll-sales-name">{c.salesRep.name}</span>
                     </div>
                   </div>
                 </div>
-                <span className="cll-cell cll-cell-region">{c.region}</span>
-                <span className="cll-cell cll-debt">
-                  {(c.totalDebt / 10000).toFixed(1)}억<em>원</em>
-                </span>
-                <span
-                  className={`cll-cell cll-disposable cll-cell-disposable ${c.disposable < 0 ? "neg" : ""}`}
-                >
-                  {c.disposable >= 0 ? "+" : ""}
-                  {c.disposable}만원
-                </span>
-                <span className="cll-cell cll-cell-proc">
-                  <span className={`cll-proc-tag ${PROC_COLOR[c.recommended]}`}>
-                    {c.recommended}
-                  </span>
-                </span>
-                <div className="cll-cell cll-cell-score">
-                  <ScoreBar score={c.score} />
-                </div>
-                <span className="cll-cell cll-cell-status">
-                  <span
-                    className={`cll-status-badge ${STATUS_COLOR[c.status]}`}
-                  >
-                    {c.status}
-                  </span>
-                </span>
-                <span className="cll-cell cll-date">
-                  {c.date.slice(5).replace("-", "/")}
-                </span>
-                <span className="cll-cell cll-action">
-                  <button
-                    className="cll-view-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate("/checklist/result");
-                    }}
-                  >
-                    결과 보기
-                  </button>
-                </span>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -rf /tmp/pw-run2 /tmp/claude-shot-list2.png /tmp/npminit2.log /tmp/npmi2.log)",
+      "Bash(npm --prefix /tmp/pw-run3 install --prefix /tmp/pw-run3 playwright@1.61.1 >/tmp/npmi3.log 2>&1; tail -5 /tmp/npmi3.log)",
+      "Bash(git -C /Users/soohyun/Files/repository/hihireo08/wireframe status --porcelain package.json)",
+      "Bash(rm -rf /tmp/pw-run3 /tmp/claude-shot-list3.png /tmp/npmi3.log)",
+      "Bash(mkdir -p /tmp/pw-run4)",
+      "Bash(npm --prefix /tmp/pw-run4 install playwright@1.61.1)",
+      "Bash(rm -rf /tmp/pw-run4 /tmp/claude-shot-setter-*.png /tmp/npmi4.log)",
+      "Bash(mkdir -p /tmp/pw-run5)",
+      "Bash(npm --prefix /tmp/pw-run5 install playwright@1.61.1)",
+      "Bash(rm -rf /tmp/pw-run5 /tmp/claude-shot-sample.png /tmp/npmi5.log)"
+    ],
+    "additionalDirectories": [
+      "/private/tmp/pw-run2",
+      "/tmp",
+      "/private/tmp/pw-run3",
+      "/private/tmp/pw-run4",
+      "/private/tmp/pw-run5"
+    ]
+  }
+}

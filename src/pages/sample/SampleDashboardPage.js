@@ -21,6 +21,12 @@ const CLIENT = {
   ],
 };
 
+const SALES_REP = {
+  name: "박지훈",
+  branch: "강남영업점",
+  thumb: "/images/thumb_sample1.png",
+};
+
 const OPTIONS = [
   {
     id: "rehabilitation",
@@ -599,68 +605,6 @@ const PROCEDURES = {
   },
 };
 
-/* ── 출장담당자 전용 데이터 ── */
-const FIELD_DOCS = {
-  rehabilitation: [
-    { id: "d1", text: "주민등록등본 1부" },
-    {
-      id: "d2",
-      text: "소득 증빙 서류 (급여명세서 또는 사업자 매출장부·세금계산서)",
-    },
-    { id: "d3", text: "각 금융기관 대출 잔액증명서" },
-    { id: "d4", text: "가족관계증명서 1부" },
-    { id: "d5", text: "무재산 확인서 (부동산·차량 없는 경우)" },
-    { id: "d6", text: "금융거래 확인서 (최근 1년)" },
-    { id: "d7", text: "신분증 사본" },
-  ],
-  debtAdjustment: [
-    { id: "d1", text: "신분증 사본" },
-    { id: "d2", text: "주민등록등본 1부" },
-    { id: "d3", text: "소득 증빙 서류 (급여명세서 또는 사업소득 확인서)" },
-    { id: "d4", text: "각 금융기관 채무 내역 확인서" },
-    { id: "d5", text: "가계수지 현황표 (수입·지출 내역)" },
-  ],
-  bankruptcy: [
-    { id: "d1", text: "주민등록등본 1부" },
-    { id: "d2", text: "신분증 사본" },
-    { id: "d3", text: "각 금융기관 채무 내역 확인서" },
-    { id: "d4", text: "재산 관련 서류 (부동산 등기부등본, 차량 등록증 등)" },
-    { id: "d5", text: "가족관계증명서 1부" },
-    { id: "d6", text: "소득 증빙 서류 (없을 경우 무소득 확인서)" },
-    { id: "d7", text: "금융거래 확인서 (최근 1년)" },
-  ],
-};
-
-
-const FIELD_FAQ = [
-  {
-    q: "신청하면 직장에 영향이 있나요?",
-    a: "일반 사기업 직원의 경우 개인회생·파산은 원칙적으로 해고 사유가 되지 않습니다. 단, 금융기관·공무원·일부 자격증 직종은 별도 확인이 필요합니다.",
-  },
-  {
-    q: "신청 후 카드 사용이 안 되나요?",
-    a: "신청 이후 신용카드 사용은 어렵습니다. 변제 기간 중에는 체크카드·현금 위주로 생활하셔야 합니다. 변제 완료 후 신용 회복이 시작됩니다.",
-  },
-  {
-    q: "집과 차는 어떻게 되나요?",
-    a: "전월세 거주 중이라면 주거지는 보호됩니다. 자가 주택이나 차량이 있는 경우 재산 처분 여부는 법원 판단에 따라 달라집니다.",
-  },
-  {
-    q: "가족에게 영향이 가나요?",
-    a: "본인의 채무이므로 가족에게 직접적인 법적 책임은 없습니다. 다만 배우자의 소득은 가용소득 산정 시 일부 반영될 수 있습니다.",
-  },
-  {
-    q: "얼마나 걸리나요?",
-    a: "신청부터 면책까지 통상 3~5년이 소요됩니다. 서류 준비(1~2주) → 법원 접수 → 개시결정(1~3개월) → 변제(36~60개월) → 면책 순서로 진행됩니다.",
-  },
-  {
-    q: "지금 당장 추심을 멈출 수 있나요?",
-    a: "법원 접수 후 금지명령이 발령되면 채권자의 전화·압류·강제집행이 즉시 중지됩니다. 신청 전에도 내용증명 발송으로 일시 대응이 가능합니다.",
-  },
-];
-
-const RECOMMENDED_PROC = OPTIONS.find((o) => o.recommended)?.id ?? "rehabilitation";
-
 const calcRemainingWeeks = (steps, currentStepId) => {
   const idx = steps.findIndex((s) => s.id === currentStepId);
   if (idx < 0) return 0;
@@ -678,6 +622,30 @@ const weeksToLabel = (weeks) => {
 };
 
 const procStorageKey = (clientId, procId) => `proc_step_${clientId}_${procId}`;
+
+const INTERNAL_STAFF = { name: "데모 상담사", role: "내부 상담사" };
+const SALES_STAFF = {
+  name: SALES_REP.name,
+  role: `${SALES_REP.branch} 출장담당자`,
+};
+
+/* 단계별 설정자 샘플 데이터 */
+const STEP_SETTERS = {
+  rehabilitation: {
+    1: { ...INTERNAL_STAFF, at: "2026.06.20 10:15" },
+    2: { ...INTERNAL_STAFF, at: "2026.06.22 14:30" },
+    3: { ...SALES_STAFF, at: "2026.06.24 09:40" },
+    4: { ...SALES_STAFF, at: "2026.06.25 11:05" },
+  },
+  debtAdjustment: {
+    1: { ...INTERNAL_STAFF, at: "2026.06.21 09:30" },
+    2: { ...SALES_STAFF, at: "2026.06.23 13:10" },
+  },
+  bankruptcy: {
+    1: { ...INTERNAL_STAFF, at: "2026.06.19 10:00" },
+    2: { ...SALES_STAFF, at: "2026.06.21 14:20" },
+  },
+};
 
 /* 링 게이지 컴포넌트 */
 const Ring = ({ score, size = 130, strokeWidth = 7 }) => {
@@ -770,10 +738,6 @@ const SampleDashboardPage = () => {
     return saved ? parseInt(saved) : null;
   });
 
-  /* 출장담당자 전용 상태 */
-  const [checkedDocs, setCheckedDocs] = useState(new Set());
-  const [openFaq, setOpenFaq] = useState(null);
-
   const [chatMessages, setChatMessages] = useState([INITIAL_AI_MSG]);
   const [chatInput, setChatInput] = useState("");
   const [isAiTyping, setIsAiTyping] = useState(false);
@@ -809,422 +773,6 @@ const SampleDashboardPage = () => {
   const totalRepayment = AI.repaymentAmount * AI.repaymentMonths;
   const exemptDebt = CLIENT.totalDebt - totalRepayment;
 
-  /* ── 출장담당자 전용 뷰 ── */
-  if (isExternal) {
-    const proc = PROCEDURES[selectedOption];
-    const { steps, color, label, totalMonths } = proc;
-    const currentIdx = steps.findIndex((s) => s.id === procCurrentStep);
-    const completedIds = new Set(
-      procCurrentStep
-        ? steps.filter((s) => s.id < procCurrentStep).map((s) => s.id)
-        : [],
-    );
-    const remainingWeeks = calcRemainingWeeks(steps, procCurrentStep);
-    const progressPct =
-      currentIdx >= 0 ? Math.round((currentIdx / (steps.length - 1)) * 100) : 0;
-    const fieldDocs = FIELD_DOCS[selectedOption] || FIELD_DOCS.rehabilitation;
-    const isRecommended = selectedOption === RECOMMENDED_PROC;
-    const toggleDoc = (id) =>
-      setCheckedDocs((prev) => {
-        const n = new Set(prev);
-        n.has(id) ? n.delete(id) : n.add(id);
-        return n;
-      });
-    const handleSetCurrent = (stepId) => {
-      setProcCurrentStep(stepId);
-      localStorage.setItem(procStorageKey(1, selectedOption), String(stepId));
-    };
-    const checkedCount = fieldDocs.filter((d) => checkedDocs.has(d.id)).length;
-
-    return (
-      <div className="sdp-page">
-        <div className="sdp-body">
-          {/* 상단 네비 */}
-          <div className="sdp-topnav">
-            <div className="sdp-topnav-client">
-              <div className="sdp-chip-dot" />
-              <span>
-                {CLIENT.name} · {CLIENT.age}세 · {CLIENT.job}
-              </span>
-            </div>
-            <div className="sdp-topnav-right">
-              <button
-                className="sdp-view-toggle-btn"
-                onClick={() => navigate("/checklist/result")}
-              >
-                내부용
-              </button>
-              <span className="sdp-topnav-date">2026.06.28 16:00</span>
-              <button
-                className="sdp-icon-btn"
-                onClick={() => navigate("/checklist")}
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <rect
-                    x="2"
-                    y="3.5"
-                    width="12"
-                    height="1.4"
-                    rx="0.7"
-                    fill="#444"
-                  />
-                  <rect
-                    x="2"
-                    y="7.3"
-                    width="12"
-                    height="1.4"
-                    rx="0.7"
-                    fill="#444"
-                  />
-                  <rect
-                    x="2"
-                    y="11.1"
-                    width="12"
-                    height="1.4"
-                    rx="0.7"
-                    fill="#444"
-                  />
-                </svg>
-                <span>목록</span>
-              </button>
-            </div>
-          </div>
-
-          {/* ① 요약 히어로 */}
-          <section className="fv-hero">
-            <div className="fv-hero-top">
-              <span className="fv-hero-eyebrow">추천 절차</span>
-              <div className="fv-proc-tabs">
-                {Object.values(PROCEDURES).map((p) => (
-                  <button
-                    key={p.id}
-                    className={`fv-proc-tab ${selectedOption === p.id ? "active" : ""}`}
-                    style={
-                      selectedOption === p.id
-                        ? { borderColor: p.color, color: p.color }
-                        : {}
-                    }
-                    onClick={() => {
-                      setSelectedOption(p.id);
-                      setCheckedDocs(new Set());
-                    }}
-                  >
-                    {p.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <h1 className="fv-hero-title" style={{ color }}>
-              {label}
-            </h1>
-            <div className="fv-hero-cards">
-              <div className="fv-kcard">
-                <span className="fv-kcard-label">월 납부 예상액</span>
-                <span className="fv-kcard-val">
-                  {AI.repaymentAmount}
-                  <em>만원</em>
-                </span>
-              </div>
-              <div className="fv-kcard">
-                <span className="fv-kcard-label">납부 기간</span>
-                <span className="fv-kcard-val">
-                  {AI.repaymentMonths}
-                  <em>개월</em>
-                </span>
-              </div>
-              <div className="fv-kcard fv-kcard--accent">
-                <span className="fv-kcard-label">예상 면책 채무</span>
-                <span className="fv-kcard-val">
-                  약 {exemptDebt.toLocaleString()}
-                  <em>만원</em>
-                </span>
-              </div>
-            </div>
-          </section>
-
-          {/* ② 조건 분석 */}
-          {(() => {
-            const opt = OPTIONS.find((o) => o.id === selectedOption);
-            const passItems    = opt.conditions.filter((c) => c.type === "pass");
-            const cautionItems = opt.conditions.filter((c) => c.type === "caution");
-            const riskItems    = opt.conditions.filter((c) => c.type === "risk");
-            return (
-              <section className="sdp-section">
-                <div className="fv-eval-header">
-                  <p className="sdp-section-label" style={{ margin: 0 }}>조건 분석</p>
-                  <div className="fv-cond-legend">
-                    <span className="sdp-cond-badge pass">충족 {passItems.length}</span>
-                    <span className="sdp-cond-badge caution">보충 필요 {cautionItems.length}</span>
-                    <span className="sdp-cond-badge risk">위험 요소 {riskItems.length}</span>
-                  </div>
-                  {isRecommended ? (
-                    <span className="fv-eval-badge recommended">추천</span>
-                  ) : (
-                    <span className="fv-eval-badge not-recommended">
-                      비권장 — {PROCEDURES[RECOMMENDED_PROC].label} 우선 권장
-                    </span>
-                  )}
-                </div>
-
-                <div className="fv-cond-list">
-                  {passItems.map((c, i) => (
-                    <div key={`pass-${i}`} className="fv-cond fv-cond-pass">
-                      <div className="fv-cond-icon">
-                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
-                          <circle cx="8" cy="8" r="8" fill="#16a34a" />
-                          <path d="M4.5 8l2.5 2.5 4.5-4.5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </div>
-                      <span className="fv-cond-text">{c.text}</span>
-                    </div>
-                  ))}
-                  {cautionItems.map((c, i) => (
-                    <div key={`caution-${i}`} className="fv-cond fv-cond-caution">
-                      <div className="fv-cond-icon">
-                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
-                          <path d="M8 1.5L14.5 13H1.5L8 1.5Z" fill="#d97706" strokeLinejoin="round" />
-                          <path d="M8 6v3.5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" />
-                          <circle cx="8" cy="11" r="0.9" fill="#fff" />
-                        </svg>
-                      </div>
-                      <span className="fv-cond-text">{c.text}</span>
-                    </div>
-                  ))}
-                  {riskItems.map((c, i) => (
-                    <div key={`risk-${i}`} className="fv-cond fv-cond-risk">
-                      <div className="fv-cond-icon">
-                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
-                          <circle cx="8" cy="8" r="8" fill="#dc2626" />
-                          <path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" />
-                        </svg>
-                      </div>
-                      <span className="fv-cond-text">{c.text}</span>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            );
-          })()}
-
-          {/* ③ 절차 로드맵 */}
-          <section className="sdp-section">
-            <div className="sdp-proc-header">
-              <p className="sdp-section-label" style={{ margin: 0 }}>
-                절차 로드맵
-              </p>
-              <span
-                className="sdp-proc-badge"
-                style={{ background: color + "18", color }}
-              >
-                {label} · {steps.length}단계
-              </span>
-              <span className="sdp-proc-total">{totalMonths}</span>
-            </div>
-            <div className="fv-roadmap">
-              {/* 좌: 타임라인 (더 크게) */}
-              <div className="fv-roadmap-tl">
-                {steps.map((step, idx) => {
-                  const isDone = completedIds.has(step.id);
-                  const isCur = step.id === procCurrentStep;
-                  return (
-                    <div key={step.id} className="fv-tl-item">
-                      <div className="fv-tl-track">
-                        <div
-                          className={`fv-tl-dot ${isCur ? "current" : isDone ? "done" : "pending"}`}
-                          style={
-                            isCur
-                              ? { background: color, borderColor: color }
-                              : {}
-                          }
-                        />
-                        {idx < steps.length - 1 && (
-                          <div
-                            className={`fv-tl-line ${isDone ? "done" : ""}`}
-                          />
-                        )}
-                      </div>
-                      <div
-                        className={`fv-tl-content ${isCur ? "current" : isDone ? "done" : ""}`}
-                        onClick={() => handleSetCurrent(step.id)}
-                        title="현재 단계로 설정"
-                      >
-                        <div className="fv-tl-title-row">
-                          <span className="fv-tl-step-title">
-                            {step.id}단계. {step.title}
-                          </span>
-                          {isCur && (
-                            <span
-                              className="fv-tl-cur-badge"
-                              style={{ background: color }}
-                            >
-                              현재
-                            </span>
-                          )}
-                        </div>
-                        <span className="fv-tl-dur">{step.durationLabel}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              {/* 우: 현황 카드 */}
-              <div className="fv-roadmap-info">
-                <div className="fv-info-card">
-                  <span className="fv-info-label">현재 단계</span>
-                  <span className="fv-info-val">
-                    {procCurrentStep
-                      ? `${procCurrentStep}단계. ${steps.find((s) => s.id === procCurrentStep)?.title}`
-                      : "단계를 클릭해서 설정하세요"}
-                  </span>
-                </div>
-                <div className="fv-info-card">
-                  <span className="fv-info-label">예상 남은 기간</span>
-                  <span className="fv-info-val fv-info-big">
-                    {weeksToLabel(remainingWeeks)}
-                  </span>
-                  <span className="fv-info-sub">전체 {totalMonths}</span>
-                </div>
-                <div className="fv-progress-wrap">
-                  <div className="fv-progress-labels">
-                    <span>진행률</span>
-                    <span>{progressPct}%</span>
-                  </div>
-                  <div className="fv-progress-bg">
-                    <div
-                      className="fv-progress-fill"
-                      style={{ width: `${progressPct}%`, background: color }}
-                    />
-                  </div>
-                </div>
-                <p className="fv-roadmap-hint">
-                  각 단계를 클릭하면 현재 단계로 설정됩니다
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* ④ 재무 요약 */}
-          <section className="sdp-section">
-            <p className="sdp-section-label">재무 현황 요약</p>
-            <div className="fv-finance-grid">
-              <div className="fv-fin-item">
-                <span className="fv-fin-label">총 채무</span>
-                <span className="fv-fin-val">
-                  {CLIENT.totalDebt.toLocaleString()}
-                  <em>만원</em>
-                </span>
-              </div>
-              <div className="fv-fin-item">
-                <span className="fv-fin-label">총 자산</span>
-                <span className="fv-fin-val">
-                  {CLIENT.totalAsset.toLocaleString()}
-                  <em>만원</em>
-                </span>
-              </div>
-              <div className="fv-fin-item">
-                <span className="fv-fin-label">월 가용 소득</span>
-                <span className="fv-fin-val">
-                  +{CLIENT.disposableIncome}
-                  <em>만원</em>
-                </span>
-              </div>
-              <div className="fv-fin-item">
-                <span className="fv-fin-label">연체 기간</span>
-                <span className="fv-fin-val">
-                  {CLIENT.overduePeriod}
-                  <em>개월</em>
-                </span>
-              </div>
-            </div>
-          </section>
-
-          {/* ⑤ 서류 체크리스트 */}
-          <section className="sdp-section">
-            <div className="fv-doc-header">
-              <p className="sdp-section-label" style={{ margin: 0 }}>
-                준비 서류 확인
-              </p>
-              <span className="fv-doc-count">
-                {checkedCount} / {fieldDocs.length}
-              </span>
-            </div>
-            <p className="fv-doc-sub">
-              오늘 지참하셨거나 준비 가능한 서류에 체크해주세요
-            </p>
-            <div className="fv-doc-list">
-              {fieldDocs.map((doc) => {
-                const checked = checkedDocs.has(doc.id);
-                return (
-                  <label
-                    key={doc.id}
-                    className={`fv-doc-item ${checked ? "checked" : ""}`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggleDoc(doc.id)}
-                      className="fv-doc-cb"
-                    />
-                    <span className={`fv-doc-box ${checked ? "checked" : ""}`}>
-                      {checked && (
-                        <svg
-                          width="11"
-                          height="11"
-                          viewBox="0 0 12 12"
-                          fill="none"
-                        >
-                          <path
-                            d="M2 6l3 3 5-5"
-                            stroke="#fff"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      )}
-                    </span>
-                    <span className="fv-doc-text">{doc.text}</span>
-                  </label>
-                );
-              })}
-            </div>
-            {checkedCount === fieldDocs.length && fieldDocs.length > 0 && (
-              <div className="fv-doc-complete">
-                모든 서류가 확인되었습니다 ✓
-              </div>
-            )}
-          </section>
-
-          {/* ⑥ 자주 묻는 질문 */}
-          <section className="sdp-section" style={{ borderBottom: "none" }}>
-            <p className="sdp-section-label">자주 묻는 질문</p>
-            <div className="fv-faq-list">
-              {FIELD_FAQ.map((item, i) => (
-                <div
-                  key={i}
-                  className={`fv-faq-item ${openFaq === i ? "open" : ""}`}
-                >
-                  <button
-                    className="fv-faq-q"
-                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  >
-                    <span>{item.q}</span>
-                    <span
-                      className={`fv-faq-chevron ${openFaq === i ? "open" : ""}`}
-                    >
-                      ›
-                    </span>
-                  </button>
-                  {openFaq === i && <p className="fv-faq-a">{item.a}</p>}
-                </div>
-              ))}
-            </div>
-          </section>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="sdp-page">
       <div className="sdp-body">
@@ -1237,40 +785,46 @@ const SampleDashboardPage = () => {
             </span>
           </div>
           <div className="sdp-topnav-right">
-            {/* 테스트용 뷰 전환 버튼 */}
-            <button
-              className="sdp-view-toggle-btn"
-              title={isExternal ? "내부 뷰로 전환" : "외부 뷰로 전환"}
-              onClick={() =>
-                navigate(
-                  isExternal
-                    ? "/checklist/result"
-                    : "/checklist/result-external",
-                )
-              }
-            >
-              {isExternal ? "외부용" : "내부용"}
-            </button>
+            {isExternal ? (
+              <div className="sdp-sales-chip">
+                <img src={SALES_REP.thumb} alt="" className="sdp-sales-thumb" />
+                <div className="sdp-sales-info">
+                  <span className="sdp-sales-branch">{SALES_REP.branch}</span>
+                  <span className="sdp-sales-name">{SALES_REP.name}</span>
+                </div>
+              </div>
+            ) : (
+              /* 테스트용 뷰 전환 버튼 */
+              <button
+                className="sdp-view-toggle-btn"
+                title="외부 뷰로 전환"
+                onClick={() => navigate("/checklist/result-external")}
+              >
+                내부용
+              </button>
+            )}
             <span className="sdp-topnav-date">2026.06.28 16:00</span>
             {/* 아이콘 액션 버튼들 */}
-            <button
-              className="sdp-icon-btn"
-              title="정보 수정"
-              onClick={() =>
-                navigate("/checklist/form", { state: { fromResult: true } })
-              }
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path
-                  d="M11.5 2.5L13.5 4.5L5 13H3V11L11.5 2.5Z"
-                  stroke="#444"
-                  strokeWidth="1.4"
-                  strokeLinejoin="round"
-                />
-                <path d="M10 4L12 6" stroke="#444" strokeWidth="1.4" />
-              </svg>
-              <span>정보 수정</span>
-            </button>
+            {!isExternal && (
+              <button
+                className="sdp-icon-btn"
+                title="정보 수정"
+                onClick={() =>
+                  navigate("/checklist/form", { state: { fromResult: true } })
+                }
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path
+                    d="M11.5 2.5L13.5 4.5L5 13H3V11L11.5 2.5Z"
+                    stroke="#444"
+                    strokeWidth="1.4"
+                    strokeLinejoin="round"
+                  />
+                  <path d="M10 4L12 6" stroke="#444" strokeWidth="1.4" />
+                </svg>
+                <span>정보 수정</span>
+              </button>
+            )}
             <button
               className="sdp-icon-btn"
               title="목록"
@@ -1304,27 +858,29 @@ const SampleDashboardPage = () => {
               </svg>
               <span>목록</span>
             </button>
-            <button
-              className="sdp-icon-btn sdp-icon-btn--primary"
-              title="저장하기"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path
-                  d="M8 2V10M8 10L5 7M8 10L11 7"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M2 12H14"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <span>저장하기</span>
-            </button>
+            {!isExternal && (
+              <button
+                className="sdp-icon-btn sdp-icon-btn--primary"
+                title="저장하기"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path
+                    d="M8 2V10M8 10L5 7M8 10L11 7"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M2 12H14"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <span>저장하기</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -1816,6 +1372,7 @@ const SampleDashboardPage = () => {
                     const isOpen = procOpenSteps.has(step.id);
                     const isCurrent = step.id === procCurrentStep;
                     const isDone = completedIds.has(step.id);
+                    const setter = STEP_SETTERS[selectedOption]?.[step.id];
                     const { details } = step;
                     return (
                       <div
@@ -1838,6 +1395,11 @@ const SampleDashboardPage = () => {
                             <span className="sdp-pstep-dur">
                               {step.durationLabel}
                             </span>
+                            {setter && (
+                              <span className="sdp-pstep-setter">
+                                {setter.name} 설정
+                              </span>
+                            )}
                           </div>
                           <div
                             style={{
@@ -1937,6 +1499,15 @@ const SampleDashboardPage = () => {
                                 <span>⚠</span>
                                 <p>{details.caution}</p>
                               </div>
+                            )}
+                            {setter && (
+                              <p className="sdp-pstep-setter-info">
+                                <strong>{setter.name}</strong>
+                                <span className="sdp-pstep-setter-role">
+                                  {setter.role}
+                                </span>
+                                님이 {setter.at}에 설정
+                              </p>
                             )}
                             <button
                               className={`sdp-pstep-set-btn ${isCurrent ? "active" : ""}`}
