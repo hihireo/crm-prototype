@@ -10,14 +10,24 @@
       "Bash(rm -rf /tmp/pw-run4 /tmp/claude-shot-setter-*.png /tmp/npmi4.log)",
       "Bash(mkdir -p /tmp/pw-run5)",
       "Bash(npm --prefix /tmp/pw-run5 install playwright@1.61.1)",
-      "Bash(rm -rf /tmp/pw-run5 /tmp/claude-shot-sample.png /tmp/npmi5.log)"
+      "Bash(rm -rf /tmp/pw-run5 /tmp/claude-shot-sample.png /tmp/npmi5.log)",
+      "Bash(mkdir -p /tmp/pw-run6)",
+      "Bash(npm --prefix /tmp/pw-run6 install playwright@1.61.1)",
+      "Bash(rm -rf /tmp/pw-run6 /tmp/claude-shot-name.png /tmp/npmi6.log)",
+      "Bash(mkdir -p /tmp/pw-run7)",
+      "Bash(npm --prefix /tmp/pw-run7 install playwright@1.61.1)",
+      "Bash(NODE_PATH=/tmp/pw-run7/node_modules node verify_collapsed.js)",
+      "Bash(NODE_PATH=/tmp/pw-run7/node_modules node /private/tmp/claude-501/-Users-soohyun-Files-repository-hihireo08-wireframe/00bc12b7-0b0a-43ee-8775-28f9e40ec208/scratchpad/verify_collapsed.js)",
+      "Bash(rm -rf /tmp/pw-run7 /tmp/claude-shot-collapsed.png /tmp/claude-shot-expanded.png /tmp/npmi7.log)"
     ],
     "additionalDirectories": [
       "/private/tmp/pw-run2",
       "/tmp",
       "/private/tmp/pw-run3",
       "/private/tmp/pw-run4",
-      "/private/tmp/pw-run5"
+      "/private/tmp/pw-run5",
+      "/private/tmp/pw-run6",
+      "/private/tmp/pw-run7"
     ]
   }
 }

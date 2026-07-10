@@ -623,7 +623,7 @@ const weeksToLabel = (weeks) => {
 
 const procStorageKey = (clientId, procId) => `proc_step_${clientId}_${procId}`;
 
-const INTERNAL_STAFF = { name: "데모 상담사", role: "내부 상담사" };
+const INTERNAL_STAFF = { name: "이수민", role: "내부 상담사" };
 const SALES_STAFF = {
   name: SALES_REP.name,
   role: `${SALES_REP.branch} 출장담당자`,
@@ -1395,11 +1395,6 @@ const SampleDashboardPage = () => {
                             <span className="sdp-pstep-dur">
                               {step.durationLabel}
                             </span>
-                            {setter && (
-                              <span className="sdp-pstep-setter">
-                                {setter.name} 설정
-                              </span>
-                            )}
                           </div>
                           <div
                             style={{
