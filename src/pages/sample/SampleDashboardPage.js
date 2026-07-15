@@ -1008,24 +1008,24 @@ const SampleDashboardPage = () => {
   };
 
   /* 와이어프레임 테스트용: 입력 전 상태로 되돌리기 */
-  const resetPaymentConfig = () => {
-    if (
-      !window.confirm(
-        "결제 조건을 초기화하고 입력 전 상태로 되돌립니다. (테스트용)",
-      )
-    )
-      return;
-    setPaymentConfigured(false);
-    setInstallments([]);
-    setPaymentCanceled(false);
-    setStopType(null);
-    setCanceledAt(null);
-    setDraftTotalFee("");
-    setDraftMethod("installment");
-    setDraftCount("");
-    setDraftDate(TODAY_LABEL);
-    setPayEditing(true);
-  };
+  // const resetPaymentConfig = () => {
+  //   if (
+  //     !window.confirm(
+  //       "결제 조건을 초기화하고 입력 전 상태로 되돌립니다. (테스트용)",
+  //     )
+  //   )
+  //     return;
+  //   setPaymentConfigured(false);
+  //   setInstallments([]);
+  //   setPaymentCanceled(false);
+  //   setStopType(null);
+  //   setCanceledAt(null);
+  //   setDraftTotalFee("");
+  //   setDraftMethod("installment");
+  //   setDraftCount("");
+  //   setDraftDate(TODAY_LABEL);
+  //   setPayEditing(true);
+  // };
 
   useEffect(() => {
     if (chatMessages.length > 1) {
@@ -2143,9 +2143,9 @@ const SampleDashboardPage = () => {
                   {paymentConfigured && hasPaidProgress && (
                     <p className="sdp-pay-modal-warning">
                       <span>⚠</span>
-                      결제 조건을 수정하면 이미 완납·환불 처리된 회차를
-                      포함해 전체 회차 일정이 새로 계산됩니다. 기존 납부
-                      내역이 초기화될 수 있으니 확인 후 적용해 주세요.
+                      결제 조건을 수정하면 이미 완납·환불 처리된 회차를 포함해
+                      전체 회차 일정이 새로 계산됩니다. 기존 납부 내역이
+                      초기화될 수 있으니 확인 후 적용해 주세요.
                     </p>
                   )}
                   <div className="sdp-pay-form">
@@ -2426,9 +2426,8 @@ const SampleDashboardPage = () => {
                             <>
                               {canceledAt} 기준 결제가 환불 처리되었습니다.
                               납부했던 {refundedCount}회차(
-                              {refundedAmount.toLocaleString()}만원)가
-                              환불되며, 남은 {canceledCount}회차는 청구되지
-                              않습니다.
+                              {refundedAmount.toLocaleString()}만원)가 환불되며,
+                              남은 {canceledCount}회차는 청구되지 않습니다.
                             </>
                           ) : (
                             <>
