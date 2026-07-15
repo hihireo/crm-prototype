@@ -51,9 +51,18 @@ const CLIENTS = [
     disposable: 45,
     recommended: "개인회생",
     score: 78,
+    stageStatus: "절차진행중",
     stageIndex: 4,
     date: "2026-06-28",
     salesRep: SALES_REPS[0],
+    payment: {
+      configured: true,
+      totalFee: 700,
+      method: "installment",
+      count: 7,
+      paidCount: 3,
+      status: "진행중",
+    },
   },
   {
     id: 2,
@@ -67,9 +76,10 @@ const CLIENTS = [
     disposable: 120,
     recommended: "채무조정",
     score: 65,
-    stageIndex: 0,
+    stageStatus: "상담중",
     date: "2026-06-27",
     salesRep: SALES_REPS[1],
+    payment: { configured: false },
   },
   {
     id: 3,
@@ -83,9 +93,18 @@ const CLIENTS = [
     disposable: -20,
     recommended: "파산",
     score: 42,
+    stageStatus: "절차진행중",
     stageIndex: 4,
     date: "2026-06-26",
     salesRep: SALES_REPS[2],
+    payment: {
+      configured: true,
+      totalFee: 500,
+      method: "lump",
+      count: 1,
+      paidCount: 1,
+      status: "완납",
+    },
   },
   {
     id: 4,
@@ -99,9 +118,17 @@ const CLIENTS = [
     disposable: 80,
     recommended: "채무조정",
     score: 71,
-    stageIndex: 4,
+    stageStatus: "검토중",
     date: "2026-06-25",
     salesRep: SALES_REPS[0],
+    payment: {
+      configured: true,
+      totalFee: 600,
+      method: "installment",
+      count: 6,
+      paidCount: 2,
+      status: "진행중",
+    },
   },
   {
     id: 5,
@@ -115,9 +142,18 @@ const CLIENTS = [
     disposable: 90,
     recommended: "개인회생",
     score: 82,
-    stageIndex: 5,
+    stageStatus: "절차진행중",
+    stageIndex: 7,
     date: "2026-06-24",
     salesRep: SALES_REPS[1],
+    payment: {
+      configured: true,
+      totalFee: 800,
+      method: "installment",
+      count: 8,
+      paidCount: 8,
+      status: "완납",
+    },
   },
   {
     id: 6,
@@ -131,9 +167,18 @@ const CLIENTS = [
     disposable: 140,
     recommended: "개인회생",
     score: 85,
+    stageStatus: "절차진행중",
     stageIndex: 3,
     date: "2026-06-23",
     salesRep: SALES_REPS[2],
+    payment: {
+      configured: true,
+      totalFee: 700,
+      method: "installment",
+      count: 7,
+      paidCount: 4,
+      status: "진행중",
+    },
   },
   {
     id: 7,
@@ -147,9 +192,18 @@ const CLIENTS = [
     disposable: 30,
     recommended: "개인회생",
     score: 61,
+    stageStatus: "절차진행중",
     stageIndex: 6,
     date: "2026-06-22",
     salesRep: SALES_REPS[0],
+    payment: {
+      configured: true,
+      totalFee: 900,
+      method: "installment",
+      count: 10,
+      paidCount: 6,
+      status: "진행중",
+    },
   },
   {
     id: 8,
@@ -163,9 +217,10 @@ const CLIENTS = [
     disposable: 55,
     recommended: "채무조정",
     score: 68,
-    stageIndex: 1,
+    stageStatus: "상담중",
     date: "2026-06-21",
     salesRep: SALES_REPS[1],
+    payment: { configured: false },
   },
   {
     id: 9,
@@ -179,9 +234,17 @@ const CLIENTS = [
     disposable: -30,
     recommended: "파산",
     score: 38,
-    stageIndex: 3,
+    stageStatus: "반려됨",
     date: "2026-06-20",
     salesRep: SALES_REPS[2],
+    payment: {
+      configured: true,
+      totalFee: 400,
+      method: "installment",
+      count: 4,
+      paidCount: 2,
+      status: "중도 해지",
+    },
   },
   {
     id: 10,
@@ -195,9 +258,17 @@ const CLIENTS = [
     disposable: 15,
     recommended: "개인회생",
     score: 55,
-    stageIndex: 7,
+    stageStatus: "중단됨",
     date: "2026-06-19",
     salesRep: SALES_REPS[0],
+    payment: {
+      configured: true,
+      totalFee: 600,
+      method: "installment",
+      count: 6,
+      paidCount: 3,
+      status: "환불 처리",
+    },
   },
   {
     id: 11,
@@ -211,9 +282,17 @@ const CLIENTS = [
     disposable: 70,
     recommended: "개인회생",
     score: 74,
-    stageIndex: 1,
+    stageStatus: "계약대기중",
     date: "2026-06-18",
     salesRep: SALES_REPS[1],
+    payment: {
+      configured: true,
+      totalFee: 700,
+      method: "installment",
+      count: 7,
+      paidCount: 1,
+      status: "진행중",
+    },
   },
   {
     id: 12,
@@ -227,11 +306,71 @@ const CLIENTS = [
     disposable: 95,
     recommended: "개인회생",
     score: 79,
-    stageIndex: 5,
+    stageStatus: "절차진행중",
+    stageIndex: 4,
     date: "2026-06-17",
     salesRep: SALES_REPS[2],
+    payment: {
+      configured: true,
+      totalFee: 500,
+      method: "installment",
+      count: 5,
+      paidCount: 5,
+      status: "완납",
+    },
   },
 ];
+
+const STAGE_STATUS_CLASS = {
+  상담중: "consult",
+  검토중: "review",
+  반려됨: "rejected",
+  계약대기중: "pending",
+  절차진행중: "active",
+  중단됨: "halted",
+};
+
+const stageBadgeLabel = (status, stageIndex, stageTotal) => {
+  if (status === "절차진행중")
+    return `절차진행중 ${stageIndex + 1}/${stageTotal}`;
+  return status;
+};
+
+const STAGE_STATUS_DOT = {
+  상담중: "consult",
+  검토중: "review",
+  반려됨: "rejected",
+  계약대기중: "pending",
+  절차진행중: "active",
+  중단됨: "halted",
+};
+
+const STAGE_STATUSES = [
+  "상담중",
+  "검토중",
+  "반려됨",
+  "계약대기중",
+  "절차진행중",
+  "중단됨",
+];
+
+const PAY_STATUS_CLASS = {
+  진행중: "active",
+  완납: "done",
+  "중도 해지": "stopped",
+  "환불 처리": "refunded",
+};
+
+const paySeqLabel = (payment) => {
+  if (payment.method === "lump") return "일괄납부";
+  return `${payment.paidCount}/${payment.count}`;
+};
+
+const payProgressPct = (payment) => {
+  if (payment.method === "lump") return payment.paidCount > 0 ? 100 : 0;
+  if (!payment.count) return 0;
+  return Math.round((payment.paidCount / payment.count) * 100);
+};
 
 const PROC_FILTERS = ["전체", "개인회생", "채무조정", "파산"];
 const PROC_COLOR = {
@@ -276,7 +415,6 @@ const ChecklistListPage = () => {
     )
     .sort((a, b) => {
       const dir = sortDir === "asc" ? 1 : -1;
-      if (sortBy === "score") return (a.score - b.score) * dir;
       if (sortBy === "totalDebt") return (a.totalDebt - b.totalDebt) * dir;
       if (sortBy === "date") return a.date.localeCompare(b.date) * dir;
       return 0;
@@ -361,19 +499,13 @@ const ChecklistListPage = () => {
           </div>
           <div className="cll-stat-card">
             <span className="cll-stat-label">진행단계 현황</span>
-            {["초기 단계", "중간 단계", "후기 단계"].map((s, i) => {
-              const cnt = CLIENTS.filter((c) => {
-                const pct =
-                  (c.stageIndex + 1) / STAGE_NAMES[c.recommended].length;
-                if (i === 0) return pct <= 1 / 3;
-                if (i === 1) return pct > 1 / 3 && pct <= 2 / 3;
-                return pct > 2 / 3;
-              }).length;
-              const dotClass = ["ongoing", "progress", "done"][i];
+            {STAGE_STATUSES.map((status) => {
+              const cnt = CLIENTS.filter((c) => c.stageStatus === status).length;
+              const dotClass = STAGE_STATUS_DOT[status];
               return (
-                <div key={s} className="cll-status-row">
+                <div key={status} className="cll-status-row">
                   <span className={`cll-status-dot ${dotClass}`} />
-                  <span className="cll-status-label">{s}</span>
+                  <span className="cll-status-label">{status}</span>
                   <span className="cll-status-cnt">{cnt}건</span>
                 </div>
               );
@@ -437,11 +569,8 @@ const ChecklistListPage = () => {
               총 채무 <SortIcon col="totalDebt" />
             </button>
             <span>월 가용소득</span>
-            <span>추천 절차</span>
-            <button className="cll-th-btn" onClick={() => handleSort("score")}>
-              성공 가능성 <SortIcon col="score" />
-            </button>
-            <span>진행단계</span>
+            <span>결제정보</span>
+            <span>상태</span>
             <button className="cll-th-btn" onClick={() => handleSort("date")}>
               상담일 <SortIcon col="date" />
             </button>
@@ -453,10 +582,7 @@ const ChecklistListPage = () => {
             <div className="cll-empty">검색 결과가 없습니다.</div>
           ) : (
             sorted.map((c) => {
-              const stages = STAGE_NAMES[c.recommended];
-              const stagePct = Math.round(
-                ((c.stageIndex + 1) / stages.length) * 100,
-              );
+              const stageTotal = STAGE_NAMES[c.recommended].length;
               return (
                 <div
                   key={c.id}
@@ -481,27 +607,50 @@ const ChecklistListPage = () => {
                     {c.disposable >= 0 ? "+" : ""}
                     {c.disposable}만원
                   </span>
-                  <span className="cll-cell cll-cell-proc">
-                    <span
-                      className={`cll-proc-tag ${PROC_COLOR[c.recommended]}`}
-                    >
-                      {c.recommended}
-                    </span>
-                  </span>
-                  <span className="cll-cell cll-cell-score">
-                    <strong className="cll-score-num">{c.score}</strong>
-                    <span className="cll-score-total">/100</span>
-                  </span>
+                  <div className="cll-cell cll-cell-payment">
+                    {c.payment.configured ? (
+                      <div className="cll-pay-block">
+                        <span className="cll-pay-fee">
+                          {c.payment.totalFee.toLocaleString()}
+                          <em>만원</em>
+                        </span>
+                        <div className="cll-pay-detail">
+                          <div className="cll-pay-bar">
+                            <div
+                              className={`cll-pay-bar-fill ${PAY_STATUS_CLASS[c.payment.status] || ""}`}
+                              style={{
+                                width: `${payProgressPct(c.payment)}%`,
+                              }}
+                            />
+                          </div>
+                          <div className="cll-pay-foot">
+                            <span className="cll-pay-seq">
+                              {paySeqLabel(c.payment)}
+                            </span>
+                            <span
+                              className={`cll-pay-status ${PAY_STATUS_CLASS[c.payment.status] || ""}`}
+                            >
+                              {c.payment.status}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="cll-pay-unset">결제 미설정</span>
+                    )}
+                  </div>
                   <div className="cll-cell cll-cell-stage">
-                    <span className="cll-stage-label">
-                      {c.stageIndex + 1}/{stages.length} ·{" "}
-                      {stages[c.stageIndex]}
-                    </span>
-                    <div className="cll-stage-bar">
-                      <div
-                        className="cll-stage-fill"
-                        style={{ width: `${stagePct}%` }}
-                      />
+                    <div className="cll-stage-row">
+                      <span className="cll-stage-proc">{c.recommended}</span>
+                      <span
+                        className={`cll-stage-badge ${STAGE_STATUS_CLASS[c.stageStatus] || ""}`}
+                      >
+                        {stageBadgeLabel(
+                          c.stageStatus,
+                          c.stageIndex,
+                          stageTotal,
+                        )}
+                      </span>
                     </div>
                   </div>
                   <span className="cll-cell cll-date">

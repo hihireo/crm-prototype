@@ -307,17 +307,16 @@ const PaymentStatsPage = () => {
 
   const summary = useMemo(() => {
     const paid = filteredRecords.filter((r) => r.status === "paid");
-    const unpaid = filteredRecords.filter(
-      (r) => r.status === "pending" || r.status === "overdue",
-    );
     const overdue = filteredRecords.filter((r) => r.status === "overdue");
+    const pending = filteredRecords.filter((r) => r.status === "pending");
     const canceled = filteredRecords.filter((r) => r.status === "canceled");
     return {
       paidCount: paid.length,
       paidAmount: sumAmount(paid),
-      unpaidCount: unpaid.length,
-      unpaidAmount: sumAmount(unpaid),
       overdueCount: overdue.length,
+      overdueAmount: sumAmount(overdue),
+      pendingCount: pending.length,
+      pendingAmount: sumAmount(pending),
       canceledCount: canceled.length,
       canceledAmount: sumAmount(canceled),
     };
@@ -437,12 +436,19 @@ const PaymentStatsPage = () => {
           <div className="pst-kpi">
             <span className="pst-kpi-label">미납</span>
             <span className="pst-kpi-val warn">
-              {summary.unpaidAmount.toLocaleString()}
+              {summary.overdueAmount.toLocaleString()}
               <em>만원</em>
             </span>
-            <span className="pst-kpi-sub">
-              {summary.unpaidCount}건 · 기한초과 {summary.overdueCount}건 포함
+            <span className="pst-kpi-sub">{summary.overdueCount}건</span>
+          </div>
+
+          <div className="pst-kpi">
+            <span className="pst-kpi-label">결제예정</span>
+            <span className="pst-kpi-val info">
+              {summary.pendingAmount.toLocaleString()}
+              <em>만원</em>
             </span>
+            <span className="pst-kpi-sub">{summary.pendingCount}건</span>
           </div>
 
           <div className="pst-kpi">

@@ -200,6 +200,24 @@
 .cll-status-dot.progress {
   background: #3b82f6;
 }
+.cll-status-dot.consult {
+  background: #94a3b8;
+}
+.cll-status-dot.review {
+  background: #f59e0b;
+}
+.cll-status-dot.rejected {
+  background: #ef4444;
+}
+.cll-status-dot.pending {
+  background: #8b5cf6;
+}
+.cll-status-dot.active {
+  background: #3b82f6;
+}
+.cll-status-dot.halted {
+  background: #9ca3af;
+}
 
 .cll-status-label {
   font-size: 13px;
@@ -333,11 +351,11 @@
   overflow: hidden;
 }
 
-/* grid 9열: 고객정보 / 지역 / 채무 / 가용소득 / 절차 / 성공률 / 진행단계 / 날짜 / 영업담당자 */
+/* grid 8열: 고객정보 / 지역 / 채무 / 가용소득 / 수임료결제 / 진행단계 / 날짜 / 영업담당자 */
 .cll-table-head,
 .cll-row {
   display: grid;
-  grid-template-columns: 190px 80px 90px 90px 100px 100px 200px 60px 150px;
+  grid-template-columns: 190px 80px 90px 90px 175px 215px 60px 150px;
   align-items: center;
   gap: 12px;
   padding: 0 20px;
@@ -462,54 +480,185 @@
   color: #bbb;
 }
 
-/* ── 성공 가능성 ── */
-.cll-cell-score {
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
+/* ── 결제정보 ── */
+.cll-cell-payment {
+  min-width: 0;
 }
 
-.cll-score-num {
-  font-size: 15px;
-  font-weight: 800;
+.cll-pay-block {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-start;
+}
+
+.cll-pay-fee {
+  font-size: 14px;
+  font-weight: 700;
   color: #111;
   letter-spacing: -0.02em;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.cll-pay-fee em {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 400;
+  color: #bbb;
+  margin-left: 1px;
 }
 
-.cll-score-total {
+.cll-pay-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  max-width: 128px;
+}
+
+.cll-pay-bar {
+  height: 3px;
+  background: #f0f0f0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.cll-pay-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+}
+.cll-pay-bar-fill.active {
+  background: #3b82f6;
+}
+.cll-pay-bar-fill.done {
+  background: #22c55e;
+}
+.cll-pay-bar-fill.stopped {
+  background: #ef4444;
+}
+.cll-pay-bar-fill.refunded {
+  background: #8b5cf6;
+}
+
+.cll-pay-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.cll-pay-seq {
   font-size: 11px;
-  color: #bbb;
+  font-weight: 500;
+  color: #aaa;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.cll-pay-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  line-height: 1;
+}
+.cll-pay-status::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.cll-pay-status.active {
+  color: #1d4ed8;
+}
+.cll-pay-status.active::before {
+  background: #3b82f6;
+}
+.cll-pay-status.done {
+  color: #15803d;
+}
+.cll-pay-status.done::before {
+  background: #22c55e;
+}
+.cll-pay-status.stopped {
+  color: #b91c1c;
+}
+.cll-pay-status.stopped::before {
+  background: #ef4444;
+}
+.cll-pay-status.refunded {
+  color: #6d28d9;
+}
+.cll-pay-status.refunded::before {
+  background: #8b5cf6;
+}
+
+.cll-pay-unset {
+  font-size: 12px;
+  color: #ccc;
+  letter-spacing: -0.01em;
 }
 
 /* ── 진행단계 ── */
 .cll-cell-stage {
+  min-width: 0;
+}
+
+.cll-stage-row {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
-  white-space: normal;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
 }
 
-.cll-stage-label {
-  font-size: 12px;
+.cll-stage-proc {
+  font-size: 13px;
   font-weight: 600;
-  color: #444;
-  letter-spacing: -0.01em;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: #333;
+  letter-spacing: -0.02em;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.cll-stage-bar {
-  height: 4px;
-  background: #f0f0f0;
-  border-radius: 3px;
-  overflow: hidden;
-  margin-right: 20px;
+.cll-stage-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  line-height: 1.3;
+  flex-shrink: 0;
 }
-.cll-stage-fill {
-  height: 100%;
-  background: #3b82f6;
-  border-radius: 3px;
+.cll-stage-badge.active {
+  background: #f0f7ff;
+  color: #1d4ed8;
+}
+.cll-stage-badge.consult {
+  background: #f8fafc;
+  color: #64748b;
+}
+.cll-stage-badge.review {
+  background: #fffbeb;
+  color: #b45309;
+}
+.cll-stage-badge.rejected {
+  background: #fff5f5;
+  color: #b91c1c;
+}
+.cll-stage-badge.pending {
+  background: #f5f3ff;
+  color: #6d28d9;
+}
+.cll-stage-badge.halted {
+  background: #f3f4f6;
+  color: #6b7280;
 }
 
 /* ── 영업담당자 ── */
@@ -634,13 +783,18 @@
     grid-row: 1;
   }
 
-  /* 절차 태그: 우상단 */
-  .cll-cell-proc {
+  /* 결제정보: 우상단 */
+  .cll-cell-payment {
     grid-column: 2;
     grid-row: 1;
-    display: flex;
-    align-items: flex-start;
     padding-top: 2px;
+    align-items: flex-end;
+  }
+  .cll-pay-block {
+    align-items: flex-end;
+  }
+  .cll-pay-detail {
+    max-width: 108px;
   }
 
   /* 채무: 좌 두번째 행 */
@@ -648,13 +802,6 @@
     grid-column: 1;
     grid-row: 2;
     font-size: 13px;
-    margin-top: 6px;
-  }
-
-  /* 성공 가능성: 우 두번째 행 */
-  .cll-cell-score {
-    grid-column: 2;
-    grid-row: 2;
     margin-top: 6px;
   }
 
