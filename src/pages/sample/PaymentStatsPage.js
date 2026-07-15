@@ -359,25 +359,6 @@ const PaymentStatsPage = () => {
     if (val && rangeStart && val < rangeStart) setRangeStart(val);
   };
 
-  const applyRangePreset = (preset) => {
-    if (preset === "thisMonth") {
-      const bounds = monthBoundsIso(DEFAULT_MONTH);
-      setRangeStart(bounds.start);
-      setRangeEnd(bounds.end);
-    } else if (preset === "last3") {
-      const startOfMonth = new Date(
-        TODAY.getFullYear(),
-        TODAY.getMonth() - 2,
-        1,
-      );
-      setRangeStart(isoDate(startOfMonth));
-      setRangeEnd(isoDate(TODAY));
-    } else if (preset === "all") {
-      setRangeStart(OVERALL_MIN_ISO);
-      setRangeEnd(OVERALL_MAX_ISO);
-    }
-  };
-
   return (
     <div className="pst-page">
       <div className="pst-body">
