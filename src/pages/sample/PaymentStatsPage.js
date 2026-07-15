@@ -8,19 +8,40 @@ const TODAY = new Date(2026, 5, 28); // 2026.06.28
 const TODAY_LABEL = "2026.06.28";
 
 const addMonths = (date, delta) => {
-  const d = new Date(date.getFullYear(), date.getMonth() + delta, date.getDate());
+  const d = new Date(
+    date.getFullYear(),
+    date.getMonth() + delta,
+    date.getDate(),
+  );
   return d;
 };
 
 const fmtDot = (d) =>
   `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(
-    d.getDate()
+    d.getDate(),
   ).padStart(2, "0")}`;
 
-const monthKey = (d) => `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}`;
+const monthKey = (d) =>
+  `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}`;
 const monthTitle = (key) => {
   const [y, m] = key.split(".");
   return `${y}년 ${m}월`;
+};
+
+const isoDate = (d) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate(),
+  ).padStart(2, "0")}`;
+const parseIso = (s) => {
+  const [y, m, d] = s.split("-").map(Number);
+  return new Date(y, m - 1, d);
+};
+const monthBoundsIso = (key) => {
+  const [y, m] = key.split(".").map(Number);
+  return {
+    start: isoDate(new Date(y, m - 1, 1)),
+    end: isoDate(new Date(y, m, 0)),
+  };
 };
 
 /* ───────────────────────────
@@ -52,10 +73,44 @@ const REPS = [
 
 const BRANCHES = [...new Set(REPS.map((r) => r.branch))];
 
-const LAST_NAMES = ["김", "이", "박", "최", "정", "강", "조", "윤", "장", "임", "한", "오", "서", "권", "황"];
+const LAST_NAMES = [
+  "김",
+  "이",
+  "박",
+  "최",
+  "정",
+  "강",
+  "조",
+  "윤",
+  "장",
+  "임",
+  "한",
+  "오",
+  "서",
+  "권",
+  "황",
+];
 const FIRST_NAMES = [
-  "민준", "서연", "도윤", "지우", "하은", "지훈", "유진", "하람", "은우", "수아",
-  "현우", "지안", "예은", "시우", "다인", "주원", "서윤", "건우", "나윤", "태민",
+  "민준",
+  "서연",
+  "도윤",
+  "지우",
+  "하은",
+  "지훈",
+  "유진",
+  "하람",
+  "은우",
+  "수아",
+  "현우",
+  "지안",
+  "예은",
+  "시우",
+  "다인",
+  "주원",
+  "서윤",
+  "건우",
+  "나윤",
+  "태민",
 ];
 const clientName = (i) =>
   `${LAST_NAMES[i % LAST_NAMES.length]}${FIRST_NAMES[(i * 7) % FIRST_NAMES.length]}`;
@@ -89,8 +144,8 @@ const buildClients = () => {
       scenarioRoll < 0.11
         ? "canceled"
         : scenarioRoll < 0.24
-        ? "overdue"
-        : "normal";
+          ? "overdue"
+          : "normal";
 
     // 이미 도래한 회차 수 (취소 시점이 미래 회차를 앞질러 "선결제"되지 않도록 제한)
     let dueSeqCount = 0;
@@ -172,7 +227,7 @@ const ALL_RECORDS = CLIENTS.flatMap((c) =>
     amount: it.amount,
     status: it.status,
     dueDate: it.dueDate,
-  }))
+  })),
 );
 
 const sumAmount = (records) => records.reduce((s, r) => s + r.amount, 0);
@@ -196,11 +251,15 @@ const DEFAULT_MONTH = MONTH_KEYS.includes(monthKey(TODAY))
   ? monthKey(TODAY)
   : MONTH_KEYS[MONTH_KEYS.length - 1];
 
+/* 데이터 전체 범위 (기간 직접 지정 시 선택 가능한 최소/최대 날짜) */
+const OVERALL_MIN_ISO = monthBoundsIso(MONTH_KEYS[0]).start;
+const OVERALL_MAX_ISO = monthBoundsIso(MONTH_KEYS[MONTH_KEYS.length - 1]).end;
+
 const STATUS_LABEL = {
-  paid: "완납",
-  overdue: "연체",
+  paid: "납부",
+  overdue: "미납",
   pending: "예정",
-  canceled: "취소",
+  canceled: "환불",
 };
 
 /* ───────────────────────────
@@ -212,18 +271,27 @@ const PaymentStatsPage = () => {
   const [selectedMonth, setSelectedMonth] = useState(DEFAULT_MONTH);
   const [selectedBranch, setSelectedBranch] = useState(ALL_BRANCHES);
 
+  /* 조회 방식: 월 단위 이동 vs 기간 직접 지정 */
+  const [dateMode, setDateMode] = useState("month"); // "month" | "range"
+  const [rangeStart, setRangeStart] = useState(
+    () => monthBoundsIso(DEFAULT_MONTH).start,
+  );
+  const [rangeEnd, setRangeEnd] = useState(
+    () => monthBoundsIso(DEFAULT_MONTH).end,
+  );
+
   const filteredRecords = useMemo(
     () =>
       selectedBranch === ALL_BRANCHES
         ? ALL_RECORDS
         : ALL_RECORDS.filter((r) => r.client.rep.branch === selectedBranch),
-    [selectedBranch]
+    [selectedBranch],
   );
 
   const summary = useMemo(() => {
     const paid = filteredRecords.filter((r) => r.status === "paid");
     const unpaid = filteredRecords.filter(
-      (r) => r.status === "pending" || r.status === "overdue"
+      (r) => r.status === "pending" || r.status === "overdue",
     );
     const overdue = filteredRecords.filter((r) => r.status === "overdue");
     const canceled = filteredRecords.filter((r) => r.status === "canceled");
@@ -244,11 +312,70 @@ const PaymentStatsPage = () => {
       filteredRecords
         .filter((r) => monthKey(r.dueDate) === selectedMonth)
         .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime()),
-    [filteredRecords, selectedMonth]
+    [filteredRecords, selectedMonth],
   );
   const goToMonth = (delta) => {
     const next = MONTH_KEYS[monthIndex + delta];
     if (next) setSelectedMonth(next);
+  };
+
+  const rangeRecords = useMemo(() => {
+    if (!rangeStart || !rangeEnd) return [];
+    const startTime = parseIso(rangeStart).getTime();
+    const endTime = parseIso(rangeEnd).getTime();
+    return filteredRecords
+      .filter(
+        (r) =>
+          r.dueDate.getTime() >= startTime && r.dueDate.getTime() <= endTime,
+      )
+      .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
+  }, [filteredRecords, rangeStart, rangeEnd]);
+
+  const displayedRecords = dateMode === "month" ? monthRecords : rangeRecords;
+
+  /* 월별 이동 ↔ 기간 직접 지정을 오갈 때 현재 보던 시점을 그대로 이어받아 매끄럽게 전환 */
+  const switchToRangeMode = () => {
+    const bounds = monthBoundsIso(selectedMonth);
+    setRangeStart(bounds.start);
+    setRangeEnd(bounds.end);
+    setDateMode("range");
+  };
+
+  const switchToMonthMode = () => {
+    const key = monthKey(parseIso(rangeStart));
+    if (MONTH_KEYS.includes(key)) setSelectedMonth(key);
+    setDateMode("month");
+  };
+
+  const handleRangeStartChange = (e) => {
+    const val = e.target.value;
+    setRangeStart(val);
+    if (val && rangeEnd && val > rangeEnd) setRangeEnd(val);
+  };
+
+  const handleRangeEndChange = (e) => {
+    const val = e.target.value;
+    setRangeEnd(val);
+    if (val && rangeStart && val < rangeStart) setRangeStart(val);
+  };
+
+  const applyRangePreset = (preset) => {
+    if (preset === "thisMonth") {
+      const bounds = monthBoundsIso(DEFAULT_MONTH);
+      setRangeStart(bounds.start);
+      setRangeEnd(bounds.end);
+    } else if (preset === "last3") {
+      const startOfMonth = new Date(
+        TODAY.getFullYear(),
+        TODAY.getMonth() - 2,
+        1,
+      );
+      setRangeStart(isoDate(startOfMonth));
+      setRangeEnd(isoDate(TODAY));
+    } else if (preset === "all") {
+      setRangeStart(OVERALL_MIN_ISO);
+      setRangeEnd(OVERALL_MAX_ISO);
+    }
   };
 
   return (
@@ -300,12 +427,12 @@ const PaymentStatsPage = () => {
               <em>만원</em>
             </span>
             <span className="pst-kpi-sub">
-              {summary.unpaidCount}건 · 연체 {summary.overdueCount}건 포함
+              {summary.unpaidCount}건 · 기한초과 {summary.overdueCount}건 포함
             </span>
           </div>
 
           <div className="pst-kpi">
-            <span className="pst-kpi-label">중도해지(취소)</span>
+            <span className="pst-kpi-label">환불</span>
             <span className="pst-kpi-val muted">
               {summary.canceledAmount.toLocaleString()}
               <em>만원</em>
@@ -316,40 +443,88 @@ const PaymentStatsPage = () => {
 
         {/* 월별 상세 내역 */}
         <section className="pst-section">
-          <div className="pst-month-nav-row">
-            <div className="pst-month-nav">
+          <div className="pst-mode-toggle-row">
+            <div className="pst-mode-toggle">
               <button
-                className="pst-nav-arrow"
-                onClick={() => goToMonth(-1)}
-                disabled={monthIndex <= 0}
-                aria-label="이전 달"
+                className={`pst-mode-btn ${dateMode === "month" ? "active" : ""}`}
+                onClick={switchToMonthMode}
               >
-                ‹
+                월별
               </button>
-              <select
-                className="pst-month-select"
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-              >
-                {MONTH_KEYS.map((key) => (
-                  <option key={key} value={key}>
-                    {monthTitle(key)}
-                  </option>
-                ))}
-              </select>
               <button
-                className="pst-nav-arrow"
-                onClick={() => goToMonth(1)}
-                disabled={monthIndex >= MONTH_KEYS.length - 1}
-                aria-label="다음 달"
+                className={`pst-mode-btn ${dateMode === "range" ? "active" : ""}`}
+                onClick={switchToRangeMode}
               >
-                ›
+                직접 입력
               </button>
             </div>
           </div>
 
-          {monthRecords.length === 0 ? (
-            <p className="pst-hint">해당 월에 예정된 납부 내역이 없습니다.</p>
+          {dateMode === "month" ? (
+            <div className="pst-month-nav-row">
+              <div className="pst-month-nav">
+                <button
+                  className="pst-nav-arrow"
+                  onClick={() => goToMonth(-1)}
+                  disabled={monthIndex <= 0}
+                  aria-label="이전 달"
+                >
+                  ‹
+                </button>
+                <span className="pst-month-select">
+                  {monthTitle(selectedMonth)}
+                </span>
+                <button
+                  className="pst-nav-arrow"
+                  onClick={() => goToMonth(1)}
+                  disabled={monthIndex >= MONTH_KEYS.length - 1}
+                  aria-label="다음 달"
+                >
+                  ›
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="pst-range-row">
+              <div className="pst-range-picker">
+                <input
+                  type="date"
+                  className="pst-range-input"
+                  value={rangeStart}
+                  min={OVERALL_MIN_ISO}
+                  max={OVERALL_MAX_ISO}
+                  onChange={handleRangeStartChange}
+                />
+                <span className="pst-range-sep">–</span>
+                <input
+                  type="date"
+                  className="pst-range-input"
+                  value={rangeEnd}
+                  min={OVERALL_MIN_ISO}
+                  max={OVERALL_MAX_ISO}
+                  onChange={handleRangeEndChange}
+                />
+              </div>
+              {/* <div className="pst-range-presets">
+                <button onClick={() => applyRangePreset("thisMonth")}>
+                  이번 달
+                </button>
+                <button onClick={() => applyRangePreset("last3")}>
+                  최근 3개월
+                </button>
+                <button onClick={() => applyRangePreset("all")}>
+                  전체 기간
+                </button>
+              </div> */}
+            </div>
+          )}
+
+          {displayedRecords.length === 0 ? (
+            <p className="pst-hint">
+              {dateMode === "month"
+                ? "해당 월에 예정된 납부 내역이 없습니다."
+                : "해당 기간에 예정된 납부 내역이 없습니다."}
+            </p>
           ) : (
             <table className="pst-record-table">
               <thead>
@@ -363,19 +538,25 @@ const PaymentStatsPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {monthRecords.map((r) => (
+                {displayedRecords.map((r) => (
                   <tr key={r.id}>
                     <td>{fmtDot(r.dueDate)}</td>
                     <td className="pst-cell-name">{r.client.name}</td>
                     <td>
                       {r.client.rep.name}
-                      <span className="pst-rep-branch">{r.client.rep.branch}</span>
+                      <span className="pst-rep-branch">
+                        {r.client.rep.branch}
+                      </span>
                     </td>
                     <td>
                       {r.seq}
-                      <span className="pst-seq-total">/{r.client.count}회차</span>
+                      <span className="pst-seq-total">
+                        /{r.client.count}회차
+                      </span>
                     </td>
-                    <td className="pst-cell-amt">{r.amount.toLocaleString()}만원</td>
+                    <td className="pst-cell-amt">
+                      {r.amount.toLocaleString()}만원
+                    </td>
                     <td>
                       <span className={`pst-status-badge ${r.status}`}>
                         {STATUS_LABEL[r.status]}
