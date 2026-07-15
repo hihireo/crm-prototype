@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./PaymentStatsPage.css";
 
 /* ───────────────────────────
@@ -262,6 +262,23 @@ const STATUS_LABEL = {
   canceled: "환불",
 };
 
+const PAGE_SIZE = 15;
+
+/* 페이지 번호 목록 생성 (양 끝 + 현재 페이지 주변만 노출, 나머지는 … 로 축약) */
+const getPageNumbers = (current, total) => {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages = new Set([
+    1,
+    2,
+    total - 1,
+    total,
+    current - 1,
+    current,
+    current + 1,
+  ]);
+  return [...pages].filter((p) => p >= 1 && p <= total).sort((a, b) => a - b);
+};
+
 /* ───────────────────────────
    메인 페이지
 ─────────────────────────── */
@@ -332,6 +349,22 @@ const PaymentStatsPage = () => {
   }, [filteredRecords, rangeStart, rangeEnd]);
 
   const displayedRecords = dateMode === "month" ? monthRecords : rangeRecords;
+
+  /* 페이지네이션 */
+  const [page, setPage] = useState(1);
+  useEffect(() => {
+    setPage(1);
+  }, [dateMode, selectedMonth, selectedBranch, rangeStart, rangeEnd]);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(displayedRecords.length / PAGE_SIZE),
+  );
+  const currentPage = Math.min(page, totalPages);
+  const pagedRecords = displayedRecords.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
 
   /* 월별 이동 ↔ 기간 직접 지정을 오갈 때 현재 보던 시점을 그대로 이어받아 매끄럽게 전환 */
   const switchToRangeMode = () => {
@@ -519,7 +552,7 @@ const PaymentStatsPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {displayedRecords.map((r) => (
+                {pagedRecords.map((r) => (
                   <tr key={r.id}>
                     <td>{fmtDot(r.dueDate)}</td>
                     <td className="pst-cell-name">{r.client.name}</td>
@@ -547,6 +580,46 @@ const PaymentStatsPage = () => {
                 ))}
               </tbody>
             </table>
+          )}
+
+          {displayedRecords.length > 0 && totalPages > 1 && (
+            <div className="pst-pagination">
+              <span className="pst-pagination-info">
+                총 {displayedRecords.length}건 중 {(currentPage - 1) * PAGE_SIZE + 1}
+                –{Math.min(currentPage * PAGE_SIZE, displayedRecords.length)}
+              </span>
+              <div className="pst-pagination-controls">
+                <button
+                  className="pst-page-arrow"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage <= 1}
+                  aria-label="이전 페이지"
+                >
+                  ‹
+                </button>
+                {getPageNumbers(currentPage, totalPages).map((p, i, arr) => (
+                  <React.Fragment key={p}>
+                    {i > 0 && p - arr[i - 1] > 1 && (
+                      <span className="pst-page-ellipsis">…</span>
+                    )}
+                    <button
+                      className={`pst-page-num ${p === currentPage ? "active" : ""}`}
+                      onClick={() => setPage(p)}
+                    >
+                      {p}
+                    </button>
+                  </React.Fragment>
+                ))}
+                <button
+                  className="pst-page-arrow"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage >= totalPages}
+                  aria-label="다음 페이지"
+                >
+                  ›
+                </button>
+              </div>
+            </div>
           )}
         </section>
       </div>
