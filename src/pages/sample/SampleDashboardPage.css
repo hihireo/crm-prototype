@@ -1850,3 +1850,585 @@
   transition: width 0.4s ease;
 }
 
+/* ───────────────────────────
+   수임료 결제 정보 (topnav 버튼 + 모달)
+─────────────────────────── */
+.sdp-pay-nav-btn {
+  position: relative;
+}
+
+.sdp-pay-nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.sdp-pay-nav-dot.active {
+  background: #2563eb;
+}
+.sdp-pay-nav-dot.done {
+  background: #16a34a;
+}
+.sdp-pay-nav-dot.canceled {
+  background: #dc2626;
+}
+
+.sdp-pay-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 900;
+}
+@media (min-width: 640px) {
+  .sdp-pay-modal-overlay {
+    align-items: center;
+  }
+}
+
+.sdp-pay-modal {
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  width: 100%;
+  max-width: 620px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+}
+@media (min-width: 640px) {
+  .sdp-pay-modal {
+    border-radius: 16px;
+  }
+}
+
+.sdp-pay-modal-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 22px;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+}
+
+.sdp-pay-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+
+.sdp-pay-modal-body {
+  padding: 22px;
+  overflow-y: auto;
+}
+
+.sdp-pay-modal-hint {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  background: #eff6ff;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #1d4ed8;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+.sdp-pay-modal-testrow {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px dashed #eee;
+}
+
+.sdp-pay-edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  padding: 6px 12px;
+  background: #fff;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: all 0.12s;
+}
+.sdp-pay-edit-btn:hover {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
+.sdp-pay-status-badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: -0.01em;
+}
+.sdp-pay-status-badge.active {
+  background: #eff6ff;
+  color: #2563eb;
+}
+.sdp-pay-status-badge.done {
+  background: #dcfce7;
+  color: #15803d;
+}
+.sdp-pay-status-badge.canceled {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.sdp-pay-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  padding: 18px 20px;
+  background: #fafafa;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.sdp-pay-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sdp-pay-summary-label {
+  font-size: 12px;
+  color: #aaa;
+  letter-spacing: -0.01em;
+}
+
+.sdp-pay-summary-val {
+  font-size: 20px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.sdp-pay-summary-val em {
+  font-style: normal;
+  font-size: 13px;
+  font-weight: 400;
+  color: #bbb;
+  margin-left: 2px;
+}
+
+.sdp-pay-summary-date {
+  font-size: 16px;
+}
+
+.sdp-pay-progress {
+  margin-bottom: 18px;
+}
+
+.sdp-pay-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #999;
+  letter-spacing: -0.01em;
+}
+.sdp-pay-progress-labels strong {
+  font-size: 13px;
+  color: #111;
+  font-weight: 800;
+}
+
+.sdp-pay-progress-bg {
+  width: 100%;
+  height: 6px;
+  background: #eeeeee;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.sdp-pay-progress-fill {
+  height: 100%;
+  background: #2563eb;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.sdp-pay-list {
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.sdp-pay-row {
+  display: grid;
+  grid-template-columns: 52px 84px 64px 46px 1fr 30px;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  border-bottom: 1px solid #f5f5f5;
+  transition: background 0.1s;
+}
+.sdp-pay-row:last-child {
+  border-bottom: none;
+}
+.sdp-pay-row:hover {
+  background: #fafafa;
+}
+.sdp-pay-row.canceled {
+  opacity: 0.55;
+}
+.sdp-pay-row.refunded {
+  opacity: 0.75;
+}
+
+.sdp-pay-row-seq {
+  font-size: 12px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.01em;
+}
+
+.sdp-pay-row-date {
+  font-size: 12px;
+  color: #888;
+  letter-spacing: -0.01em;
+}
+
+.sdp-pay-row-amt {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  letter-spacing: -0.01em;
+}
+
+.sdp-pay-row-chip {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  text-align: center;
+  letter-spacing: -0.01em;
+}
+.sdp-pay-row-chip.paid {
+  background: #dcfce7;
+  color: #15803d;
+}
+.sdp-pay-row-chip.unpaid {
+  background: #f0f0f0;
+  color: #999;
+}
+.sdp-pay-row-chip.canceled {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.sdp-pay-row-chip.refunded {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.sdp-pay-row-paiddate {
+  font-size: 12px;
+  color: #bbb;
+  letter-spacing: -0.01em;
+  text-align: right;
+}
+
+.sdp-pay-check-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1.5px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s;
+  padding: 0;
+}
+.sdp-pay-check-btn:hover:not(:disabled) {
+  border-color: #111;
+}
+.sdp-pay-check-btn.checked {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+.sdp-pay-check-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.sdp-pay-date-edit {
+  grid-column: 5 / 7;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.sdp-pay-date-edit-input {
+  flex: 1;
+  max-width: 138px;
+  padding: 4px 8px;
+  border: 1.5px solid #111;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+  color: #111;
+  outline: none;
+}
+.sdp-pay-date-confirm-btn,
+.sdp-pay-date-cancel-btn {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.sdp-pay-date-confirm-btn {
+  background: #16a34a;
+}
+.sdp-pay-date-confirm-btn:hover {
+  background: #15803d;
+}
+.sdp-pay-date-cancel-btn {
+  background: #f0f0f0;
+}
+.sdp-pay-date-cancel-btn:hover {
+  background: #e5e5e5;
+}
+
+.sdp-pay-footer {
+  margin-top: 16px;
+}
+
+.sdp-pay-stop-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.sdp-pay-suspend-btn,
+.sdp-pay-refund-btn {
+  padding: 9px 16px;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: background 0.12s;
+}
+.sdp-pay-suspend-btn {
+  border: 1px solid #ddd;
+  color: #666;
+}
+.sdp-pay-suspend-btn:hover {
+  background: #f5f5f5;
+}
+.sdp-pay-refund-btn {
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+}
+.sdp-pay-refund-btn:hover {
+  background: #fef2f2;
+}
+
+.sdp-pay-canceled-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 16px;
+  background: #fef2f2;
+  border-radius: 10px;
+}
+.sdp-pay-canceled-note span {
+  font-size: 14px;
+  color: #dc2626;
+  flex-shrink: 0;
+}
+.sdp-pay-canceled-note p {
+  flex: 1;
+  margin: 0;
+  font-size: 12.5px;
+  color: #991b1b;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+.sdp-pay-resume-btn {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border: 1px solid #dc2626;
+  border-radius: 7px;
+  background: #fff;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #dc2626;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.sdp-pay-resume-btn:hover {
+  background: #dc2626;
+  color: #fff;
+}
+
+.sdp-pay-modal-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  font-size: 12.5px;
+  color: #92400e;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+.sdp-pay-modal-warning span {
+  flex-shrink: 0;
+  font-size: 13px;
+}
+
+/* ── 결제 조건 입력 폼 ── */
+.sdp-pay-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+  background: #fafafa;
+  border-radius: 12px;
+}
+
+.sdp-pay-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sdp-pay-field-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #888;
+  letter-spacing: -0.01em;
+}
+
+.sdp-pay-field-hint {
+  margin: 0;
+  font-size: 12px;
+  color: #999;
+  letter-spacing: -0.01em;
+}
+
+.sdp-pay-input-suffix {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 220px;
+}
+.sdp-pay-input-suffix span {
+  font-size: 13px;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.sdp-pay-input {
+  padding: 10px 13px;
+  background: #fff;
+  border: 1.5px solid #e5e5e5;
+  border-radius: 9px;
+  font-size: 14px;
+  color: #111;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  outline: none;
+  transition: border-color 0.12s;
+  max-width: 220px;
+}
+.sdp-pay-input:focus {
+  border-color: #111;
+}
+.sdp-pay-input::placeholder {
+  color: #ccc;
+}
+
+.sdp-pay-chips {
+  display: flex;
+  gap: 8px;
+}
+
+.sdp-pay-chip {
+  padding: 8px 16px;
+  border: 1.5px solid #e5e5e5;
+  border-radius: 20px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: all 0.13s;
+}
+.sdp-pay-chip:hover {
+  border-color: #bbb;
+}
+.sdp-pay-chip.on {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
+.sdp-pay-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.sdp-pay-cancel-edit-btn {
+  padding: 9px 18px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: background 0.12s;
+}
+.sdp-pay-cancel-edit-btn:hover {
+  background: #f0f0f0;
+}
+
+.sdp-pay-apply-btn {
+  padding: 9px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #111;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: background 0.12s;
+}
+.sdp-pay-apply-btn:hover {
+  background: #333;
+}
+

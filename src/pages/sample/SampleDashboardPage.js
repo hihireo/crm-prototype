@@ -27,6 +27,97 @@ const SALES_REP = {
   thumb: "/images/thumb_sample1.png",
 };
 
+/* 수임료 결제 정보 (분할 납부) — 기본값 */
+const PAYMENT = {
+  totalFee: 700, // 총 수임료 (만원)
+  method: "installment", // "installment" | "lump"
+  installmentCount: 7,
+  contractDate: "2026.06.28",
+  installments: [
+    {
+      seq: 1,
+      dueDate: "2026.06.28",
+      amount: 100,
+      status: "paid",
+      paidDate: "2026.06.28",
+    },
+    {
+      seq: 2,
+      dueDate: "2026.07.28",
+      amount: 100,
+      status: "paid",
+      paidDate: "2026.07.29",
+    },
+    {
+      seq: 3,
+      dueDate: "2026.08.28",
+      amount: 100,
+      status: "paid",
+      paidDate: "2026.08.28",
+    },
+    {
+      seq: 4,
+      dueDate: "2026.09.28",
+      amount: 100,
+      status: "unpaid",
+      paidDate: null,
+    },
+    {
+      seq: 5,
+      dueDate: "2026.10.28",
+      amount: 100,
+      status: "unpaid",
+      paidDate: null,
+    },
+    {
+      seq: 6,
+      dueDate: "2026.11.28",
+      amount: 100,
+      status: "unpaid",
+      paidDate: null,
+    },
+    {
+      seq: 7,
+      dueDate: "2026.12.28",
+      amount: 100,
+      status: "unpaid",
+      paidDate: null,
+    },
+  ],
+};
+const TODAY_LABEL = "2026.06.28";
+
+/* "YYYY.MM.DD" 문자열 ↔ Date 변환 및 회차별 일정 생성 */
+const parseDotDate = (label) => {
+  const [y, m, d] = label.split(".").map(Number);
+  return new Date(y, m - 1, d);
+};
+const formatDotDate = (date) =>
+  `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(
+    date.getDate(),
+  ).padStart(2, "0")}`;
+const addMonthsToDot = (label, months) => {
+  const d = parseDotDate(label);
+  d.setMonth(d.getMonth() + months);
+  return formatDotDate(d);
+};
+const dotToIso = (label) => (label || "").replaceAll(".", "-");
+const isoToDot = (iso) => (iso || "").replaceAll("-", ".");
+
+/* 총 수임료·회차·첫 납부일을 기준으로 회차별 결제 일정을 생성 (나머지는 마지막 회차에 반영) */
+const buildInstallments = (totalFee, count, contractDate) => {
+  const n = Math.max(1, Math.round(count) || 1);
+  const base = Math.floor(totalFee / n);
+  const remainder = totalFee - base * n;
+  return Array.from({ length: n }, (_, i) => ({
+    seq: i + 1,
+    dueDate: addMonthsToDot(contractDate, i),
+    amount: i === n - 1 ? base + remainder : base,
+    status: "unpaid",
+    paidDate: null,
+  }));
+};
+
 const OPTIONS = [
   {
     id: "rehabilitation",
@@ -743,6 +834,199 @@ const SampleDashboardPage = () => {
   const [isAiTyping, setIsAiTyping] = useState(false);
   const chatEndRef = useRef(null);
 
+  /* 수임료 결제 정보 상태 */
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [paymentConfigured, setPaymentConfigured] = useState(false); // 결제 조건 입력 여부 (false = 입력 전 상태)
+  const [payTotalFee, setPayTotalFee] = useState(PAYMENT.totalFee);
+  const [payMethod, setPayMethod] = useState(PAYMENT.method);
+  const [payInstallmentCount, setPayInstallmentCount] = useState(
+    PAYMENT.installmentCount,
+  );
+  const [payContractDate, setPayContractDate] = useState(PAYMENT.contractDate);
+  const [installments, setInstallments] = useState(PAYMENT.installments);
+  const [paymentCanceled, setPaymentCanceled] = useState(false);
+  const [stopType, setStopType] = useState(null); // null | "suspended" | "refunded"
+  const [canceledAt, setCanceledAt] = useState(null);
+
+  /* 회차 납부 처리 시 납부일 지정 UI 상태 */
+  const [dateEditSeq, setDateEditSeq] = useState(null);
+  const [dateEditValue, setDateEditValue] = useState("");
+
+  /* 결제 조건 입력(수정) 폼 상태 — 입력 전 상태에서도 이 폼이 그대로 사용됨 */
+  const [payEditing, setPayEditing] = useState(false);
+  const [draftTotalFee, setDraftTotalFee] = useState(String(PAYMENT.totalFee));
+  const [draftMethod, setDraftMethod] = useState(PAYMENT.method);
+  const [draftCount, setDraftCount] = useState(
+    String(PAYMENT.installmentCount),
+  );
+  const [draftDate, setDraftDate] = useState(PAYMENT.contractDate);
+
+  const startMarkPaid = (seq) => {
+    setDateEditSeq(seq);
+    setDateEditValue(dotToIso(TODAY_LABEL));
+  };
+
+  const cancelMarkPaid = () => {
+    setDateEditSeq(null);
+    setDateEditValue("");
+  };
+
+  const confirmMarkPaid = (seq) => {
+    if (!dateEditValue) {
+      alert("납부일을 선택해 주세요.");
+      return;
+    }
+    setInstallments((prev) =>
+      prev.map((it) =>
+        it.seq === seq
+          ? { ...it, status: "paid", paidDate: isoToDot(dateEditValue) }
+          : it,
+      ),
+    );
+    setDateEditSeq(null);
+    setDateEditValue("");
+  };
+
+  const togglePaid = (seq) => {
+    setInstallments((prev) =>
+      prev.map((it) => {
+        if (it.seq !== seq || it.status !== "paid") return it;
+        return { ...it, status: "unpaid", paidDate: null };
+      }),
+    );
+  };
+
+  const handleSuspendPayment = () => {
+    if (
+      !window.confirm(
+        "남은 회차의 결제를 중단 처리하시겠습니까?\n지금까지 납부한 회차는 그대로 유지되고, 남은 회차는 앞으로 청구되지 않습니다.",
+      )
+    )
+      return;
+    setInstallments((prev) =>
+      prev.map((it) =>
+        it.status === "unpaid" ? { ...it, status: "canceled" } : it,
+      ),
+    );
+    setPaymentCanceled(true);
+    setStopType("suspended");
+    setCanceledAt(TODAY_LABEL);
+  };
+
+  const handleRefundPayment = () => {
+    if (
+      !window.confirm(
+        "지금까지 납부한 금액을 환불 처리하고 결제를 중단하시겠습니까?\n이미 납부한 회차는 '환불'로 표시되며, 남은 회차는 앞으로 청구되지 않습니다.",
+      )
+    )
+      return;
+    setInstallments((prev) =>
+      prev.map((it) => {
+        if (it.status === "paid")
+          return { ...it, status: "refunded", refundedDate: TODAY_LABEL };
+        if (it.status === "unpaid") return { ...it, status: "canceled" };
+        return it;
+      }),
+    );
+    setPaymentCanceled(true);
+    setStopType("refunded");
+    setCanceledAt(TODAY_LABEL);
+  };
+
+  const handleResumePayment = () => {
+    setInstallments((prev) =>
+      prev.map((it) => {
+        if (it.status === "canceled") return { ...it, status: "unpaid" };
+        if (it.status === "refunded")
+          return { ...it, status: "paid", refundedDate: null };
+        return it;
+      }),
+    );
+    setPaymentCanceled(false);
+    setStopType(null);
+    setCanceledAt(null);
+  };
+
+  const openPaymentModal = () => {
+    if (!paymentConfigured) {
+      setDraftTotalFee("");
+      setDraftMethod("installment");
+      setDraftCount("");
+      setDraftDate(TODAY_LABEL);
+      setPayEditing(true);
+    }
+    setPaymentModalOpen(true);
+  };
+
+  const startEditPayment = () => {
+    setDraftTotalFee(String(payTotalFee));
+    setDraftMethod(payMethod);
+    setDraftCount(String(payInstallmentCount));
+    setDraftDate(payContractDate);
+    setPayEditing(true);
+  };
+
+  const cancelEditPayment = () => {
+    if (paymentConfigured) {
+      setPayEditing(false);
+    } else {
+      setPaymentModalOpen(false);
+    }
+  };
+
+  const applyPaymentSettings = () => {
+    const fee = Number(draftTotalFee);
+    if (!fee || fee <= 0) {
+      alert("총 수임료를 올바르게 입력해 주세요.");
+      return;
+    }
+    const count =
+      draftMethod === "lump" ? 1 : Math.max(1, Number(draftCount) || 1);
+    if (!draftDate) {
+      alert("첫 납부일을 입력해 주세요.");
+      return;
+    }
+    const hasProgress = installments.some((it) => it.status !== "unpaid");
+    if (
+      hasProgress &&
+      !window.confirm(
+        "결제 조건을 변경하면 이미 납부(완납/환불) 처리된 회차를 포함해 전체 회차 정보가 새로 계산됩니다.\n계속하시겠습니까?",
+      )
+    )
+      return;
+
+    setPayTotalFee(fee);
+    setPayMethod(draftMethod);
+    setPayInstallmentCount(count);
+    setPayContractDate(draftDate);
+    setInstallments(buildInstallments(fee, count, draftDate));
+    setPaymentCanceled(false);
+    setStopType(null);
+    setCanceledAt(null);
+    setPaymentConfigured(true);
+    setPayEditing(false);
+  };
+
+  /* 와이어프레임 테스트용: 입력 전 상태로 되돌리기 */
+  const resetPaymentConfig = () => {
+    if (
+      !window.confirm(
+        "결제 조건을 초기화하고 입력 전 상태로 되돌립니다. (테스트용)",
+      )
+    )
+      return;
+    setPaymentConfigured(false);
+    setInstallments([]);
+    setPaymentCanceled(false);
+    setStopType(null);
+    setCanceledAt(null);
+    setDraftTotalFee("");
+    setDraftMethod("installment");
+    setDraftCount("");
+    setDraftDate(TODAY_LABEL);
+    setPayEditing(true);
+  };
+
   useEffect(() => {
     if (chatMessages.length > 1) {
       chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -772,6 +1056,40 @@ const SampleDashboardPage = () => {
 
   const totalRepayment = AI.repaymentAmount * AI.repaymentMonths;
   const exemptDebt = CLIENT.totalDebt - totalRepayment;
+
+  const paidCount = installments.filter((it) => it.status === "paid").length;
+  const canceledCount = installments.filter(
+    (it) => it.status === "canceled",
+  ).length;
+  const refundedCount = installments.filter(
+    (it) => it.status === "refunded",
+  ).length;
+  const paidAmount = installments
+    .filter((it) => it.status === "paid")
+    .reduce((sum, it) => sum + it.amount, 0);
+  const refundedAmount = installments
+    .filter((it) => it.status === "refunded")
+    .reduce((sum, it) => sum + it.amount, 0);
+  const paymentProgressPct =
+    payTotalFee > 0 ? Math.round((paidAmount / payTotalFee) * 100) : 0;
+  const paymentOverallStatus = paymentCanceled
+    ? stopType === "refunded"
+      ? "환불 처리"
+      : "중도 해지"
+    : paidCount === installments.length
+      ? "완납"
+      : "진행중";
+  const payBaseAmount =
+    payMethod === "lump"
+      ? payTotalFee
+      : Math.floor(payTotalFee / payInstallmentCount);
+  const payHasRemainder =
+    payMethod !== "lump" &&
+    installments.length > 0 &&
+    installments[installments.length - 1]?.amount !== payBaseAmount;
+  const hasPaidProgress = installments.some(
+    (it) => it.status === "paid" || it.status === "refunded",
+  );
 
   return (
     <div className="sdp-page">
@@ -825,6 +1143,44 @@ const SampleDashboardPage = () => {
                 <span>정보 수정</span>
               </button>
             )}
+            <button
+              className="sdp-icon-btn sdp-pay-nav-btn"
+              title="수임료 결제 정보"
+              onClick={openPaymentModal}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect
+                  x="1.5"
+                  y="4"
+                  width="13"
+                  height="9"
+                  rx="1.5"
+                  stroke="#444"
+                  strokeWidth="1.3"
+                />
+                <path d="M1.5 6.8h13" stroke="#444" strokeWidth="1.3" />
+                <rect
+                  x="3.5"
+                  y="9.3"
+                  width="3"
+                  height="1.4"
+                  rx="0.5"
+                  fill="#444"
+                />
+              </svg>
+              <span>결제 정보</span>
+              {paymentConfigured && (
+                <span
+                  className={`sdp-pay-nav-dot ${
+                    paymentOverallStatus === "완납"
+                      ? "done"
+                      : paymentOverallStatus === "중도 해지"
+                        ? "canceled"
+                        : "active"
+                  }`}
+                />
+              )}
+            </button>
             <button
               className="sdp-icon-btn"
               title="목록"
@@ -1700,6 +2056,426 @@ const SampleDashboardPage = () => {
                   전송하기
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 수임료 결제 정보 모달 */}
+      {paymentModalOpen && (
+        <div
+          className="sdp-pay-modal-overlay"
+          onClick={() => setPaymentModalOpen(false)}
+        >
+          <div className="sdp-pay-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="sdp-pay-modal-head">
+              <div className="sdp-pay-modal-title">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <rect
+                    x="1.5"
+                    y="4"
+                    width="13"
+                    height="9"
+                    rx="1.5"
+                    stroke="#111"
+                    strokeWidth="1.3"
+                  />
+                  <path d="M1.5 6.8h13" stroke="#111" strokeWidth="1.3" />
+                  <rect
+                    x="3.5"
+                    y="9.3"
+                    width="3"
+                    height="1.4"
+                    rx="0.5"
+                    fill="#111"
+                  />
+                </svg>
+                <span>수임료 결제 정보</span>
+                {paymentConfigured && !payEditing && (
+                  <span
+                    className={`sdp-pay-status-badge ${
+                      paymentOverallStatus === "완납"
+                        ? "done"
+                        : paymentOverallStatus === "중도 해지"
+                          ? "canceled"
+                          : "active"
+                    }`}
+                  >
+                    {paymentOverallStatus}
+                  </span>
+                )}
+              </div>
+              {paymentConfigured && !payEditing && (
+                <button
+                  className="sdp-pay-edit-btn"
+                  onClick={startEditPayment}
+                  title="결제 조건 수정"
+                >
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M11.5 2.5L13.5 4.5L5 13H3V11L11.5 2.5Z"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  결제 조건 수정
+                </button>
+              )}
+              <button
+                className="sdp-sms-modal-close"
+                onClick={() => setPaymentModalOpen(false)}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path
+                    d="M3 3l10 10M13 3L3 13"
+                    stroke="#666"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="sdp-pay-modal-body">
+              {payEditing ? (
+                <>
+                  {paymentConfigured && hasPaidProgress && (
+                    <p className="sdp-pay-modal-warning">
+                      <span>⚠</span>
+                      결제 조건을 수정하면 이미 완납·환불 처리된 회차를
+                      포함해 전체 회차 일정이 새로 계산됩니다. 기존 납부
+                      내역이 초기화될 수 있으니 확인 후 적용해 주세요.
+                    </p>
+                  )}
+                  <div className="sdp-pay-form">
+                    <div className="sdp-pay-field">
+                      <span className="sdp-pay-field-label">총 수임료</span>
+                      <div className="sdp-pay-input-suffix">
+                        <input
+                          className="sdp-pay-input"
+                          type="number"
+                          min="1"
+                          inputMode="numeric"
+                          value={draftTotalFee}
+                          onChange={(e) => setDraftTotalFee(e.target.value)}
+                          placeholder="예: 700"
+                          autoFocus={!paymentConfigured}
+                        />
+                        <span>만원</span>
+                      </div>
+                    </div>
+
+                    <div className="sdp-pay-field">
+                      <span className="sdp-pay-field-label">납부 방식</span>
+                      <div className="sdp-pay-chips">
+                        <button
+                          className={`sdp-pay-chip ${draftMethod === "installment" ? "on" : ""}`}
+                          onClick={() => setDraftMethod("installment")}
+                        >
+                          분할납부
+                        </button>
+                        <button
+                          className={`sdp-pay-chip ${draftMethod === "lump" ? "on" : ""}`}
+                          onClick={() => setDraftMethod("lump")}
+                        >
+                          일괄납부
+                        </button>
+                      </div>
+                    </div>
+
+                    {draftMethod === "installment" && (
+                      <div className="sdp-pay-field">
+                        <span className="sdp-pay-field-label">분할 횟수</span>
+                        <div className="sdp-pay-input-suffix">
+                          <input
+                            className="sdp-pay-input"
+                            type="number"
+                            min="1"
+                            max="36"
+                            inputMode="numeric"
+                            value={draftCount}
+                            onChange={(e) => setDraftCount(e.target.value)}
+                            placeholder="예: 7"
+                          />
+                          <span>개월</span>
+                        </div>
+                        {Number(draftTotalFee) > 0 &&
+                          Number(draftCount) > 0 && (
+                            <p className="sdp-pay-field-hint">
+                              회당 약{" "}
+                              {Math.floor(
+                                Number(draftTotalFee) / Number(draftCount),
+                              ).toLocaleString()}
+                              만원 × {Number(draftCount)}회
+                            </p>
+                          )}
+                      </div>
+                    )}
+
+                    <div className="sdp-pay-field">
+                      <span className="sdp-pay-field-label">
+                        {draftMethod === "lump" ? "납부일" : "첫 회차 납부일"}
+                      </span>
+                      <input
+                        className="sdp-pay-input"
+                        type="date"
+                        value={dotToIso(draftDate)}
+                        onChange={(e) => setDraftDate(isoToDot(e.target.value))}
+                      />
+                    </div>
+
+                    <div className="sdp-pay-form-actions">
+                      <button
+                        className="sdp-pay-cancel-edit-btn"
+                        onClick={cancelEditPayment}
+                      >
+                        {paymentConfigured ? "취소" : "닫기"}
+                      </button>
+                      <button
+                        className="sdp-pay-apply-btn"
+                        onClick={applyPaymentSettings}
+                      >
+                        적용
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="sdp-pay-summary">
+                    <div className="sdp-pay-summary-item">
+                      <span className="sdp-pay-summary-label">총 수임료</span>
+                      <span className="sdp-pay-summary-val">
+                        {payTotalFee.toLocaleString()}
+                        <em>만원</em>
+                      </span>
+                    </div>
+                    <div className="sdp-pay-summary-item">
+                      <span className="sdp-pay-summary-label">납부 방식</span>
+                      <span className="sdp-pay-summary-val">
+                        {payMethod === "lump" ? (
+                          "일괄납부"
+                        ) : (
+                          <>
+                            {payHasRemainder ? "약 " : ""}
+                            {payBaseAmount.toLocaleString()}만원
+                            <em> × {payInstallmentCount}개월</em>
+                          </>
+                        )}
+                      </span>
+                    </div>
+                    <div className="sdp-pay-summary-item">
+                      <span className="sdp-pay-summary-label">
+                        {payMethod === "lump" ? "납부일" : "계약일"}
+                      </span>
+                      <span className="sdp-pay-summary-val sdp-pay-summary-date">
+                        {payContractDate}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="sdp-pay-progress">
+                    <div className="sdp-pay-progress-labels">
+                      <span>납부 현황</span>
+                      <span>
+                        <strong>{paidCount}</strong>/{installments.length}회 ·{" "}
+                        {paidAmount.toLocaleString()}만원 /{" "}
+                        {payTotalFee.toLocaleString()}만원
+                      </span>
+                    </div>
+                    <div className="sdp-pay-progress-bg">
+                      <div
+                        className="sdp-pay-progress-fill"
+                        style={{ width: `${paymentProgressPct}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="sdp-pay-list">
+                    {installments.map((it) => {
+                      const isPaid = it.status === "paid";
+                      const isCanceled = it.status === "canceled";
+                      const isRefunded = it.status === "refunded";
+                      const isEditingDate = dateEditSeq === it.seq;
+                      return (
+                        <div
+                          key={it.seq}
+                          className={`sdp-pay-row ${it.status}`}
+                        >
+                          <span className="sdp-pay-row-seq">{it.seq}회차</span>
+                          <span className="sdp-pay-row-date">{it.dueDate}</span>
+                          <span className="sdp-pay-row-amt">
+                            {it.amount.toLocaleString()}만원
+                          </span>
+                          <span className={`sdp-pay-row-chip ${it.status}`}>
+                            {isPaid
+                              ? "완납"
+                              : isRefunded
+                                ? "환불"
+                                : isCanceled
+                                  ? "취소"
+                                  : "미납"}
+                          </span>
+                          {isEditingDate ? (
+                            <div className="sdp-pay-date-edit">
+                              <input
+                                type="date"
+                                className="sdp-pay-date-edit-input"
+                                value={dateEditValue}
+                                onChange={(e) =>
+                                  setDateEditValue(e.target.value)
+                                }
+                                autoFocus
+                              />
+                              <button
+                                className="sdp-pay-date-confirm-btn"
+                                onClick={() => confirmMarkPaid(it.seq)}
+                                title="이 날짜로 완납 처리"
+                              >
+                                <svg
+                                  width="11"
+                                  height="11"
+                                  viewBox="0 0 16 16"
+                                  fill="none"
+                                >
+                                  <path
+                                    d="M3.5 8.5l3 3 6-7"
+                                    stroke="#fff"
+                                    strokeWidth="2.2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
+                              </button>
+                              <button
+                                className="sdp-pay-date-cancel-btn"
+                                onClick={cancelMarkPaid}
+                                title="취소"
+                              >
+                                <svg
+                                  width="10"
+                                  height="10"
+                                  viewBox="0 0 16 16"
+                                  fill="none"
+                                >
+                                  <path
+                                    d="M3 3l10 10M13 3L3 13"
+                                    stroke="#999"
+                                    strokeWidth="1.6"
+                                    strokeLinecap="round"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          ) : (
+                            <>
+                              <span className="sdp-pay-row-paiddate">
+                                {isPaid
+                                  ? `${it.paidDate} 수령`
+                                  : isRefunded
+                                    ? `${it.refundedDate} 환불`
+                                    : isCanceled
+                                      ? "미청구"
+                                      : "—"}
+                              </span>
+                              <button
+                                className={`sdp-pay-check-btn ${isPaid ? "checked" : ""}`}
+                                disabled={isCanceled || isRefunded}
+                                onClick={() =>
+                                  isPaid
+                                    ? togglePaid(it.seq)
+                                    : startMarkPaid(it.seq)
+                                }
+                                title={
+                                  isPaid
+                                    ? "미납으로 되돌리기"
+                                    : "납부일 지정 후 완납 처리"
+                                }
+                              >
+                                {isPaid && (
+                                  <svg
+                                    width="11"
+                                    height="11"
+                                    viewBox="0 0 16 16"
+                                    fill="none"
+                                  >
+                                    <path
+                                      d="M3.5 8.5l3 3 6-7"
+                                      stroke="#fff"
+                                      strokeWidth="2.2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>
+                                )}
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="sdp-pay-footer">
+                    {paymentCanceled ? (
+                      <div className="sdp-pay-canceled-note">
+                        <span>⚠</span>
+                        <p>
+                          {stopType === "refunded" ? (
+                            <>
+                              {canceledAt} 기준 결제가 환불 처리되었습니다.
+                              납부했던 {refundedCount}회차(
+                              {refundedAmount.toLocaleString()}만원)가
+                              환불되며, 남은 {canceledCount}회차는 청구되지
+                              않습니다.
+                            </>
+                          ) : (
+                            <>
+                              {canceledAt} 기준 {paidCount}회차까지 납부 후
+                              결제가 중단되었습니다. 남은 {canceledCount}
+                              회차는 청구되지 않습니다.
+                            </>
+                          )}
+                        </p>
+                        <button
+                          className="sdp-pay-resume-btn"
+                          onClick={handleResumePayment}
+                        >
+                          철회
+                        </button>
+                      </div>
+                    ) : (
+                      paidCount < installments.length && (
+                        <div className="sdp-pay-stop-actions">
+                          <button
+                            className="sdp-pay-suspend-btn"
+                            onClick={handleSuspendPayment}
+                          >
+                            중단
+                          </button>
+                          <button
+                            className="sdp-pay-refund-btn"
+                            onClick={handleRefundPayment}
+                          >
+                            환불
+                          </button>
+                        </div>
+                      )
+                    )}
+                  </div>
+
+                  <div className="sdp-pay-modal-testrow">
+                    {/* <button
+                      className="sdp-view-toggle-btn"
+                      title="와이어프레임 테스트용"
+                      onClick={resetPaymentConfig}
+                    >
+                      입력 전 상태로 보기 (테스트)
+                    </button> */}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

@@ -1,0 +1,330 @@
+/* ===== 회생·파산 결제 통계 — Modern / Toss-style ===== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.pst-page {
+  min-height: 100vh;
+  background: #fff;
+  font-family: -apple-system, "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  color: #111;
+}
+
+.pst-body {
+  max-width: 1040px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 24px 72px;
+}
+
+/* ── Head ── */
+.pst-head {
+  padding: 40px 0 32px;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.pst-head-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.pst-branch-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding-top: 26px;
+}
+
+.pst-filter-label {
+  font-size: 12.5px;
+  color: #888;
+  letter-spacing: -0.01em;
+}
+
+.pst-branch-select {
+  border: 1px solid #e8e8e8;
+  background: #fff;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #111;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+}
+.pst-branch-select:focus {
+  outline: none;
+  border-color: #111;
+}
+
+.pst-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  color: #aaa;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+}
+
+.pst-title {
+  font-size: 34px;
+  font-weight: 900;
+  color: #111;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin: 0 0 10px;
+}
+
+.pst-sub {
+  font-size: 14px;
+  color: #666;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.pst-section {
+  padding: 32px 0;
+}
+
+.pst-hint {
+  font-size: 12.5px;
+  color: #999;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  margin: 14px 0 0;
+}
+
+/* ───────────────────────────
+   상단 summary 카드
+─────────────────────────── */
+.pst-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 28px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.pst-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  border: 1px solid #ebebeb;
+  border-radius: 14px;
+}
+
+.pst-kpi-label {
+  font-size: 12px;
+  color: #888;
+  letter-spacing: -0.01em;
+}
+
+.pst-kpi-val {
+  font-size: 24px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+.pst-kpi-val.warn {
+  color: #b91c1c;
+}
+.pst-kpi-val.muted {
+  color: #888;
+}
+.pst-kpi-val em {
+  font-style: normal;
+  font-size: 13px;
+  font-weight: 400;
+  color: #bbb;
+  margin-left: 3px;
+}
+
+.pst-kpi-sub {
+  font-size: 12px;
+  color: #999;
+  letter-spacing: -0.01em;
+}
+
+/* ───────────────────────────
+   월 이동 UI — 살짝 중앙에 비중을 둔, 테두리 없는 미니멀 배치
+─────────────────────────── */
+.pst-month-nav-row {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 28px;
+}
+
+.pst-month-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.pst-nav-arrow {
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 1;
+  color: #aaa;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pst-nav-arrow:hover:not(:disabled) {
+  background: #f5f5f5;
+  color: #111;
+}
+.pst-nav-arrow:disabled {
+  color: #e5e5e5;
+  cursor: not-allowed;
+}
+
+.pst-month-select {
+  border: none;
+  background: transparent;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s;
+}
+.pst-month-select:hover {
+  background: #f7f7f7;
+}
+.pst-month-select:focus {
+  outline: none;
+  background: #f7f7f7;
+}
+
+/* ───────────────────────────
+   납부 내역 테이블
+─────────────────────────── */
+.pst-record-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pst-record-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: #aaa;
+  letter-spacing: 0.02em;
+  padding: 0 10px 10px;
+  border-bottom: 1px solid #eee;
+}
+.pst-record-table th:last-child,
+.pst-record-table td:last-child,
+.pst-record-table td.pst-cell-amt {
+  text-align: right;
+}
+.pst-record-table th:first-child,
+.pst-record-table td:first-child {
+  padding-left: 4px;
+}
+.pst-record-table th:last-child,
+.pst-record-table td:last-child {
+  padding-right: 4px;
+}
+
+.pst-record-table td {
+  padding: 13px 10px;
+  font-size: 13.5px;
+  color: #333;
+  border-bottom: 1px solid #f7f7f7;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.pst-record-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.pst-record-table tbody tr:hover td {
+  background: #fafafa;
+}
+
+.pst-cell-name {
+  font-weight: 700;
+  color: #111;
+}
+
+.pst-cell-amt {
+  font-weight: 700;
+  color: #111;
+}
+
+.pst-rep-branch {
+  font-size: 11.5px;
+  color: #aaa;
+  margin-left: 6px;
+}
+
+.pst-seq-total {
+  font-size: 11.5px;
+  color: #aaa;
+}
+
+.pst-status-badge {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: -0.01em;
+}
+.pst-status-badge.paid {
+  background: #dcfce7;
+  color: #15803d;
+}
+.pst-status-badge.overdue {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.pst-status-badge.pending {
+  background: #eff6ff;
+  color: #2563eb;
+}
+.pst-status-badge.canceled {
+  background: #f5f5f5;
+  color: #888;
+}
+
+/* ───────────────────────────
+   반응형
+─────────────────────────── */
+@media (max-width: 768px) {
+  .pst-title {
+    font-size: 26px;
+  }
+  .pst-kpis {
+    grid-template-columns: 1fr;
+  }
+  .pst-record-table {
+    display: block;
+    overflow-x: auto;
+  }
+  .pst-head-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .pst-branch-filter {
+    padding-top: 0;
+  }
+}
+

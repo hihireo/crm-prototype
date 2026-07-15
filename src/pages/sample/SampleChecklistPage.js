@@ -226,10 +226,27 @@ const SampleChecklistPage = () => {
             </div>
             {/* 분석하기 버튼 (우) */}
             <button className="scl-mobile-analyze-btn" onClick={goToResult}>
-              <svg width="11" height="11" viewBox="0 0 14 14" fill="none" style={{ marginRight: 5, flexShrink: 0 }}>
-                <path d="M7 0C7.2 2.8 8.2 4.8 10.5 6C8.2 7.2 7.2 9.2 7 12C6.8 9.2 5.8 7.2 3.5 6C5.8 4.8 6.8 2.8 7 0Z" fill="currentColor"/>
-                <path d="M12 4C12.1 5.2 12.6 6 13.5 6.5C12.6 7 12.1 7.8 12 9C11.9 7.8 11.4 7 10.5 6.5C11.4 6 11.9 5.2 12 4Z" fill="currentColor" opacity="0.5"/>
-                <path d="M2 8C2.1 8.8 2.5 9.3 3 9.5C2.5 9.7 2.1 10.2 2 11C1.9 10.2 1.5 9.7 1 9.5C1.5 9.3 1.9 8.8 2 8Z" fill="currentColor" opacity="0.5"/>
+              <svg
+                width="11"
+                height="11"
+                viewBox="0 0 14 14"
+                fill="none"
+                style={{ marginRight: 5, flexShrink: 0 }}
+              >
+                <path
+                  d="M7 0C7.2 2.8 8.2 4.8 10.5 6C8.2 7.2 7.2 9.2 7 12C6.8 9.2 5.8 7.2 3.5 6C5.8 4.8 6.8 2.8 7 0Z"
+                  fill="currentColor"
+                />
+                <path
+                  d="M12 4C12.1 5.2 12.6 6 13.5 6.5C12.6 7 12.1 7.8 12 9C11.9 7.8 11.4 7 10.5 6.5C11.4 6 11.9 5.2 12 4Z"
+                  fill="currentColor"
+                  opacity="0.5"
+                />
+                <path
+                  d="M2 8C2.1 8.8 2.5 9.3 3 9.5C2.5 9.7 2.1 10.2 2 11C1.9 10.2 1.5 9.7 1 9.5C1.5 9.3 1.9 8.8 2 8Z"
+                  fill="currentColor"
+                  opacity="0.5"
+                />
               </svg>
               분석하기
             </button>
@@ -239,7 +256,15 @@ const SampleChecklistPage = () => {
               onClick={() => setSidebarOpen((v) => !v)}
               aria-label={sidebarOpen ? "단계 메뉴 닫기" : "단계 메뉴 열기"}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              >
                 <path d="M6 9l6 6 6-6" />
               </svg>
             </button>

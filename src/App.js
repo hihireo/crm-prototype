@@ -11,6 +11,7 @@ import SampleChecklistPage from "./pages/sample/SampleChecklistPage";
 import SampleDashboardPage from "./pages/sample/SampleDashboardPage";
 import ChecklistListPage from "./pages/sample/ChecklistListPage";
 import ProcedureGuidePage from "./pages/sample/ProcedureGuidePage";
+import PaymentStatsPage from "./pages/sample/PaymentStatsPage";
 
 const DEMO_USER    = { name: "데모 상담사", email: "demo@talkgate.kr" };
 const DEMO_SERVICE = "TalkGate Demo";
@@ -18,10 +19,12 @@ const DEMO_SERVICE = "TalkGate Demo";
 function AppContent() {
   const location = useLocation();
   const isChecklistRoute = location.pathname.startsWith("/checklist");
+  const isStatisticsRoute = location.pathname.startsWith("/statistics");
+  const showHeader = isChecklistRoute || isStatisticsRoute;
 
   return (
     <div className="App">
-      {isChecklistRoute && (
+      {showHeader && (
         <Header
           user={DEMO_USER}
           currentService={DEMO_SERVICE}
@@ -36,6 +39,7 @@ function AppContent() {
           <Route path="/checklist/result"           element={<SampleDashboardPage />} />
           <Route path="/checklist/result-external"  element={<SampleDashboardPage />} />
           <Route path="/checklist/procedure"        element={<ProcedureGuidePage />} />
+          <Route path="/statistics"                 element={<PaymentStatsPage />} />
           {/* 그 외 모든 경로 → 목록으로 */}
           <Route path="*" element={<Navigate to="/checklist" replace />} />
         </Routes>
