@@ -2432,3 +2432,516 @@
   background: #333;
 }
 
+/* ── 변호사 분석 데이터 검토 ── */
+.sdp-review-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 12px 0 20px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+}
+.sdp-review-bar-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.sdp-review-bar-info strong {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.sdp-review-bar-info span {
+  font-size: 12px;
+  letter-spacing: -0.01em;
+  line-height: 1.45;
+}
+.sdp-review-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.sdp-review-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  border: none;
+  transition: background 0.12s, color 0.12s;
+}
+.sdp-review-btn--reject {
+  background: #fff;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+.sdp-review-btn--reject:hover {
+  background: #fff5f5;
+}
+.sdp-review-btn--accept {
+  background: #111;
+  color: #fff;
+}
+.sdp-review-btn--accept:hover {
+  background: #333;
+}
+.sdp-review-bar--pending {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+.sdp-review-bar--pending .sdp-review-bar-info strong {
+  color: #111;
+}
+.sdp-review-bar--pending .sdp-review-bar-info span {
+  color: #64748b;
+}
+.sdp-review-bar--accepted {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  justify-content: flex-start;
+}
+.sdp-review-bar-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+.sdp-review-bar--accepted .sdp-review-bar-info strong {
+  color: #15803d;
+}
+.sdp-review-bar--accepted .sdp-review-bar-info span {
+  color: #16a34a;
+}
+.sdp-review-bar--rejected {
+  background: #fff5f5;
+  border-color: #fecaca;
+  justify-content: flex-start;
+}
+.sdp-review-bar--rejected .sdp-review-bar-info strong {
+  color: #b91c1c;
+}
+.sdp-review-result-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.sdp-review-bar--accepted .sdp-review-result-icon {
+  background: #22c55e;
+  color: #fff;
+}
+.sdp-review-bar--rejected .sdp-review-result-icon {
+  background: #ef4444;
+  color: #fff;
+}
+.sdp-review-reject-reason {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #991b1b;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sdp-review-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 900;
+  padding: 0;
+}
+@media (min-width: 640px) {
+  .sdp-review-modal-overlay {
+    align-items: center;
+    padding: 24px;
+  }
+}
+
+.sdp-review-modal {
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+}
+@media (min-width: 640px) {
+  .sdp-review-modal {
+    border-radius: 14px;
+  }
+}
+
+.sdp-review-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+}
+
+.sdp-review-modal-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+
+.sdp-review-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.12s;
+}
+.sdp-review-modal-close:hover {
+  background: #f5f5f5;
+}
+
+.sdp-review-modal-body {
+  padding: 18px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sdp-review-modal-desc {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+.sdp-review-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sdp-review-field-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #888;
+  letter-spacing: -0.01em;
+}
+
+.sdp-review-input {
+  width: 100%;
+  height: 44px;
+  box-sizing: border-box;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-size: 14px;
+  color: #111;
+  font-family: inherit;
+  background: #fafafa;
+  letter-spacing: -0.01em;
+  transition: border-color 0.12s, background 0.12s;
+}
+.sdp-review-input::placeholder {
+  color: #bbb;
+}
+.sdp-review-input:focus {
+  outline: none;
+  border-color: #111;
+  background: #fff;
+}
+
+.sdp-review-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 20px 18px;
+  border-top: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.sdp-review-cancel-btn {
+  padding: 9px 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: background 0.12s, border-color 0.12s;
+}
+.sdp-review-cancel-btn:hover {
+  background: #f5f5f5;
+  border-color: #ddd;
+}
+
+.sdp-review-confirm-reject-btn {
+  padding: 9px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #dc2626;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: background 0.12s;
+}
+.sdp-review-confirm-reject-btn:hover {
+  background: #b91c1c;
+}
+@media (max-width: 640px) {
+  .sdp-review-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .sdp-review-bar-actions {
+    justify-content: flex-end;
+  }
+}
+
+/* ── 진행 절차 선택 모달 ── */
+.sdp-proc-select-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 950;
+  padding: 0;
+}
+@media (min-width: 640px) {
+  .sdp-proc-select-overlay {
+    align-items: center;
+    padding: 24px;
+  }
+}
+
+.sdp-proc-select-modal {
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+@media (min-width: 640px) {
+  .sdp-proc-select-modal {
+    border-radius: 14px;
+  }
+}
+
+.sdp-proc-select-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.sdp-proc-select-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+
+.sdp-proc-select-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.sdp-proc-select-close:hover {
+  background: #f5f5f5;
+}
+
+.sdp-proc-select-body {
+  padding: 18px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sdp-proc-select-desc {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+.sdp-proc-select-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sdp-proc-select-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid #eee;
+  border-radius: 12px;
+  background: #fafafa;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.12s, background 0.12s;
+}
+.sdp-proc-select-item:hover {
+  border-color: #ddd;
+  background: #f5f5f5;
+}
+.sdp-proc-select-item.selected {
+  border-color: #111;
+  background: #fff;
+  box-shadow: 0 0 0 1px #111;
+}
+
+.sdp-proc-select-item-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.sdp-proc-select-item-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+
+.sdp-proc-select-rec {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: #111;
+  color: #fff;
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+}
+
+.sdp-proc-select-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.sdp-proc-select-score {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.sdp-proc-select-score em {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 500;
+  color: #bbb;
+}
+
+.sdp-proc-select-grade {
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 28px;
+  text-align: right;
+}
+.sdp-proc-select-grade.g-양호 {
+  color: #111;
+}
+.sdp-proc-select-grade.g-보통 {
+  color: #666;
+}
+.sdp-proc-select-grade.g-낮음 {
+  color: #999;
+}
+
+.sdp-proc-select-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 20px 18px;
+  border-top: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.sdp-proc-select-cancel {
+  padding: 9px 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: background 0.12s;
+}
+.sdp-proc-select-cancel:hover {
+  background: #f5f5f5;
+}
+
+.sdp-proc-select-confirm {
+  padding: 9px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #111;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: background 0.12s;
+}
+.sdp-proc-select-confirm:hover {
+  background: #333;
+}
+

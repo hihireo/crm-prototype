@@ -834,6 +834,11 @@ const SampleDashboardPage = () => {
   const [isAiTyping, setIsAiTyping] = useState(false);
   const chatEndRef = useRef(null);
 
+  /* 변호사 분석 데이터 검토 상태 (외부 뷰) */
+  const [reviewStatus, setReviewStatus] = useState("pending"); // pending | accepted | rejected
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+
   /* 수임료 결제 정보 상태 */
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [paymentConfigured, setPaymentConfigured] = useState(false); // 결제 조건 입력 여부 (false = 입력 전 상태)
@@ -860,6 +865,10 @@ const SampleDashboardPage = () => {
     String(PAYMENT.installmentCount),
   );
   const [draftDate, setDraftDate] = useState(PAYMENT.contractDate);
+
+  /* 결제 적용 시 진행 절차 선택 모달 */
+  const [procSelectModalOpen, setProcSelectModalOpen] = useState(false);
+  const [draftSelectedProc, setDraftSelectedProc] = useState("rehabilitation");
 
   const startMarkPaid = (seq) => {
     setDateEditSeq(seq);
@@ -974,14 +983,12 @@ const SampleDashboardPage = () => {
     }
   };
 
-  const applyPaymentSettings = () => {
+  const requestApplyPayment = () => {
     const fee = Number(draftTotalFee);
     if (!fee || fee <= 0) {
       alert("총 수임료를 올바르게 입력해 주세요.");
       return;
     }
-    const count =
-      draftMethod === "lump" ? 1 : Math.max(1, Number(draftCount) || 1);
     if (!draftDate) {
       alert("첫 납부일을 입력해 주세요.");
       return;
@@ -995,6 +1002,15 @@ const SampleDashboardPage = () => {
     )
       return;
 
+    setDraftSelectedProc(selectedOption);
+    setProcSelectModalOpen(true);
+  };
+
+  const confirmApplyWithProcedure = () => {
+    const fee = Number(draftTotalFee);
+    const count =
+      draftMethod === "lump" ? 1 : Math.max(1, Number(draftCount) || 1);
+
     setPayTotalFee(fee);
     setPayMethod(draftMethod);
     setPayInstallmentCount(count);
@@ -1004,6 +1020,8 @@ const SampleDashboardPage = () => {
     setStopType(null);
     setCanceledAt(null);
     setPaymentConfigured(true);
+    setSelectedOption(draftSelectedProc);
+    setProcSelectModalOpen(false);
     setPayEditing(false);
   };
 
@@ -1052,6 +1070,31 @@ const SampleDashboardPage = () => {
       setChatMessages((prev) => [...prev, { role: "ai", text: answer }]);
       setIsAiTyping(false);
     }, 1000);
+  };
+
+  const handleAcceptReview = () => {
+    if (
+      !window.confirm(
+        "전달받은 분석 데이터를 수락하시겠습니까?\n\n계약 진행 후 결제 정보를 입력하면 절차 진행 단계로 넘어갑니다.",
+      )
+    )
+      return;
+    setReviewStatus("accepted");
+  };
+
+  const openRejectModal = () => {
+    setRejectReason("");
+    setRejectModalOpen(true);
+  };
+
+  const handleConfirmReject = () => {
+    if (!rejectReason.trim()) {
+      alert("거절 사유를 입력해 주세요.");
+      return;
+    }
+    setReviewStatus("rejected");
+    setRejectModalOpen(false);
+    navigate("/checklist");
   };
 
   const totalRepayment = AI.repaymentAmount * AI.repaymentMonths;
@@ -1239,6 +1282,53 @@ const SampleDashboardPage = () => {
             )}
           </div>
         </div>
+
+        {/* 변호사 분석 데이터 검토 (외부 뷰) */}
+        {isExternal && (
+          <>
+            {reviewStatus === "pending" && (
+              <div className="sdp-review-bar sdp-review-bar--pending">
+                <div className="sdp-review-bar-info">
+                  <strong>분석 데이터 검토 요청</strong>
+                  <span>
+                    영업팀이 전달한 AI 분석 결과를 검토하고 수락 또는 거절해
+                    주세요.
+                  </span>
+                </div>
+                <div className="sdp-review-bar-actions">
+                  <button
+                    type="button"
+                    className="sdp-review-btn sdp-review-btn--reject"
+                    onClick={openRejectModal}
+                  >
+                    거절
+                  </button>
+                  <button
+                    type="button"
+                    className="sdp-review-btn sdp-review-btn--accept"
+                    onClick={handleAcceptReview}
+                  >
+                    수락
+                  </button>
+                </div>
+              </div>
+            )}
+            {reviewStatus === "accepted" && (
+              <div className="sdp-review-bar sdp-review-bar--accepted">
+                <div className="sdp-review-bar-content">
+                  <span className="sdp-review-result-icon">✓</span>
+                  <div className="sdp-review-bar-info">
+                    <strong>분석 데이터를 수락했습니다</strong>
+                    <span>
+                      영업담당자에게 수락 알림이 전달됩니다. 계약 진행 후
+                      결제 정보를 입력하면 절차 진행 단계로 넘어갑니다.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
 
         {/* ① 히어로: 추천 옵션 + 큰 링 */}
         <section className="sdp-hero">
@@ -2234,7 +2324,7 @@ const SampleDashboardPage = () => {
                       </button>
                       <button
                         className="sdp-pay-apply-btn"
-                        onClick={applyPaymentSettings}
+                        onClick={requestApplyPayment}
                       >
                         적용
                       </button>
@@ -2475,6 +2565,155 @@ const SampleDashboardPage = () => {
                   </div>
                 </>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 진행 절차 선택 모달 */}
+      {procSelectModalOpen && (
+        <div
+          className="sdp-proc-select-overlay"
+          onClick={() => setProcSelectModalOpen(false)}
+        >
+          <div
+            className="sdp-proc-select-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sdp-proc-select-head">
+              <h2 className="sdp-proc-select-title">진행 절차 선택</h2>
+              <button
+                type="button"
+                className="sdp-proc-select-close"
+                onClick={() => setProcSelectModalOpen(false)}
+                aria-label="닫기"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path
+                    d="M3 3l10 10M13 3L3 13"
+                    stroke="#666"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="sdp-proc-select-body">
+              <p className="sdp-proc-select-desc">
+                결제 정보 적용 후 진행할 절차를 선택해 주세요. 선택한 절차로
+                진행 단계가 시작됩니다.
+              </p>
+              <div className="sdp-proc-select-list">
+                {OPTIONS.map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    className={`sdp-proc-select-item ${draftSelectedProc === opt.id ? "selected" : ""}`}
+                    onClick={() => setDraftSelectedProc(opt.id)}
+                  >
+                    <div className="sdp-proc-select-item-main">
+                      <span className="sdp-proc-select-item-name">
+                        {opt.label}
+                      </span>
+                      {opt.recommended && (
+                        <span className="sdp-proc-select-rec">추천</span>
+                      )}
+                    </div>
+                    <div className="sdp-proc-select-item-meta">
+                      <span className="sdp-proc-select-score">
+                        {opt.score}
+                        <em>/100</em>
+                      </span>
+                      <span className={`sdp-proc-select-grade g-${opt.grade}`}>
+                        {opt.grade}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="sdp-proc-select-footer">
+              <button
+                type="button"
+                className="sdp-proc-select-cancel"
+                onClick={() => setProcSelectModalOpen(false)}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className="sdp-proc-select-confirm"
+                onClick={confirmApplyWithProcedure}
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 분석 데이터 거절 모달 */}
+      {rejectModalOpen && (
+        <div
+          className="sdp-review-modal-overlay"
+          onClick={() => setRejectModalOpen(false)}
+        >
+          <div
+            className="sdp-review-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sdp-review-modal-head">
+              <h2 className="sdp-review-modal-title">분석 데이터 거절</h2>
+              <button
+                type="button"
+                className="sdp-review-modal-close"
+                onClick={() => setRejectModalOpen(false)}
+                aria-label="닫기"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path
+                    d="M3 3l10 10M13 3L3 13"
+                    stroke="#666"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="sdp-review-modal-body">
+              <p className="sdp-review-modal-desc">
+                거절 사유를 입력해 주세요. 영업담당자에게 전달됩니다.
+              </p>
+              <label className="sdp-review-field">
+                <span className="sdp-review-field-label">거절 사유</span>
+                <input
+                  type="text"
+                  className="sdp-review-input"
+                  placeholder=""
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleConfirmReject();
+                  }}
+                  autoFocus
+                />
+              </label>
+            </div>
+            <div className="sdp-review-modal-footer">
+              <button
+                type="button"
+                className="sdp-review-cancel-btn"
+                onClick={() => setRejectModalOpen(false)}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className="sdp-review-confirm-reject-btn"
+                onClick={handleConfirmReject}
+              >
+                거절 확정
+              </button>
             </div>
           </div>
         </div>
