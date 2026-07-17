@@ -27,6 +27,151 @@ const SALES_REP = {
   thumb: "/images/thumb_sample1.png",
 };
 
+const TRANSMISSION_NOTES_KEY = "sdp_transmission_notes_1";
+
+const BASE_TRANSMISSION_NOTES = [
+  {
+    id: "share-1",
+    type: "share",
+    authorName: SALES_REP.name,
+    authorRole: "영업",
+    authorMeta: SALES_REP.branch,
+    datetime: "2026.06.28 15:42",
+    message:
+      "고객 소득 증빙 자료는 다음 주 월요일까지 수급 예정입니다. 사채 3천만원은 금융기관 대출이 아닌 점 참고 부탁드립니다.",
+  },
+  {
+    id: "share-2",
+    type: "share",
+    authorName: SALES_REP.name,
+    authorRole: "영업",
+    authorMeta: SALES_REP.branch,
+    datetime: "2026.06.27 09:10",
+    message:
+      "긴급 공유 건입니다. 고객이 이번 주 내 계약 의사가 있어 빠른 검토 부탁드립니다.",
+  },
+];
+
+const REJECT_DEMO_NOTE = {
+  id: "reject-demo",
+  type: "reject",
+  authorName: "이서연",
+  authorRole: "변호사",
+  authorMeta: "TG법무법인",
+  datetime: "2026.06.26 14:30",
+  message:
+    "채무 목록에 미기재 항목이 있어 보입니다. 사채 채권자 정보 확인 후 재공유 부탁드립니다.",
+};
+
+const ACCEPT_DEMO_NOTE = {
+  id: "accept-demo",
+  type: "accept",
+  authorName: "이서연",
+  authorRole: "변호사",
+  authorMeta: "TG법무법인",
+  datetime: "2026.06.25 11:00",
+  message: "분석 내용 확인했습니다. 계약 진행 시 바로 절차 착수 가능합니다.",
+};
+
+const PAYMENT_DEMO_NOTE = {
+  id: "payment-demo",
+  type: "payment",
+  authorName: SALES_REP.name,
+  authorRole: "영업",
+  authorMeta: SALES_REP.branch,
+  datetime: "2026.06.28 16:20",
+  message:
+    "총 700만원 · 분할 7회 · 첫 납부일 2026.06.28 · 개인회생 절차 시작",
+};
+
+const TRANSMISSION_AUTHOR_DEFAULTS = {
+  share: {
+    authorName: SALES_REP.name,
+    authorRole: "영업",
+    authorMeta: SALES_REP.branch,
+  },
+  accept: {
+    authorName: "검토 변호사",
+    authorRole: "변호사",
+    authorMeta: "",
+  },
+  reject: {
+    authorName: "검토 변호사",
+    authorRole: "변호사",
+    authorMeta: "",
+  },
+  payment: {
+    authorName: SALES_REP.name,
+    authorRole: "영업",
+    authorMeta: SALES_REP.branch,
+  },
+};
+
+const buildPaymentNoteMessage = (fee, method, count, date, procId) => {
+  const procLabel =
+    { rehabilitation: "개인회생", debtAdjustment: "채무조정(워크아웃)", bankruptcy: "파산" }[
+      procId
+    ] || procId;
+  const methodLabel = method === "lump" ? "일괄납부" : `분할 ${count}회`;
+  const dateLabel = method === "lump" ? "납부일" : "첫 납부일";
+  return `총 ${fee.toLocaleString()}만원 · ${methodLabel} · ${dateLabel} ${date} · ${procLabel} 절차 시작`;
+};
+
+const formatTransmissionDatetime = () => {
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+};
+
+const loadTransmissionNotes = (isExternal) => {
+  let stored = [];
+  try {
+    stored = JSON.parse(localStorage.getItem(TRANSMISSION_NOTES_KEY) || "[]");
+  } catch {
+    stored = [];
+  }
+  const notes = [...BASE_TRANSMISSION_NOTES, ...stored];
+  const hasReject = notes.some((n) => n.type === "reject");
+  const hasAccept = notes.some((n) => n.type === "accept");
+  const hasPayment = notes.some((n) => n.type === "payment");
+  if (!isExternal) {
+    if (!hasReject) notes.push(REJECT_DEMO_NOTE);
+    if (!hasAccept) notes.push(ACCEPT_DEMO_NOTE);
+    if (!hasPayment) notes.push(PAYMENT_DEMO_NOTE);
+  }
+  return notes.sort((a, b) => b.datetime.localeCompare(a.datetime));
+};
+
+const saveTransmissionNote = (type, message, authorOverride = {}) => {
+  const author = { ...TRANSMISSION_AUTHOR_DEFAULTS[type], ...authorOverride };
+  const note = {
+    id: `${type}-${Date.now()}`,
+    type,
+    authorName: author.authorName,
+    authorRole: author.authorRole,
+    authorMeta: author.authorMeta,
+    datetime: formatTransmissionDatetime(),
+    message,
+  };
+  let stored = [];
+  try {
+    stored = JSON.parse(localStorage.getItem(TRANSMISSION_NOTES_KEY) || "[]");
+  } catch {
+    stored = [];
+  }
+  localStorage.setItem(
+    TRANSMISSION_NOTES_KEY,
+    JSON.stringify([...stored, note]),
+  );
+};
+
+const TRANSMISSION_TYPE_LABEL = {
+  share: "공유",
+  accept: "수락",
+  reject: "반려",
+  payment: "결제",
+};
+
 /* 수임료 결제 정보 (분할 납부) — 기본값 */
 const PAYMENT = {
   totalFee: 700, // 총 수임료 (만원)
@@ -838,6 +983,15 @@ const SampleDashboardPage = () => {
   const [reviewStatus, setReviewStatus] = useState("pending"); // pending | accepted | rejected
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
+  const [acceptModalOpen, setAcceptModalOpen] = useState(false);
+  const [acceptMessage, setAcceptMessage] = useState("");
+  const [transmissionNotes, setTransmissionNotes] = useState(() =>
+    loadTransmissionNotes(isExternal),
+  );
+
+  useEffect(() => {
+    setTransmissionNotes(loadTransmissionNotes(isExternal));
+  }, [isExternal]);
 
   /* 수임료 결제 정보 상태 */
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
@@ -1023,6 +1177,17 @@ const SampleDashboardPage = () => {
     setSelectedOption(draftSelectedProc);
     setProcSelectModalOpen(false);
     setPayEditing(false);
+    saveTransmissionNote(
+      "payment",
+      buildPaymentNoteMessage(
+        fee,
+        draftMethod,
+        count,
+        draftDate,
+        draftSelectedProc,
+      ),
+    );
+    setTransmissionNotes(loadTransmissionNotes(isExternal));
   };
 
   /* 와이어프레임 테스트용: 입력 전 상태로 되돌리기 */
@@ -1072,14 +1237,20 @@ const SampleDashboardPage = () => {
     }, 1000);
   };
 
-  const handleAcceptReview = () => {
-    if (
-      !window.confirm(
-        "전달받은 분석 데이터를 수락하시겠습니까?\n\n계약 진행 후 결제 정보를 입력하면 절차 진행 단계로 넘어갑니다.",
-      )
-    )
+  const openAcceptModal = () => {
+    setAcceptMessage("");
+    setAcceptModalOpen(true);
+  };
+
+  const handleConfirmAccept = () => {
+    if (!acceptMessage.trim()) {
+      alert("수락 메시지를 입력해 주세요.");
       return;
+    }
+    saveTransmissionNote("accept", acceptMessage.trim());
     setReviewStatus("accepted");
+    setAcceptModalOpen(false);
+    setTransmissionNotes(loadTransmissionNotes(isExternal));
   };
 
   const openRejectModal = () => {
@@ -1094,6 +1265,7 @@ const SampleDashboardPage = () => {
     }
     setReviewStatus("rejected");
     setRejectModalOpen(false);
+    saveTransmissionNote("reject", rejectReason.trim());
     navigate("/checklist");
   };
 
@@ -1147,13 +1319,26 @@ const SampleDashboardPage = () => {
           </div>
           <div className="sdp-topnav-right">
             {isExternal ? (
-              <div className="sdp-sales-chip">
-                <img src={SALES_REP.thumb} alt="" className="sdp-sales-thumb" />
-                <div className="sdp-sales-info">
-                  <span className="sdp-sales-branch">{SALES_REP.branch}</span>
-                  <span className="sdp-sales-name">{SALES_REP.name}</span>
+              <>
+                <button
+                  className="sdp-view-toggle-btn"
+                  title="내부 뷰로 전환"
+                  onClick={() => navigate("/checklist/result")}
+                >
+                  내부용
+                </button>
+                <div className="sdp-sales-chip">
+                  <img
+                    src={SALES_REP.thumb}
+                    alt=""
+                    className="sdp-sales-thumb"
+                  />
+                  <div className="sdp-sales-info">
+                    <span className="sdp-sales-branch">{SALES_REP.branch}</span>
+                    <span className="sdp-sales-name">{SALES_REP.name}</span>
+                  </div>
                 </div>
-              </div>
+              </>
             ) : (
               /* 테스트용 뷰 전환 버튼 */
               <button
@@ -1287,26 +1472,25 @@ const SampleDashboardPage = () => {
         {isExternal && (
           <>
             {reviewStatus === "pending" && (
-              <div className="sdp-review-bar sdp-review-bar--pending">
-                <div className="sdp-review-bar-info">
-                  <strong>분석 데이터 검토 요청</strong>
-                  <span>
-                    영업팀이 전달한 AI 분석 결과를 검토하고 수락 또는 거절해
-                    주세요.
+              <div className="sdp-review-strip sdp-review-strip--pending">
+                <div className="sdp-review-strip-main">
+                  <span className="sdp-review-strip-label">검토 대기</span>
+                  <span className="sdp-review-strip-desc">
+                    AI 분석 결과를 검토하고 수락 또는 거절해 주세요
                   </span>
                 </div>
-                <div className="sdp-review-bar-actions">
+                <div className="sdp-review-strip-actions">
                   <button
                     type="button"
-                    className="sdp-review-btn sdp-review-btn--reject"
+                    className="sdp-review-strip-btn sdp-review-strip-btn--ghost"
                     onClick={openRejectModal}
                   >
                     거절
                   </button>
                   <button
                     type="button"
-                    className="sdp-review-btn sdp-review-btn--accept"
-                    onClick={handleAcceptReview}
+                    className="sdp-review-strip-btn sdp-review-strip-btn--primary"
+                    onClick={openAcceptModal}
                   >
                     수락
                   </button>
@@ -1314,20 +1498,64 @@ const SampleDashboardPage = () => {
               </div>
             )}
             {reviewStatus === "accepted" && (
-              <div className="sdp-review-bar sdp-review-bar--accepted">
-                <div className="sdp-review-bar-content">
-                  <span className="sdp-review-result-icon">✓</span>
-                  <div className="sdp-review-bar-info">
-                    <strong>분석 데이터를 수락했습니다</strong>
-                    <span>
-                      영업담당자에게 수락 알림이 전달됩니다. 계약 진행 후
-                      결제 정보를 입력하면 절차 진행 단계로 넘어갑니다.
-                    </span>
-                  </div>
-                </div>
+              <div className="sdp-review-strip sdp-review-strip--done">
+                <span className="sdp-review-done-dot" aria-hidden="true" />
+                <p className="sdp-review-done-text">
+                  <strong>수락 완료</strong>
+                  계약 진행 후 결제 정보 입력 시 절차 단계로 이동합니다
+                </p>
               </div>
             )}
           </>
+        )}
+
+        {/* 전달 사항 */}
+        {transmissionNotes.length > 0 && (
+          <section className="sdp-transmission-section">
+            <div className="sdp-transmission-panel">
+              <header className="sdp-transmission-panel-head">
+                <h3 className="sdp-transmission-panel-title">전달 사항</h3>
+                <span className="sdp-transmission-panel-count">
+                  {transmissionNotes.length}
+                </span>
+              </header>
+              <ul className="sdp-transmission-thread">
+                {transmissionNotes.map((note) => (
+                  <li
+                    key={note.id}
+                    className={`sdp-transmission-entry sdp-transmission-entry--${note.type}`}
+                  >
+                    <div className="sdp-transmission-entry-marker">
+                      <span className="sdp-transmission-dot" />
+                    </div>
+                    <div className="sdp-transmission-entry-content">
+                      <div className="sdp-transmission-entry-top">
+                        <span className="sdp-transmission-type">
+                          {TRANSMISSION_TYPE_LABEL[note.type]}
+                        </span>
+                        <span className="sdp-transmission-sep">·</span>
+                        <span className="sdp-transmission-author">
+                          {note.authorName}
+                        </span>
+                        {note.authorMeta && (
+                          <>
+                            <span className="sdp-transmission-sep">·</span>
+                            <span className="sdp-transmission-branch">
+                              {note.authorMeta}
+                            </span>
+                          </>
+                        )}
+                        <time className="sdp-transmission-time">
+                          {note.datetime}
+                        </time>
+                      </div>
+                      <p className="sdp-transmission-msg">{note.message}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
         )}
 
         {/* ① 히어로: 추천 옵션 + 큰 링 */}
@@ -2646,6 +2874,75 @@ const SampleDashboardPage = () => {
                 onClick={confirmApplyWithProcedure}
               >
                 확인
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 분석 데이터 수락 모달 */}
+      {acceptModalOpen && (
+        <div
+          className="sdp-review-modal-overlay"
+          onClick={() => setAcceptModalOpen(false)}
+        >
+          <div
+            className="sdp-review-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sdp-review-modal-head">
+              <h2 className="sdp-review-modal-title">분석 데이터 수락</h2>
+              <button
+                type="button"
+                className="sdp-review-modal-close"
+                onClick={() => setAcceptModalOpen(false)}
+                aria-label="닫기"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path
+                    d="M3 3l10 10M13 3L3 13"
+                    stroke="#666"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="sdp-review-modal-body">
+              <p className="sdp-review-modal-desc">
+                수락 메시지를 입력해 주세요. 영업담당자에게 전달됩니다.
+                <br />
+                계약 진행 후 결제 정보를 입력하면 절차 진행 단계로 넘어갑니다.
+              </p>
+              <label className="sdp-review-field">
+                <span className="sdp-review-field-label">수락 메시지</span>
+                <input
+                  type="text"
+                  className="sdp-review-input"
+                  placeholder="예: 분석 내용 확인했습니다. 계약 진행 부탁드립니다."
+                  value={acceptMessage}
+                  onChange={(e) => setAcceptMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleConfirmAccept();
+                  }}
+                  autoFocus
+                />
+              </label>
+            </div>
+            <div className="sdp-review-modal-footer">
+              <button
+                type="button"
+                className="sdp-review-cancel-btn"
+                onClick={() => setAcceptModalOpen(false)}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className="sdp-review-confirm-accept-btn"
+                onClick={handleConfirmAccept}
+              >
+                수락 확정
               </button>
             </div>
           </div>
