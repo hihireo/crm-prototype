@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ChecklistListPage.css";
 
@@ -62,6 +62,9 @@ const CLIENTS = [
       count: 7,
       paidCount: 3,
       status: "진행중",
+      monthPaidAmount: 100,
+      monthPaidCount: 1,
+      monthScheduledAmount: 100,
     },
   },
   {
@@ -104,6 +107,9 @@ const CLIENTS = [
       count: 1,
       paidCount: 1,
       status: "완납",
+      monthPaidAmount: 0,
+      monthPaidCount: 0,
+      monthScheduledAmount: 0,
     },
   },
   {
@@ -128,6 +134,9 @@ const CLIENTS = [
       count: 6,
       paidCount: 2,
       status: "진행중",
+      monthPaidAmount: 100,
+      monthPaidCount: 1,
+      monthScheduledAmount: 100,
     },
   },
   {
@@ -153,6 +162,9 @@ const CLIENTS = [
       count: 8,
       paidCount: 8,
       status: "완납",
+      monthPaidAmount: 100,
+      monthPaidCount: 1,
+      monthScheduledAmount: 100,
     },
   },
   {
@@ -178,6 +190,9 @@ const CLIENTS = [
       count: 7,
       paidCount: 4,
       status: "진행중",
+      monthPaidAmount: 100,
+      monthPaidCount: 1,
+      monthScheduledAmount: 100,
     },
   },
   {
@@ -203,6 +218,9 @@ const CLIENTS = [
       count: 10,
       paidCount: 6,
       status: "진행중",
+      monthPaidAmount: 100,
+      monthPaidCount: 1,
+      monthScheduledAmount: 100,
     },
   },
   {
@@ -244,6 +262,9 @@ const CLIENTS = [
       count: 4,
       paidCount: 2,
       status: "중도 해지",
+      monthPaidAmount: 100,
+      monthPaidCount: 1,
+      monthScheduledAmount: 100,
     },
   },
   {
@@ -268,6 +289,9 @@ const CLIENTS = [
       count: 6,
       paidCount: 3,
       status: "환불 처리",
+      monthPaidAmount: 0,
+      monthPaidCount: 0,
+      monthScheduledAmount: 100,
     },
   },
   {
@@ -292,6 +316,9 @@ const CLIENTS = [
       count: 7,
       paidCount: 1,
       status: "진행중",
+      monthPaidAmount: 100,
+      monthPaidCount: 1,
+      monthScheduledAmount: 100,
     },
   },
   {
@@ -317,6 +344,9 @@ const CLIENTS = [
       count: 5,
       paidCount: 5,
       status: "완납",
+      monthPaidAmount: 0,
+      monthPaidCount: 0,
+      monthScheduledAmount: 0,
     },
   },
 ];
@@ -373,11 +403,76 @@ const payProgressPct = (payment) => {
 };
 
 const PROC_FILTERS = ["전체", "개인회생", "채무조정", "파산"];
-const PROC_COLOR = {
-  개인회생: "rehab",
-  채무조정: "adjust",
-  파산: "bankrupt",
-};
+
+const NEWS_FILTERS = ["전체", "개인회생", "채무조정", "파산"];
+
+const NEWS_ITEMS = [
+  {
+    id: "n1",
+    proc: "개인회생",
+    tagClass: "rehab",
+    source: "법률신문",
+    date: "07.22",
+    headline: "개인회생 신청 자격과 조건, 나도 가능할까?",
+    summary: "채무 총액·가용소득 기준과 최근 법원 실무 경향을 정리했습니다.",
+    query: "개인회생 신청 자격",
+  },
+  {
+    id: "n2",
+    proc: "개인회생",
+    tagClass: "rehab",
+    source: "연합뉴스",
+    date: "07.21",
+    headline: "개인회생 변제계획, 어떻게 세워지나",
+    summary: "월 변제액 산정 방식과 인가 전후 고객 안내 포인트를 모았습니다.",
+    query: "개인회생 변제계획",
+  },
+  {
+    id: "n3",
+    proc: "채무조정",
+    tagClass: "adjust",
+    source: "한국경제",
+    date: "07.20",
+    headline: "신용회복위원회 채무조정, 누가 신청할 수 있나",
+    summary: "개인워크아웃·프리워크아웃 신청 자격과 제외 채무를 비교합니다.",
+    query: "신용회복위원회 채무조정 신청자격",
+  },
+  {
+    id: "n4",
+    proc: "채무조정",
+    tagClass: "adjust",
+    source: "매일경제",
+    date: "07.19",
+    headline: "개인워크아웃과 프리워크아웃의 차이",
+    summary:
+      "연체 여부에 따른 선택 기준과 상담 시 자주 나오는 질문을 정리했습니다.",
+    query: "개인워크아웃 프리워크아웃 차이",
+  },
+  {
+    id: "n5",
+    proc: "파산",
+    tagClass: "bankrupt",
+    source: "조선비즈",
+    date: "07.18",
+    headline: "개인파산·면책 신청 절차 한눈에 보기",
+    summary: "파산선고부터 면책결정까지 단계별 기간과 준비 서류를 요약합니다.",
+    query: "개인파산 면책 신청절차",
+  },
+  {
+    id: "n6",
+    proc: "파산",
+    tagClass: "bankrupt",
+    source: "서울경제",
+    date: "07.17",
+    headline: "파산 선고 이후 달라지는 것들",
+    summary:
+      "취업·신용·재산 처분 등 고객이 가장 많이 묻는 불이익을 정리했습니다.",
+    query: "파산선고 이후 불이익",
+  },
+];
+
+const buildNewsSearchUrl = (query) =>
+  `https://search.naver.com/search.naver?where=news&query=${encodeURIComponent(query)}`;
 
 const ChecklistListPage = () => {
   const navigate = useNavigate();
@@ -385,16 +480,56 @@ const ChecklistListPage = () => {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("date");
   const [sortDir, setSortDir] = useState("desc");
+  const [newsOpen, setNewsOpen] = useState(false);
+  const [newsFilter, setNewsFilter] = useState("전체");
+
+  useEffect(() => {
+    if (!newsOpen) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [newsOpen]);
 
   const totalCount = CLIENTS.length;
-  const avgScore = Math.round(
-    CLIENTS.reduce((a, c) => a + c.score, 0) / totalCount,
+  const thisMonth = CLIENTS.filter((c) => c.date.startsWith("2026-06")).length;
+  const monthPaymentTotal = CLIENTS.reduce(
+    (sum, c) =>
+      sum + (c.payment.configured ? c.payment.monthPaidAmount || 0 : 0),
+    0,
   );
+  const monthScheduledTotal = CLIENTS.reduce(
+    (sum, c) =>
+      sum + (c.payment.configured ? c.payment.monthScheduledAmount || 0 : 0),
+    0,
+  );
+  const monthPaidCompleteCount = CLIENTS.reduce(
+    (sum, c) =>
+      sum + (c.payment.configured ? c.payment.monthPaidCount || 0 : 0),
+    0,
+  );
+  const monthScheduledCount = CLIENTS.reduce(
+    (sum, c) =>
+      sum +
+      (c.payment.configured && (c.payment.monthScheduledAmount || 0) > 0
+        ? 1
+        : 0),
+    0,
+  );
+  const monthPaymentPct =
+    monthScheduledTotal > 0
+      ? Math.round((monthPaymentTotal / monthScheduledTotal) * 100)
+      : 0;
+  const statusDist = STAGE_STATUSES.map((status) => ({
+    status,
+    cnt: CLIENTS.filter((c) => c.stageStatus === status).length,
+  })).filter((s) => s.cnt > 0);
+  const maxStatusCnt = Math.max(...statusDist.map((s) => s.cnt), 1);
   const procDist = CLIENTS.reduce((acc, c) => {
     acc[c.recommended] = (acc[c.recommended] || 0) + 1;
     return acc;
   }, {});
-  const thisMonth = CLIENTS.filter((c) => c.date.startsWith("2026-06")).length;
 
   const handleSort = (col) => {
     if (sortBy === col) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -420,6 +555,11 @@ const ChecklistListPage = () => {
       return 0;
     });
 
+  const filteredNews =
+    newsFilter === "전체"
+      ? NEWS_ITEMS
+      : NEWS_ITEMS.filter((n) => n.proc === newsFilter);
+
   const SortIcon = ({ col }) => (
     <span className={`cll-sort-icon ${sortBy === col ? "active" : ""}`}>
       {sortBy === col && sortDir === "asc" ? "↑" : "↓"}
@@ -437,13 +577,39 @@ const ChecklistListPage = () => {
               총 {totalCount}건 · 이번 달 {thisMonth}건 상담
             </p>
           </div>
-          <div style={{ display: "flex", gap: "8px" }}>
+          <div className="cll-header-actions">
             {/* <button
               className="cll-btn-secondary"
               onClick={() => navigate("/checklist/procedure")}
             >
               절차 안내
             </button> */}
+            <button
+              type="button"
+              className="cll-btn-news"
+              onClick={() => setNewsOpen(true)}
+            >
+              <svg width="15" height="15" viewBox="0 0 20 20" fill="none">
+                <path
+                  d="M3.5 4.5h10A1.5 1.5 0 0 1 15 6v10.5a1 1 0 0 1-1 1H4.5A1.5 1.5 0 0 1 3 16V6a1.5 1.5 0 0 1 1.5-1.5Z"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                />
+                <path
+                  d="M16.5 7H15v9.5a.5.5 0 0 0 .5.5h.5a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1Z"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                />
+                <path
+                  d="M5.5 7.5h7M5.5 10h7M5.5 12.5h4.5"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                />
+              </svg>
+              관련 뉴스
+              {/* <span className="cll-btn-news-badge">{NEWS_ITEMS.length}</span> */}
+            </button>
             <button
               className="cll-btn-primary"
               onClick={() => navigate("/checklist/form")}
@@ -464,31 +630,43 @@ const ChecklistListPage = () => {
             <span className="cll-stat-sub">이번 달 {thisMonth}건</span>
           </div>
           <div className="cll-stat-card">
-            <span className="cll-stat-label">평균 성공 가능성</span>
-            <strong className="cll-stat-val">
-              {avgScore}
-              <em>/100</em>
-            </strong>
-            <div className="cll-stat-bar">
+            <span className="cll-stat-label">이번 달 결제</span>
+            <div className="cll-pay-gauge-head">
+              <strong className="cll-pay-gauge-paid">
+                {monthPaymentTotal.toLocaleString()}
+                <em>만원</em>
+              </strong>
+              <span className="cll-pay-gauge-total">
+                / {monthScheduledTotal.toLocaleString()}만원
+              </span>
+            </div>
+            <div className="cll-pay-gauge-bar">
               <div
-                className="cll-stat-bar-fill"
-                style={{ width: `${avgScore}%` }}
+                className="cll-pay-gauge-fill"
+                style={{ width: `${monthPaymentPct}%` }}
               />
+            </div>
+            <div className="cll-pay-gauge-foot">
+              <span>납부 완료 {monthPaidCompleteCount}건</span>
+              <span>예정 {monthScheduledCount}건</span>
             </div>
           </div>
           <div className="cll-stat-card">
-            <span className="cll-stat-label">추천 절차 분포</span>
+            <span className="cll-stat-label">상태 분포</span>
             <div className="cll-dist">
-              {Object.entries(procDist).map(([proc, cnt]) => (
-                <div key={proc} className="cll-dist-row">
-                  <span className={`cll-proc-tag ${PROC_COLOR[proc]}`}>
-                    {proc}
+              {statusDist.map(({ status, cnt }) => (
+                <div key={status} className="cll-dist-row">
+                  <span className="cll-status-dist-label">
+                    <span
+                      className={`cll-status-dot ${STAGE_STATUS_DOT[status]}`}
+                    />
+                    {status}
                   </span>
                   <span className="cll-dist-bar-wrap">
                     <div className="cll-dist-bar">
                       <div
-                        className="cll-dist-fill"
-                        style={{ width: `${(cnt / totalCount) * 100}%` }}
+                        className={`cll-dist-fill cll-dist-fill--${STAGE_STATUS_DOT[status]}`}
+                        style={{ width: `${(cnt / maxStatusCnt) * 100}%` }}
                       />
                     </div>
                   </span>
@@ -500,7 +678,9 @@ const ChecklistListPage = () => {
           <div className="cll-stat-card">
             <span className="cll-stat-label">진행단계 현황</span>
             {STAGE_STATUSES.map((status) => {
-              const cnt = CLIENTS.filter((c) => c.stageStatus === status).length;
+              const cnt = CLIENTS.filter(
+                (c) => c.stageStatus === status,
+              ).length;
               const dotClass = STAGE_STATUS_DOT[status];
               return (
                 <div key={status} className="cll-status-row">
@@ -675,6 +855,91 @@ const ChecklistListPage = () => {
           )}
         </div>
       </div>
+
+      {/* 관련 뉴스 슬라이드 패널 */}
+      {newsOpen && (
+        <div
+          className="cll-news-overlay"
+          onClick={() => setNewsOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+      <aside
+        className={`cll-news-drawer ${newsOpen ? "open" : ""}`}
+        aria-hidden={!newsOpen}
+      >
+        <div style={{ marginTop: 50 }}></div>
+        <div className="cll-news-drawer-head">
+          <div>
+            <h2 className="cll-news-drawer-title">회생·파산 관련 뉴스</h2>
+          </div>
+          <button
+            type="button"
+            className="cll-news-drawer-close"
+            onClick={() => setNewsOpen(false)}
+            aria-label="닫기"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path
+                d="M3 3l10 10M13 3L3 13"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+        </div>
+
+        {/* <div className="cll-news-drawer-tabs">
+          {NEWS_FILTERS.map((f) => (
+            <button
+              key={f}
+              type="button"
+              className={`cll-news-tab ${newsFilter === f ? "on" : ""}`}
+              onClick={() => setNewsFilter(f)}
+            >
+              {f}
+            </button>
+          ))}
+        </div> */}
+
+        <div className="cll-news-drawer-list">
+          {filteredNews.map((item) => (
+            <a
+              key={item.id}
+              className="cll-news-item"
+              href={buildNewsSearchUrl(item.query)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <div className="cll-news-item-meta">
+                {/* <span className={`cll-proc-tag ${item.tagClass}`}>
+                  {item.proc}
+                </span> */}
+                <span className="cll-news-item-source">
+                  {item.source} · {item.date}
+                </span>
+              </div>
+              <p className="cll-news-item-title">{item.headline}</p>
+              <p className="cll-news-item-summary">{item.summary}</p>
+              <span className="cll-news-item-link">자세히 보기 →</span>
+            </a>
+          ))}
+        </div>
+
+        <div className="cll-news-drawer-foot">
+          {/* <a
+            href={buildNewsSearchUrl(
+              newsFilter === "전체" ? "개인회생 파산" : newsFilter,
+            )}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="cll-news-more-btn"
+          >
+            {newsFilter === "전체" ? "회생·파산" : newsFilter} 기사 더 검색하기
+          </a> */}
+        </div>
+      </aside>
     </div>
   );
 };

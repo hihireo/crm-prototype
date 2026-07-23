@@ -105,6 +105,11 @@ const TRANSMISSION_AUTHOR_DEFAULTS = {
     authorRole: "영업",
     authorMeta: SALES_REP.branch,
   },
+  refund: {
+    authorName: SALES_REP.name,
+    authorRole: "영업",
+    authorMeta: SALES_REP.branch,
+  },
 };
 
 const buildPaymentNoteMessage = (fee, method, count, date, procId) => {
@@ -123,6 +128,12 @@ const formatTransmissionDatetime = () => {
   return `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
 };
 
+const dedupeTransmissionNotes = (notes) => {
+  const byId = new Map();
+  notes.forEach((note) => byId.set(note.id, note));
+  return [...byId.values()];
+};
+
 const loadTransmissionNotes = (isExternal) => {
   let stored = [];
   try {
@@ -139,7 +150,9 @@ const loadTransmissionNotes = (isExternal) => {
     if (!hasAccept) notes.push(ACCEPT_DEMO_NOTE);
     if (!hasPayment) notes.push(PAYMENT_DEMO_NOTE);
   }
-  return notes.sort((a, b) => b.datetime.localeCompare(a.datetime));
+  return dedupeTransmissionNotes(notes).sort((a, b) =>
+    b.datetime.localeCompare(a.datetime),
+  );
 };
 
 const saveTransmissionNote = (type, message, authorOverride = {}) => {
@@ -170,6 +183,7 @@ const TRANSMISSION_TYPE_LABEL = {
   accept: "수락",
   reject: "반려",
   payment: "결제",
+  refund: "환불",
 };
 
 /* 수임료 결제 정보 (분할 납부) — 기본값 */
@@ -1006,6 +1020,8 @@ const SampleDashboardPage = () => {
   const [paymentCanceled, setPaymentCanceled] = useState(false);
   const [stopType, setStopType] = useState(null); // null | "suspended" | "refunded"
   const [canceledAt, setCanceledAt] = useState(null);
+  const [refundModalOpen, setRefundModalOpen] = useState(false);
+  const [refundMessage, setRefundMessage] = useState("");
 
   /* 회차 납부 처리 시 납부일 지정 UI 상태 */
   const [dateEditSeq, setDateEditSeq] = useState(null);
@@ -1023,6 +1039,7 @@ const SampleDashboardPage = () => {
   /* 결제 적용 시 진행 절차 선택 모달 */
   const [procSelectModalOpen, setProcSelectModalOpen] = useState(false);
   const [draftSelectedProc, setDraftSelectedProc] = useState("rehabilitation");
+  const pendingPaymentApplyRef = useRef(null);
 
   const startMarkPaid = (seq) => {
     setDateEditSeq(seq);
@@ -1076,13 +1093,16 @@ const SampleDashboardPage = () => {
     setCanceledAt(TODAY_LABEL);
   };
 
-  const handleRefundPayment = () => {
-    if (
-      !window.confirm(
-        "지금까지 납부한 금액을 환불 처리하고 결제를 중단하시겠습니까?\n이미 납부한 회차는 '환불'로 표시되며, 남은 회차는 앞으로 청구되지 않습니다.",
-      )
-    )
+  const openRefundModal = () => {
+    setRefundMessage("");
+    setRefundModalOpen(true);
+  };
+
+  const handleConfirmRefund = () => {
+    if (!refundMessage.trim()) {
+      alert("전달 사항을 입력해 주세요.");
       return;
+    }
     setInstallments((prev) =>
       prev.map((it) => {
         if (it.status === "paid")
@@ -1094,6 +1114,10 @@ const SampleDashboardPage = () => {
     setPaymentCanceled(true);
     setStopType("refunded");
     setCanceledAt(TODAY_LABEL);
+    saveTransmissionNote("refund", refundMessage.trim());
+    setTransmissionNotes(loadTransmissionNotes(isExternal));
+    setRefundModalOpen(false);
+    setRefundMessage("");
   };
 
   const handleResumePayment = () => {
@@ -1160,35 +1184,45 @@ const SampleDashboardPage = () => {
     setProcSelectModalOpen(true);
   };
 
-  const confirmApplyWithProcedure = () => {
+  const confirmApplyWithProcedure = (e) => {
+    e?.stopPropagation?.();
     const fee = Number(draftTotalFee);
     const count =
       draftMethod === "lump" ? 1 : Math.max(1, Number(draftCount) || 1);
 
+    pendingPaymentApplyRef.current = {
+      fee,
+      count,
+      method: draftMethod,
+      date: draftDate,
+      procId: draftSelectedProc,
+    };
+    setProcSelectModalOpen(false);
+  };
+
+  useEffect(() => {
+    if (procSelectModalOpen || !pendingPaymentApplyRef.current) return;
+
+    const { fee, count, method, date, procId } = pendingPaymentApplyRef.current;
+    pendingPaymentApplyRef.current = null;
+
     setPayTotalFee(fee);
-    setPayMethod(draftMethod);
+    setPayMethod(method);
     setPayInstallmentCount(count);
-    setPayContractDate(draftDate);
-    setInstallments(buildInstallments(fee, count, draftDate));
+    setPayContractDate(date);
+    setInstallments(buildInstallments(fee, count, date));
     setPaymentCanceled(false);
     setStopType(null);
     setCanceledAt(null);
     setPaymentConfigured(true);
-    setSelectedOption(draftSelectedProc);
-    setProcSelectModalOpen(false);
+    setSelectedOption(procId);
     setPayEditing(false);
     saveTransmissionNote(
       "payment",
-      buildPaymentNoteMessage(
-        fee,
-        draftMethod,
-        count,
-        draftDate,
-        draftSelectedProc,
-      ),
+      buildPaymentNoteMessage(fee, method, count, date, procId),
     );
     setTransmissionNotes(loadTransmissionNotes(isExternal));
-  };
+  }, [procSelectModalOpen, isExternal]);
 
   /* 와이어프레임 테스트용: 입력 전 상태로 되돌리기 */
   // const resetPaymentConfig = () => {
@@ -2025,7 +2059,7 @@ const SampleDashboardPage = () => {
           };
 
           return (
-            <section className="sdp-section">
+            <section className="sdp-section" key={selectedOption}>
               <div className="sdp-proc-header">
                 <p className="sdp-section-label" style={{ margin: 0 }}>
                   절차 안내
@@ -2050,7 +2084,7 @@ const SampleDashboardPage = () => {
                     const { details } = step;
                     return (
                       <div
-                        key={step.id}
+                        key={`${selectedOption}-${step.id}`}
                         className={`sdp-pstep ${isCurrent ? "current" : ""} ${isDone ? "done" : ""}`}
                       >
                         <div
@@ -2219,7 +2253,10 @@ const SampleDashboardPage = () => {
                       const isDone2 = currentIdx >= 0 && idx < currentIdx;
                       const isCur2 = step.id === procCurrentStep;
                       return (
-                        <div key={step.id} className="sdp-proc-tl-item">
+                        <div
+                          key={`${selectedOption}-${step.id}`}
+                          className="sdp-proc-tl-item"
+                        >
                           <div className="sdp-proc-tl-track">
                             <div
                               className={`sdp-proc-tl-dot ${isCur2 ? "current" : isDone2 ? "done" : "pending"}`}
@@ -2773,7 +2810,7 @@ const SampleDashboardPage = () => {
                           </button>
                           <button
                             className="sdp-pay-refund-btn"
-                            onClick={handleRefundPayment}
+                            onClick={openRefundModal}
                           >
                             환불
                           </button>
@@ -2874,6 +2911,74 @@ const SampleDashboardPage = () => {
                 onClick={confirmApplyWithProcedure}
               >
                 확인
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 환불 처리 모달 */}
+      {refundModalOpen && (
+        <div
+          className="sdp-review-modal-overlay sdp-refund-modal-overlay"
+          onClick={() => setRefundModalOpen(false)}
+        >
+          <div
+            className="sdp-review-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sdp-review-modal-head">
+              <h2 className="sdp-review-modal-title">환불 처리</h2>
+              <button
+                type="button"
+                className="sdp-review-modal-close"
+                onClick={() => setRefundModalOpen(false)}
+                aria-label="닫기"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path
+                    d="M3 3l10 10M13 3L3 13"
+                    stroke="#666"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="sdp-review-modal-body">
+              <p className="sdp-review-modal-desc">
+                지금까지 납부한 금액은 환불 처리되고 이미 납부한 회차는
+                &lsquo;환불&rsquo;로 표시되며, 남은 회차는 청구되지 않습니다.
+              </p>
+              <label className="sdp-review-field">
+                <span className="sdp-review-field-label">전달 사항</span>
+                <input
+                  type="text"
+                  className="sdp-review-input"
+                  placeholder="예: 고객 요청으로 계약 해지 및 납부액 환불 진행합니다."
+                  value={refundMessage}
+                  onChange={(e) => setRefundMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleConfirmRefund();
+                  }}
+                  autoFocus
+                />
+              </label>
+            </div>
+            <div className="sdp-review-modal-footer">
+              <button
+                type="button"
+                className="sdp-review-cancel-btn"
+                onClick={() => setRefundModalOpen(false)}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className="sdp-review-confirm-refund-btn"
+                onClick={handleConfirmRefund}
+              >
+                환불 확정
               </button>
             </div>
           </div>

@@ -2683,6 +2683,26 @@
 .sdp-review-confirm-reject-btn:hover {
   background: #333;
 }
+.sdp-refund-modal-overlay {
+  z-index: 960;
+}
+
+.sdp-review-confirm-refund-btn {
+  padding: 7px 14px;
+  border: none;
+  border-radius: 6px;
+  background: #7c3aed;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: background 0.12s;
+}
+.sdp-review-confirm-refund-btn:hover {
+  background: #6d28d9;
+}
+
 .sdp-review-confirm-accept-btn {
   padding: 7px 14px;
   border: none;
@@ -3007,6 +3027,9 @@
 }
 .sdp-transmission-entry--payment .sdp-transmission-dot {
   background: #818cf8;
+}
+.sdp-transmission-entry--refund .sdp-transmission-dot {
+  background: #c4b5fd;
 }
 
 .sdp-transmission-entry-top {
