@@ -884,19 +884,6 @@ const ChecklistListPage = () => {
           </button>
         </div>
 
-        {/* <div className="cll-news-drawer-tabs">
-          {NEWS_FILTERS.map((f) => (
-            <button
-              key={f}
-              type="button"
-              className={`cll-news-tab ${newsFilter === f ? "on" : ""}`}
-              onClick={() => setNewsFilter(f)}
-            >
-              {f}
-            </button>
-          ))}
-        </div> */}
-
         <div className="cll-news-drawer-list">
           {filteredNews.map((item) => (
             <a
@@ -921,18 +908,7 @@ const ChecklistListPage = () => {
           ))}
         </div>
 
-        <div className="cll-news-drawer-foot">
-          {/* <a
-            href={buildNewsSearchUrl(
-              newsFilter === "전체" ? "개인회생 파산" : newsFilter,
-            )}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="cll-news-more-btn"
-          >
-            {newsFilter === "전체" ? "회생·파산" : newsFilter} 기사 더 검색하기
-          </a> */}
-        </div>
+        <div className="cll-news-drawer-foot"></div>
       </aside>
     </div>
   );
