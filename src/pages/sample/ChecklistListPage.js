@@ -404,8 +404,6 @@ const payProgressPct = (payment) => {
 
 const PROC_FILTERS = ["전체", "개인회생", "채무조정", "파산"];
 
-const NEWS_FILTERS = ["전체", "개인회생", "채무조정", "파산"];
-
 const NEWS_ITEMS = [
   {
     id: "n1",
@@ -481,7 +479,6 @@ const ChecklistListPage = () => {
   const [sortBy, setSortBy] = useState("date");
   const [sortDir, setSortDir] = useState("desc");
   const [newsOpen, setNewsOpen] = useState(false);
-  const [newsFilter, setNewsFilter] = useState("전체");
 
   useEffect(() => {
     if (!newsOpen) return undefined;
@@ -555,10 +552,7 @@ const ChecklistListPage = () => {
       return 0;
     });
 
-  const filteredNews =
-    newsFilter === "전체"
-      ? NEWS_ITEMS
-      : NEWS_ITEMS.filter((n) => n.proc === newsFilter);
+  const filteredNews = NEWS_ITEMS;
 
   const SortIcon = ({ col }) => (
     <span className={`cll-sort-icon ${sortBy === col ? "active" : ""}`}>
