@@ -122,6 +122,91 @@
   line-height: 1;
 }
 
+/* ── 관련 뉴스 세로 롤링 ── */
+.cll-news-ticker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 280px;
+  height: 36px;
+  padding: 0 10px;
+  background: #fff;
+  color: #333;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  transition:
+    border-color 0.12s,
+    background 0.12s;
+}
+.cll-news-ticker:hover {
+  border-color: #aaa;
+  background: #f8f8f8;
+}
+
+.cll-news-ticker-label {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 800;
+  color: #888;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.cll-news-ticker-viewport {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 18px;
+  overflow: hidden;
+}
+
+.cll-news-ticker-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 18px;
+  animation: cll-news-slide-up 0.4s ease;
+}
+
+.cll-news-ticker-date {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #bbb;
+  letter-spacing: -0.01em;
+}
+
+.cll-news-ticker-headline {
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+@keyframes cll-news-slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cll-news-ticker-item {
+    animation: none;
+  }
+}
+
 /* ── 관련 뉴스 드로어 ── */
 .cll-news-overlay {
   position: fixed;
@@ -1039,6 +1124,14 @@
   .cll-btn-news {
     padding: 9px 12px;
     font-size: 12px;
+  }
+  .cll-news-ticker {
+    width: 150px;
+    height: 34px;
+    padding: 0 8px;
+  }
+  .cll-news-ticker-headline {
+    font-size: 11px;
   }
   .cll-news-drawer {
     width: 100vw;

@@ -410,7 +410,7 @@ const NEWS_ITEMS = [
     proc: "개인회생",
     tagClass: "rehab",
     source: "법률신문",
-    date: "07.22",
+    date: "07.27",
     headline: "개인회생 신청 자격과 조건, 나도 가능할까?",
     summary: "채무 총액·가용소득 기준과 최근 법원 실무 경향을 정리했습니다.",
     query: "개인회생 신청 자격",
@@ -420,7 +420,7 @@ const NEWS_ITEMS = [
     proc: "개인회생",
     tagClass: "rehab",
     source: "연합뉴스",
-    date: "07.21",
+    date: "07.26",
     headline: "개인회생 변제계획, 어떻게 세워지나",
     summary: "월 변제액 산정 방식과 인가 전후 고객 안내 포인트를 모았습니다.",
     query: "개인회생 변제계획",
@@ -430,7 +430,7 @@ const NEWS_ITEMS = [
     proc: "채무조정",
     tagClass: "adjust",
     source: "한국경제",
-    date: "07.20",
+    date: "07.25",
     headline: "신용회복위원회 채무조정, 누가 신청할 수 있나",
     summary: "개인워크아웃·프리워크아웃 신청 자격과 제외 채무를 비교합니다.",
     query: "신용회복위원회 채무조정 신청자격",
@@ -440,7 +440,7 @@ const NEWS_ITEMS = [
     proc: "채무조정",
     tagClass: "adjust",
     source: "매일경제",
-    date: "07.19",
+    date: "07.24",
     headline: "개인워크아웃과 프리워크아웃의 차이",
     summary:
       "연체 여부에 따른 선택 기준과 상담 시 자주 나오는 질문을 정리했습니다.",
@@ -451,7 +451,7 @@ const NEWS_ITEMS = [
     proc: "파산",
     tagClass: "bankrupt",
     source: "조선비즈",
-    date: "07.18",
+    date: "07.23",
     headline: "개인파산·면책 신청 절차 한눈에 보기",
     summary: "파산선고부터 면책결정까지 단계별 기간과 준비 서류를 요약합니다.",
     query: "개인파산 면책 신청절차",
@@ -461,11 +461,51 @@ const NEWS_ITEMS = [
     proc: "파산",
     tagClass: "bankrupt",
     source: "서울경제",
-    date: "07.17",
+    date: "07.22",
     headline: "파산 선고 이후 달라지는 것들",
     summary:
       "취업·신용·재산 처분 등 고객이 가장 많이 묻는 불이익을 정리했습니다.",
     query: "파산선고 이후 불이익",
+  },
+  {
+    id: "n7",
+    proc: "개인회생",
+    tagClass: "rehab",
+    source: "머니투데이",
+    date: "07.21",
+    headline: "개인회생 인가 후 중도 변제, 언제 유리할까",
+    summary: "조기 완납 요건과 신용회복 시점 안내 시 주의점을 정리했습니다.",
+    query: "개인회생 중도변제",
+  },
+  {
+    id: "n8",
+    proc: "채무조정",
+    tagClass: "adjust",
+    source: "헤럴드경제",
+    date: "07.20",
+    headline: "카드론·현금서비스도 채무조정 대상일까",
+    summary: "금융채무와 비금융채무 구분, 상담 시 자주 헷갈리는 사례를 모았습니다.",
+    query: "채무조정 카드론 현금서비스",
+  },
+  {
+    id: "n9",
+    proc: "파산",
+    tagClass: "bankrupt",
+    source: "법률신문",
+    date: "07.19",
+    headline: "개인파산 면책 불허가 사유, 실무에서 보는 포인트",
+    summary: "사행성 지출·재산은닉 등 자주 문제되는 유형과 대응을 요약합니다.",
+    query: "개인파산 면책 불허가",
+  },
+  {
+    id: "n10",
+    proc: "개인회생",
+    tagClass: "rehab",
+    source: "이데일리",
+    date: "07.18",
+    headline: "개인회생 금지명령, 채권추심은 언제 멈추나",
+    summary: "신청 직후 고객 안내용으로 금지·중지명령 효과를 쉽게 풀었습니다.",
+    query: "개인회생 금지명령 채권추심",
   },
 ];
 
@@ -479,6 +519,7 @@ const ChecklistListPage = () => {
   const [sortBy, setSortBy] = useState("date");
   const [sortDir, setSortDir] = useState("desc");
   const [newsOpen, setNewsOpen] = useState(false);
+  const [newsIdx, setNewsIdx] = useState(0);
 
   useEffect(() => {
     if (!newsOpen) return undefined;
@@ -488,6 +529,14 @@ const ChecklistListPage = () => {
       document.body.style.overflow = prev;
     };
   }, [newsOpen]);
+
+  useEffect(() => {
+    if (NEWS_ITEMS.length <= 1) return undefined;
+    const id = setInterval(() => {
+      setNewsIdx((i) => (i + 1) % NEWS_ITEMS.length);
+    }, 3200);
+    return () => clearInterval(id);
+  }, []);
 
   const totalCount = CLIENTS.length;
   const thisMonth = CLIENTS.filter((c) => c.date.startsWith("2026-06")).length;
@@ -580,29 +629,21 @@ const ChecklistListPage = () => {
             </button> */}
             <button
               type="button"
-              className="cll-btn-news"
+              className="cll-news-ticker"
               onClick={() => setNewsOpen(true)}
+              aria-label="관련 뉴스 전체 보기"
             >
-              <svg width="15" height="15" viewBox="0 0 20 20" fill="none">
-                <path
-                  d="M3.5 4.5h10A1.5 1.5 0 0 1 15 6v10.5a1 1 0 0 1-1 1H4.5A1.5 1.5 0 0 1 3 16V6a1.5 1.5 0 0 1 1.5-1.5Z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                />
-                <path
-                  d="M16.5 7H15v9.5a.5.5 0 0 0 .5.5h.5a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1Z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                />
-                <path
-                  d="M5.5 7.5h7M5.5 10h7M5.5 12.5h4.5"
-                  stroke="currentColor"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                />
-              </svg>
-              관련 뉴스
-              {/* <span className="cll-btn-news-badge">{NEWS_ITEMS.length}</span> */}
+              <span className="cll-news-ticker-label">관련 뉴스</span>
+              <span className="cll-news-ticker-viewport">
+                <span key={newsIdx} className="cll-news-ticker-item">
+                  <span className="cll-news-ticker-date">
+                    {NEWS_ITEMS[newsIdx].date}
+                  </span>
+                  <span className="cll-news-ticker-headline">
+                    {NEWS_ITEMS[newsIdx].headline}
+                  </span>
+                </span>
+              </span>
             </button>
             <button
               className="cll-btn-primary"
