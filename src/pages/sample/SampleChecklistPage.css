@@ -285,6 +285,265 @@
   font-size: 13px; color: #aaa;
 }
 .scl-sum-line strong { font-size: 18px; font-weight: 800; color: #111; letter-spacing: -0.03em; }
+.scl-sum-line.scl-sum-sub strong { font-size: 15px; font-weight: 700; }
+
+/* Debt input panel (심플/상세 통합) */
+.scl-debt-panel {
+  border: 1px solid #ebebeb;
+  border-radius: 14px;
+  background: #fff;
+  overflow: hidden;
+}
+.scl-debt-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+}
+.scl-debt-panel-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.scl-debt-panel-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+.scl-debt-panel-hint {
+  font-size: 12px;
+  color: #999;
+  letter-spacing: -0.01em;
+}
+.scl-debt-panel-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.scl-mode-toggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 3px;
+  background: #eee;
+  border-radius: 9px;
+  gap: 2px;
+}
+.scl-mode-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #888;
+  cursor: pointer;
+  letter-spacing: -0.02em;
+  font-family: inherit;
+}
+.scl-mode-btn.on {
+  background: #fff;
+  color: #111;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* Debt detail grid */
+.scl-debt-grid-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #ebebeb;
+  border-radius: 10px;
+  background: #fff;
+  margin: 0 -2px;
+}
+.scl-debt-max-overdue {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #f7f7f7;
+  border-radius: 10px;
+  font-size: 12px;
+  color: #888;
+  letter-spacing: -0.01em;
+}
+.scl-debt-max-overdue strong {
+  font-size: 14px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+.scl-debt-max-overdue em {
+  font-style: normal;
+  color: #bbb;
+  margin-left: auto;
+}
+
+.scl-overdue-months {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 160px;
+}
+.scl-overdue-months input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: #111;
+  background: #fff;
+}
+.scl-overdue-months input:focus {
+  outline: none;
+  border-color: #bbb;
+}
+.scl-overdue-months span {
+  font-size: 13px;
+  color: #888;
+  flex-shrink: 0;
+}
+
+.scl-debt-grid {
+  width: 100%;
+  min-width: 1320px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.scl-debt-grid thead th {
+  padding: 10px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #888;
+  letter-spacing: -0.01em;
+  text-align: left;
+  background: #fafafa;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+}
+.scl-debt-grid tbody td,
+.scl-debt-grid tfoot td {
+  padding: 6px 6px;
+  border-bottom: 1px solid #f3f3f3;
+  vertical-align: middle;
+}
+.scl-debt-grid tbody tr:last-child td {
+  border-bottom: none;
+}
+.scl-debt-grid tfoot td {
+  background: #fafafa;
+  border-top: 1px solid #eee;
+  border-bottom: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: #111;
+  padding: 10px 8px;
+}
+.scl-debt-grid .col-type { width: 8%; }
+.scl-debt-grid .col-lender { width: 9%; }
+.scl-debt-grid .col-method { width: 8%; }
+.scl-debt-grid .col-overdue { width: 8%; }
+.scl-debt-grid .col-date { width: 11%; min-width: 132px; }
+.scl-debt-grid .col-num { width: 10%; }
+.scl-debt-grid .col-rate { width: 6%; }
+.scl-debt-grid .col-calc { width: 7.5%; }
+.scl-debt-grid .col-act { width: 36px; text-align: center; }
+
+.scl-debt-grid td:nth-child(5) .scl-grid-input,
+.scl-debt-grid td:nth-child(6) .scl-grid-input {
+  min-width: 124px;
+  font-size: 12px;
+  padding: 7px 6px;
+}
+
+.scl-grid-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 6px;
+  padding: 7px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+.scl-grid-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23999' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 22px;
+  cursor: pointer;
+}
+.scl-grid-input:hover {
+  border-color: #eee;
+  background: #fafafa;
+}
+.scl-grid-input:focus {
+  outline: none;
+  border-color: #111;
+  background: #fff;
+}
+.scl-grid-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.scl-grid-calc {
+  font-size: 12px;
+  font-weight: 600;
+  color: #444;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  padding-right: 10px !important;
+}
+
+.scl-debt-remove {
+  border: none;
+  background: none;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ccc;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 2px 6px;
+  line-height: 1;
+}
+.scl-debt-remove:hover { color: #dc2626; }
+
+.scl-debt-add-row td {
+  padding: 0 !important;
+  border-bottom: none !important;
+}
+.scl-debt-add-btn {
+  width: 100%;
+  padding: 11px 12px;
+  border: none;
+  border-top: 1px dashed #e5e5e5;
+  background: #fcfcfc;
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: -0.02em;
+  text-align: left;
+}
+.scl-debt-add-btn:hover {
+  background: #f5f5f5;
+  color: #111;
+}
 
 /* Income summary */
 .scl-income-summary {

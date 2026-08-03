@@ -14,11 +14,35 @@ const STAGE_NAMES = {
     "변제 수행",
     "면책결정",
   ],
-  채무조정: [
+  신속채무조정: [
     "신청 자격 확인",
     "신청서 접수",
     "채권자 동의 절차",
     "조정 확정",
+    "분할상환 시작",
+    "조정 완료",
+  ],
+  프리워크아웃: [
+    "신청 자격 확인",
+    "신청서 접수",
+    "채권자 동의 절차",
+    "조정 확정",
+    "분할상환 시작",
+    "조정 완료",
+  ],
+  개인워크아웃: [
+    "신청 자격 확인",
+    "신청서 접수",
+    "채권자 동의 절차",
+    "조정 확정",
+    "분할상환 시작",
+    "조정 완료",
+  ],
+  새출발기금: [
+    "신청 자격 확인",
+    "신청서 접수",
+    "채무조정 심사",
+    "채무조정안 확정",
     "분할상환 시작",
     "조정 완료",
   ],
@@ -77,7 +101,7 @@ const CLIENTS = [
     totalDebt: 18500,
     income: 280,
     disposable: 120,
-    recommended: "채무조정",
+    recommended: "프리워크아웃",
     score: 65,
     stageStatus: "상담중",
     date: "2026-06-27",
@@ -122,7 +146,7 @@ const CLIENTS = [
     totalDebt: 9800,
     income: 210,
     disposable: 80,
-    recommended: "채무조정",
+    recommended: "신속채무조정",
     score: 71,
     stageStatus: "검토중",
     date: "2026-06-25",
@@ -205,10 +229,10 @@ const CLIENTS = [
     totalDebt: 38000,
     income: 150,
     disposable: 30,
-    recommended: "개인회생",
-    score: 61,
+    recommended: "새출발기금",
+    score: 74,
     stageStatus: "절차진행중",
-    stageIndex: 6,
+    stageIndex: 3,
     date: "2026-06-22",
     salesRep: SALES_REPS[0],
     payment: {
@@ -233,7 +257,7 @@ const CLIENTS = [
     totalDebt: 14500,
     income: 180,
     disposable: 55,
-    recommended: "채무조정",
+    recommended: "개인워크아웃",
     score: 68,
     stageStatus: "상담중",
     date: "2026-06-21",
@@ -402,7 +426,25 @@ const payProgressPct = (payment) => {
   return Math.round((payment.paidCount / payment.count) * 100);
 };
 
-const PROC_FILTERS = ["전체", "개인회생", "채무조정", "파산"];
+const CREDIT_RECOVERY_LABELS = [
+  "신속채무조정",
+  "프리워크아웃",
+  "개인워크아웃",
+];
+
+const PROC_FILTERS = [
+  "전체",
+  "개인회생",
+  "신용회복",
+  "새출발기금",
+  "파산",
+];
+
+const matchesProcFilter = (recommended, filter) => {
+  if (filter === "전체") return true;
+  if (filter === "신용회복") return CREDIT_RECOVERY_LABELS.includes(recommended);
+  return recommended === filter;
+};
 
 const NEWS_ITEMS = [
   {
@@ -427,24 +469,24 @@ const NEWS_ITEMS = [
   },
   {
     id: "n3",
-    proc: "채무조정",
+    proc: "신속채무조정",
     tagClass: "adjust",
     source: "한국경제",
     date: "07.25",
-    headline: "신용회복위원회 채무조정, 누가 신청할 수 있나",
-    summary: "개인워크아웃·프리워크아웃 신청 자격과 제외 채무를 비교합니다.",
-    query: "신용회복위원회 채무조정 신청자격",
+    headline: "신속채무조정, 연체 전에 신청할 수 있나",
+    summary: "연체 30일 이하 대상과 이자율 인하·분할상환 조건을 정리했습니다.",
+    query: "신속채무조정 신청자격",
   },
   {
     id: "n4",
-    proc: "채무조정",
+    proc: "프리워크아웃",
     tagClass: "adjust",
     source: "매일경제",
     date: "07.24",
-    headline: "개인워크아웃과 프리워크아웃의 차이",
+    headline: "프리워크아웃과 개인워크아웃의 차이",
     summary:
-      "연체 여부에 따른 선택 기준과 상담 시 자주 나오는 질문을 정리했습니다.",
-    query: "개인워크아웃 프리워크아웃 차이",
+      "연체 기간별 선택 기준과 상담 시 자주 나오는 질문을 정리했습니다.",
+    query: "프리워크아웃 개인워크아웃 차이",
   },
   {
     id: "n5",
@@ -479,13 +521,13 @@ const NEWS_ITEMS = [
   },
   {
     id: "n8",
-    proc: "채무조정",
+    proc: "개인워크아웃",
     tagClass: "adjust",
     source: "헤럴드경제",
     date: "07.20",
-    headline: "카드론·현금서비스도 채무조정 대상일까",
+    headline: "카드론·현금서비스도 개인워크아웃 대상일까",
     summary: "금융채무와 비금융채무 구분, 상담 시 자주 헷갈리는 사례를 모았습니다.",
-    query: "채무조정 카드론 현금서비스",
+    query: "개인워크아웃 카드론 현금서비스",
   },
   {
     id: "n9",
@@ -499,6 +541,27 @@ const NEWS_ITEMS = [
   },
   {
     id: "n10",
+    proc: "새출발기금",
+    tagClass: "newstart",
+    source: "한국경제",
+    date: "07.18",
+    headline: "소상공인 새출발기금, 누가 신청할 수 있나",
+    summary:
+      "’20.4~’25.6 사업 영위·부실(우려)차주 요건과 원금·금리 조정 차이를 정리했습니다.",
+    query: "새출발기금 신청 자격",
+  },
+  {
+    id: "n11",
+    proc: "새출발기금",
+    tagClass: "newstart",
+    source: "매일경제",
+    date: "07.17",
+    headline: "새출발기금 부실차주 vs 부실우려차주, 지원 내용 비교",
+    summary: "캠코·신복위 경로 차이와 원금 감면·금리 조정 포인트를 비교합니다.",
+    query: "새출발기금 부실차주 부실우려차주",
+  },
+  {
+    id: "n12",
     proc: "개인회생",
     tagClass: "rehab",
     source: "이데일리",
@@ -573,7 +636,10 @@ const ChecklistListPage = () => {
   })).filter((s) => s.cnt > 0);
   const maxStatusCnt = Math.max(...statusDist.map((s) => s.cnt), 1);
   const procDist = CLIENTS.reduce((acc, c) => {
-    acc[c.recommended] = (acc[c.recommended] || 0) + 1;
+    const key = CREDIT_RECOVERY_LABELS.includes(c.recommended)
+      ? "신용회복"
+      : c.recommended;
+    acc[key] = (acc[key] || 0) + 1;
     return acc;
   }, {});
 
@@ -586,7 +652,7 @@ const ChecklistListPage = () => {
   };
 
   const sorted = [...CLIENTS]
-    .filter((c) => filter === "전체" || c.recommended === filter)
+    .filter((c) => matchesProcFilter(c.recommended, filter))
     .filter(
       (c) =>
         !search ||

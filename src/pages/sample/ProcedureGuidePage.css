@@ -126,6 +126,33 @@
   font-weight: 800;
 }
 
+/* ── 신용회복 서브탭 ── */
+.pgd-subtabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: -4px;
+}
+.pgd-subtab {
+  padding: 7px 14px;
+  background: #fff;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: -0.02em;
+}
+.pgd-subtab:hover {
+  border-color: #ccc;
+  color: #444;
+}
+.pgd-subtab.active {
+  font-weight: 700;
+}
+
 /* ── 메인 2컬럼 레이아웃 ── */
 .pgd-content {
   display: grid;

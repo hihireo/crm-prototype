@@ -644,6 +644,10 @@
   background: #fee2e2;
   color: #b91c1c;
 }
+.cll-proc-tag.newstart {
+  background: #fff7ed;
+  color: #c2410c;
+}
 
 /* ── 툴바 ── */
 .cll-toolbar {

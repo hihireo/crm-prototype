@@ -1,6 +1,64 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./SampleDashboardPage.css";
+import "./SampleChecklistPage.css";
+
+const Chips = ({ options, value, onChange, multi = false }) => (
+  <div className="scl-chips">
+    {options.map((opt) => {
+      const v = typeof opt === "string" ? opt : opt.value;
+      const label = typeof opt === "string" ? opt : opt.label;
+      const selected = multi ? (value || []).includes(v) : value === v;
+      return (
+        <button
+          key={v}
+          type="button"
+          className={`scl-chip ${selected ? "on" : ""}`}
+          onClick={() => {
+            if (multi) {
+              const next = selected
+                ? (value || []).filter((x) => x !== v)
+                : [...(value || []), v];
+              onChange(next);
+            } else {
+              onChange(v);
+            }
+          }}
+        >
+          {label}
+        </button>
+      );
+    })}
+  </div>
+);
+
+const Field = ({ label, hint, children }) => (
+  <div className="scl-field">
+    <label className="scl-label">
+      {label}
+      {hint && <span className="scl-hint">{hint}</span>}
+    </label>
+    {children}
+  </div>
+);
+
+let debtEditIdSeq = 100;
+const nextEditDebtId = () => {
+  debtEditIdSeq += 1;
+  return `edit-d${debtEditIdSeq}`;
+};
+
+const emptyEditDebt = () => ({
+  id: nextEditDebtId(),
+  debtType: "은행대출",
+  lender: "",
+  loanDate: "",
+  maturityDate: "",
+  principal: "",
+  rate: "",
+  repayMethod: "원리금균등",
+  overduePeriod: "0",
+});
 
 const CLIENT = {
   name: "김민수",
@@ -8,18 +66,486 @@ const CLIENT = {
   gender: "남",
   job: "자영업",
   totalDebt: 31000,
+  totalDebtWithInterest: 39737,
+  totalInterest: 8737,
   totalAsset: 1500,
   monthlyIncome: 220,
   monthlyExpenses: 175,
   disposableIncome: 45,
   overduePeriod: 6,
   debtBreakdown: [
-    { label: "은행 대출", amount: 15000, pct: 48 },
-    { label: "카드론", amount: 8000, pct: 26 },
-    { label: "캐피탈", amount: 5000, pct: 16 },
-    { label: "사채", amount: 3000, pct: 10 },
+    { label: "은행대출", amount: 15000, totalRepay: 18710, pct: 48 },
+    { label: "카드론", amount: 8000, totalRepay: 10668, pct: 26 },
+    { label: "캐피탈", amount: 5000, totalRepay: 6553, pct: 16 },
+    { label: "사채", amount: 3000, totalRepay: 3807, pct: 10 },
   ],
 };
+
+const DEBT_TYPE_OPTIONS = [
+  "은행대출",
+  "카드론",
+  "캐피탈",
+  "저축은행",
+  "사채",
+  "개인차용",
+];
+const REPAY_METHOD_OPTIONS = ["원리금균등", "원금균등", "만기일시"];
+
+/** 심플 모드 연체기간 (OverduePeriod) */
+const OverduePeriod = {
+  None: "none",
+  Under3Months: "under_3_months",
+  From3To6Months: "3_to_6_months",
+  From6To12Months: "6_to_12_months",
+  Over1Year: "over_1_year",
+};
+
+const OVERDUE_PERIOD_OPTIONS = [
+  { value: OverduePeriod.None, label: "없음" },
+  { value: OverduePeriod.Under3Months, label: "3개월 미만" },
+  { value: OverduePeriod.From3To6Months, label: "3~6개월" },
+  { value: OverduePeriod.From6To12Months, label: "6~12개월" },
+  { value: OverduePeriod.Over1Year, label: "1년 이상" },
+];
+
+const OVERDUE_PERIOD_TO_MONTHS = {
+  [OverduePeriod.None]: 0,
+  [OverduePeriod.Under3Months]: 2,
+  [OverduePeriod.From3To6Months]: 4,
+  [OverduePeriod.From6To12Months]: 8,
+  [OverduePeriod.Over1Year]: 12,
+};
+
+const isOverduePeriodEnum = (value) =>
+  OVERDUE_PERIOD_OPTIONS.some((o) => o.value === value);
+
+const monthsToOverduePeriod = (months) => {
+  const n = Number(months) || 0;
+  if (n <= 0) return OverduePeriod.None;
+  if (n < 3) return OverduePeriod.Under3Months;
+  if (n < 6) return OverduePeriod.From3To6Months;
+  if (n < 12) return OverduePeriod.From6To12Months;
+  return OverduePeriod.Over1Year;
+};
+
+const normalizeSimpleOverdue = (value) => {
+  if (isOverduePeriodEnum(value)) return value;
+  if (value === "없음") return OverduePeriod.None;
+  if (value === "3개월 미만") return OverduePeriod.Under3Months;
+  if (value === "3~6개월") return OverduePeriod.From3To6Months;
+  if (value === "6~12개월") return OverduePeriod.From6To12Months;
+  if (value === "1년 이상") return OverduePeriod.Over1Year;
+  return monthsToOverduePeriod(
+    parseInt(String(value ?? "").replace(/[^\d]/g, ""), 10) || 0,
+  );
+};
+
+const overduePeriodLabel = (value) => {
+  const opt = OVERDUE_PERIOD_OPTIONS.find((o) => o.value === value);
+  return opt?.label ?? null;
+};
+
+const parseOverdueMonths = (value) => {
+  if (value == null || value === "" || value === "없음") return 0;
+  if (isOverduePeriodEnum(value)) return OVERDUE_PERIOD_TO_MONTHS[value] ?? 0;
+  const n = parseInt(String(value).replace(/[^\d]/g, ""), 10);
+  return Number.isNaN(n) ? 0 : n;
+};
+
+const getMaxOverdueMonths = (items) => {
+  let max = 0;
+  (items || []).forEach((i) => {
+    const n = parseOverdueMonths(i.overduePeriod);
+    if (n > max) max = n;
+  });
+  return String(max);
+};
+
+const DEFAULT_DEBT_ITEMS = [
+  {
+    id: "d1",
+    debtType: "은행대출",
+    lender: "국민은행",
+    loanDate: "2022-03-15",
+    maturityDate: "2029-03-15",
+    principalWon: 150000000,
+    rate: "6.5",
+    repayMethod: "원리금균등",
+    overduePeriod: "4",
+  },
+  {
+    id: "d2",
+    debtType: "카드론",
+    lender: "신한카드",
+    loanDate: "2023-06-01",
+    maturityDate: "2027-06-01",
+    principalWon: 80000000,
+    rate: "14.9",
+    repayMethod: "원리금균등",
+    overduePeriod: "8",
+  },
+  {
+    id: "d3",
+    debtType: "캐피탈",
+    lender: "현대캐피탈",
+    loanDate: "2023-01-10",
+    maturityDate: "2028-01-10",
+    principalWon: 50000000,
+    rate: "11.2",
+    repayMethod: "원리금균등",
+    overduePeriod: "2",
+  },
+  {
+    id: "d4",
+    debtType: "사채",
+    lender: "개인",
+    loanDate: "2024-02-01",
+    maturityDate: "2026-02-01",
+    principalWon: 30000000,
+    rate: "24",
+    repayMethod: "만기일시",
+    overduePeriod: "5",
+  },
+];
+
+const monthsBetween = (startStr, endStr) => {
+  if (!startStr || !endStr) return null;
+  const start = new Date(startStr);
+  const end = new Date(endStr);
+  if (
+    Number.isNaN(start.getTime()) ||
+    Number.isNaN(end.getTime()) ||
+    end <= start
+  )
+    return null;
+  const months =
+    (end.getFullYear() - start.getFullYear()) * 12 +
+    (end.getMonth() - start.getMonth());
+  return Math.max(1, months);
+};
+
+const calcRepayment = (principalWon, annualRatePct, n, method) => {
+  const P = Number(principalWon);
+  const rate = Number(annualRatePct);
+  if (!P || P <= 0 || !n || n < 1 || Number.isNaN(rate) || rate < 0)
+    return null;
+  const r = rate / 12 / 100;
+  const mode = method || "원리금균등";
+  if (mode === "만기일시") {
+    const monthlyInterest = P * r;
+    const totalInterest = monthlyInterest * n;
+    return {
+      months: n,
+      monthly: Math.round(monthlyInterest),
+      totalRepay: Math.round(P + totalInterest),
+      totalInterest: Math.round(totalInterest),
+    };
+  }
+  if (mode === "원금균등") {
+    const principalPart = P / n;
+    let totalInterest = 0;
+    for (let k = 0; k < n; k++) totalInterest += (P - principalPart * k) * r;
+    const totalRepay = P + totalInterest;
+    return {
+      months: n,
+      monthly: Math.round(totalRepay / n),
+      totalRepay: Math.round(totalRepay),
+      totalInterest: Math.round(totalInterest),
+    };
+  }
+  let monthly;
+  if (r === 0) monthly = P / n;
+  else {
+    const pow = Math.pow(1 + r, n);
+    monthly = (P * r * pow) / (pow - 1);
+  }
+  const totalRepay = monthly * n;
+  return {
+    months: n,
+    monthly: Math.round(monthly),
+    totalRepay: Math.round(totalRepay),
+    totalInterest: Math.round(totalRepay - P),
+  };
+};
+
+const wonToMan = (won) => Math.round((Number(won) || 0) / 10000);
+const formatWon = (n) => `${Math.round(Number(n) || 0).toLocaleString()}원`;
+const formatComma = (value) => {
+  const digits = String(value ?? "").replace(/[^\d]/g, "");
+  if (!digits) return "";
+  return Number(digits).toLocaleString("ko-KR");
+};
+const parseComma = (value) => String(value ?? "").replace(/[^\d]/g, "");
+
+const calcDebtItem = (debt) => {
+  const n = monthsBetween(debt.loanDate, debt.maturityDate);
+  if (n == null) return null;
+  return calcRepayment(
+    debt.principal,
+    debt.rate,
+    n,
+    debt.repayMethod || "원리금균등",
+  );
+};
+
+const buildDebtSummaryFromDetailRows = (rows) => {
+  const items = rows.map((row, idx) => {
+    const principalWon =
+      parseInt(row.principalWon ?? row.principal) || 0;
+    const n = monthsBetween(row.loanDate, row.maturityDate);
+    const calc = n
+      ? calcRepayment(principalWon, row.rate, n, row.repayMethod)
+      : null;
+    const amount = wonToMan(principalWon);
+    return {
+      id: row.id || `d${idx}`,
+      label: row.lender
+        ? `${row.lender}${row.debtType ? ` (${row.debtType})` : ""}`
+        : row.debtType || "미입력",
+      debtType: row.debtType || "",
+      lender: row.lender || "",
+      amount,
+      principalWon,
+      totalRepay: calc ? wonToMan(calc.totalRepay) : amount,
+      totalInterest: calc ? wonToMan(calc.totalInterest) : 0,
+      monthly: calc ? wonToMan(calc.monthly) : null,
+      months: calc?.months ?? null,
+      rate: row.rate,
+      repayMethod: row.repayMethod || "원리금균등",
+      overduePeriod: String(parseOverdueMonths(row.overduePeriod)),
+      loanDate: row.loanDate || "",
+      maturityDate: row.maturityDate || "",
+    };
+  });
+  const totalDebt = items.reduce((s, i) => s + (i.amount || 0), 0);
+  const totalDebtWithInterest = items.reduce(
+    (s, i) => s + (i.totalRepay || i.amount || 0),
+    0,
+  );
+  const overduePeriod = getMaxOverdueMonths(items);
+  return {
+    mode: "detail",
+    totalDebt,
+    totalDebtWithInterest,
+    totalInterest: totalDebtWithInterest - totalDebt,
+    overduePeriod,
+    maxOverdue: overduePeriod,
+    items,
+  };
+};
+
+const buildDebtSummaryFromSimpleDraft = (draft) => {
+  const rows = [];
+  if (draft.debtTypes.includes("은행대출")) {
+    rows.push({
+      id: "s-bank",
+      debtType: "은행대출",
+      amount: draft.bankLoan,
+    });
+  }
+  if (draft.debtTypes.includes("카드론")) {
+    rows.push({
+      id: "s-card",
+      debtType: "카드론",
+      amount: draft.creditCardDebt,
+    });
+  }
+  if (
+    draft.debtTypes.includes("캐피탈") ||
+    draft.debtTypes.includes("저축은행")
+  ) {
+    rows.push({
+      id: "s-capital",
+      debtType: draft.debtTypes.includes("캐피탈") ? "캐피탈" : "저축은행",
+      amount: draft.capitalLoan,
+    });
+  }
+  if (
+    draft.debtTypes.includes("사채") ||
+    draft.debtTypes.includes("개인차용")
+  ) {
+    rows.push({
+      id: "s-private",
+      debtType: draft.debtTypes.includes("사채") ? "사채" : "개인차용",
+      amount: draft.privateLoan,
+    });
+  }
+  return buildDebtSummaryFromSimpleRows(rows, draft.overduePeriod);
+};
+
+const buildDebtSummaryFromSimpleRows = (rows, overduePeriod = OverduePeriod.None) => {
+  const items = rows
+    .map((row, idx) => ({
+      id: row.id || `s${idx}`,
+      label: row.debtType || "기타",
+      debtType: row.debtType || "",
+      amount: parseInt(row.amount) || 0,
+    }))
+    .filter((i) => i.amount > 0);
+  const totalDebt = items.reduce((s, i) => s + i.amount, 0);
+  const overdue = normalizeSimpleOverdue(overduePeriod);
+  return {
+    mode: "simple",
+    totalDebt,
+    totalDebtWithInterest: totalDebt,
+    totalInterest: 0,
+    overduePeriod: overdue,
+    maxOverdue: overdue,
+    items,
+  };
+};
+
+const aggregateByDebtType = (items) => {
+  const map = {};
+  (items || []).forEach((i) => {
+    const type = i.debtType || i.label || "기타";
+    if (!map[type]) {
+      map[type] = { label: type, amount: 0, totalRepay: 0 };
+    }
+    map[type].amount += i.amount || 0;
+    map[type].totalRepay += i.totalRepay || i.amount || 0;
+  });
+  const list = Object.values(map).filter((x) => x.amount > 0);
+  const sum = list.reduce((s, x) => s + x.amount, 0) || 1;
+  return list.map((x) => ({
+    ...x,
+    pct: Math.round((x.amount / sum) * 100),
+  }));
+};
+
+const amountByDebtType = (items) => {
+  const amounts = {
+    bankLoan: "0",
+    creditCardDebt: "0",
+    capitalLoan: "0",
+    privateLoan: "0",
+  };
+  const types = [];
+  (items || []).forEach((i) => {
+    const type = i.debtType || i.label || "";
+    const amt = String(i.amount || 0);
+    if (type === "은행대출" || type.includes("은행 대출")) {
+      if (!types.includes("은행대출")) types.push("은행대출");
+      amounts.bankLoan = String(
+        (parseInt(amounts.bankLoan) || 0) + (parseInt(amt) || 0),
+      );
+    } else if (type === "카드론" || type.includes("카드")) {
+      if (!types.includes("카드론")) types.push("카드론");
+      amounts.creditCardDebt = String(
+        (parseInt(amounts.creditCardDebt) || 0) + (parseInt(amt) || 0),
+      );
+    } else if (
+      type === "캐피탈" ||
+      type === "저축은행" ||
+      type.includes("캐피탈")
+    ) {
+      const key = type === "저축은행" ? "저축은행" : "캐피탈";
+      if (!types.includes(key)) types.push(key);
+      amounts.capitalLoan = String(
+        (parseInt(amounts.capitalLoan) || 0) + (parseInt(amt) || 0),
+      );
+    } else if (
+      type === "사채" ||
+      type === "개인차용" ||
+      type.includes("사채")
+    ) {
+      const key = type === "개인차용" ? "개인차용" : "사채";
+      if (!types.includes(key)) types.push(key);
+      amounts.privateLoan = String(
+        (parseInt(amounts.privateLoan) || 0) + (parseInt(amt) || 0),
+      );
+    }
+  });
+  return {
+    debtTypes: types.length
+      ? types
+      : ["은행대출", "카드론", "캐피탈"],
+    ...amounts,
+  };
+};
+
+const itemsToDetailDebts = (items) => {
+  if (!items?.length) return [emptyEditDebt()];
+  return items.map((item, idx) => {
+    const principalWon =
+      item.principalWon ??
+      (item.amount != null ? Math.round(Number(item.amount) * 10000) : 0);
+    return {
+      id: item.id || `edit-${idx}`,
+      debtType: item.debtType || "은행대출",
+      lender: item.lender || "",
+      loanDate: item.loanDate || "",
+      maturityDate: item.maturityDate || "",
+      principal: String(principalWon || ""),
+      rate: item.rate ?? "",
+      repayMethod: item.repayMethod || "원리금균등",
+      overduePeriod: String(parseOverdueMonths(item.overduePeriod)),
+    };
+  });
+};
+
+const simpleDraftToDetailDebts = (draft) => {
+  const rows = [];
+  const push = (debtType, manAmount) => {
+    const amt = parseInt(manAmount) || 0;
+    if (amt <= 0) return;
+    rows.push({
+      ...emptyEditDebt(),
+      debtType,
+      principal: String(amt * 10000),
+      overduePeriod: String(parseOverdueMonths(draft.overduePeriod)),
+    });
+  };
+  if (draft.debtTypes.includes("은행대출")) push("은행대출", draft.bankLoan);
+  if (draft.debtTypes.includes("카드론")) push("카드론", draft.creditCardDebt);
+  if (
+    draft.debtTypes.includes("캐피탈") ||
+    draft.debtTypes.includes("저축은행")
+  ) {
+    push(
+      draft.debtTypes.includes("캐피탈") ? "캐피탈" : "저축은행",
+      draft.capitalLoan,
+    );
+  }
+  if (
+    draft.debtTypes.includes("사채") ||
+    draft.debtTypes.includes("개인차용")
+  ) {
+    push(
+      draft.debtTypes.includes("사채") ? "사채" : "개인차용",
+      draft.privateLoan,
+    );
+  }
+  return rows.length ? rows : [emptyEditDebt()];
+};
+
+const summaryToDebtDraft = (summary) => {
+  const mode = summary?.mode || "detail";
+  const items = summary?.items || [];
+  const simplePart = amountByDebtType(items);
+  const overdue =
+    mode === "simple"
+      ? normalizeSimpleOverdue(summary?.overduePeriod)
+      : monthsToOverduePeriod(
+          parseOverdueMonths(
+            summary?.overduePeriod ?? getMaxOverdueMonths(items),
+          ),
+        );
+  return {
+    debtInputMode: mode,
+    ...simplePart,
+    overduePeriod: overdue,
+    debts: itemsToDetailDebts(items),
+  };
+};
+
+const DEFAULT_DEBT_SUMMARY = buildDebtSummaryFromDetailRows(
+  DEFAULT_DEBT_ITEMS.map((d) => ({
+    ...d,
+    principal: String(d.principalWon),
+    principalWon: String(d.principalWon),
+  })),
+);
 
 const SALES_REP = {
   name: "박지훈",
@@ -80,8 +606,7 @@ const PAYMENT_DEMO_NOTE = {
   authorRole: "영업",
   authorMeta: SALES_REP.branch,
   datetime: "2026.06.28 16:20",
-  message:
-    "총 700만원 · 분할 7회 · 첫 납부일 2026.06.28 · 개인회생 절차 시작",
+  message: "총 700만원 · 분할 7회 · 첫 납부일 2026.06.28 · 개인회생 절차 시작",
 };
 
 const TRANSMISSION_AUTHOR_DEFAULTS = {
@@ -114,9 +639,14 @@ const TRANSMISSION_AUTHOR_DEFAULTS = {
 
 const buildPaymentNoteMessage = (fee, method, count, date, procId) => {
   const procLabel =
-    { rehabilitation: "개인회생", debtAdjustment: "채무조정(워크아웃)", bankruptcy: "파산" }[
-      procId
-    ] || procId;
+    {
+      rehabilitation: "개인회생",
+      rapidDebtAdj: "신속채무조정",
+      preWorkout: "프리워크아웃",
+      personalWorkout: "개인워크아웃",
+      newStartFund: "새출발기금",
+      bankruptcy: "파산",
+    }[procId] || procId;
   const methodLabel = method === "lump" ? "일괄납부" : `분할 ${count}회`;
   const dateLabel = method === "lump" ? "납부일" : "첫 납부일";
   return `총 ${fee.toLocaleString()}만원 · ${methodLabel} · ${dateLabel} ${date} · ${procLabel} 절차 시작`;
@@ -306,32 +836,109 @@ const OPTIONS = [
     ],
   },
   {
-    id: "debtAdjustment",
-    label: "채무조정(워크아웃)",
+    id: "rapidDebtAdj",
+    label: "신속채무조정",
+    group: "creditRecovery",
+    score: 28,
+    grade: "낮음",
+    recommended: false,
+    conditions: [
+      {
+        type: "pass",
+        text: "총 채무 3.1억원 → 신복위 신청 기준(무담보 5억·담보 10억 이하) 충족",
+      },
+      {
+        type: "risk",
+        text: "연체 6개월 → 신속채무조정(연체 30일 이하) 대상 기간 초과",
+      },
+      {
+        type: "risk",
+        text: "원금 감면 없음(이자율 인하·분할상환 중심) → 감면 폭이 개인회생·개인워크아웃보다 작음",
+      },
+    ],
+  },
+  {
+    id: "preWorkout",
+    label: "프리워크아웃",
+    group: "creditRecovery",
+    score: 35,
+    grade: "낮음",
+    recommended: false,
+    conditions: [
+      {
+        type: "pass",
+        text: "총 채무 3.1억원 → 신복위 신청 기준(15억 이하) 충족",
+      },
+      {
+        type: "risk",
+        text: "연체 6개월 → 프리워크아웃(연체 31~89일) 대상 기간 초과",
+      },
+      {
+        type: "caution",
+        text: "원금 감면 없이 연체이자·이자율 조정이 중심 → 장기 연체 고객에게는 개인워크아웃이 더 적합",
+      },
+    ],
+  },
+  {
+    id: "personalWorkout",
+    label: "개인워크아웃",
+    group: "creditRecovery",
     score: 62,
     grade: "보통",
     recommended: false,
     conditions: [
       {
         type: "pass",
-        text: "총 채무 3.1억원 → 신용회복위원회 신청 기준(15억 이하) 충족",
-      },
-      { type: "pass", text: "연체 기간 6개월 → 신청 자격 요건 충족" },
-      {
-        type: "caution",
-        text: "사채·캐피탈 채무는 워크아웃 대상 제외 가능 → 실질 감면 범위 사전 확인 필요",
+        text: "총 채무 3.1억원 → 신복위 신청 기준(15억 이하) 충족",
       },
       {
+        type: "pass",
+        text: "연체 기간 6개월 → 개인워크아웃(연체 90일 이상) 자격 충족",
+      },
+      {
+        type: "pass",
+        text: "이자 전액 감면·원금 일부 감면 검토 가능 → 신용회복 제도 중 감면 폭이 가장 큼",
+      },
+      {
         type: "caution",
-        text: "금리 조정 후에도 월 상환액이 가용 소득 초과 가능성 있음 → 상환 시뮬레이션 필요",
+        text: "사채·비협약 채무는 대상 제외 가능 → 실질 감면 범위 사전 확인 필요",
       },
       {
         type: "risk",
-        text: "채무 대비 가용 소득 낮아 개인회생보다 채무 감면 폭 작을 가능성 높음",
+        text: "채무 대비 가용 소득이 낮아 개인회생보다 감면·변제 조건이 불리할 수 있음",
+      },
+    ],
+  },
+  {
+    id: "newStartFund",
+    label: "새출발기금",
+    score: 72,
+    grade: "양호",
+    recommended: false,
+    conditions: [
+      {
+        type: "pass",
+        text: "’20.4~’25.6 중 개인사업자·소상공인 사업 영위 → 새출발기금 대상 기간 충족",
+      },
+      {
+        type: "pass",
+        text: "연체 3개월 이상 → 부실차주 요건 충족 (원금 조정 검토 가능)",
+      },
+      {
+        type: "pass",
+        text: "금융권 사업·가계대출 포함 → 협약 금융회사 채무조정 대상 가능성 높음",
+      },
+      {
+        type: "caution",
+        text: "새출발기금 기신청 이력 없음 확인 필요 → 원칙적으로 1회만 신청 가능",
+      },
+      {
+        type: "caution",
+        text: "제외 업종(부동산 임대업 등) 및 법인 폐업 여부 사전 확인 필요",
       },
       {
         type: "risk",
-        text: "자영업 소득 변동성이 높아 장기 상환계획 유지 어려울 수 있음",
+        text: "가용 소득·재산 규모에 따라 원금 감면율이 달라짐 → 개인회생과 감면 폭 비교 필요",
       },
     ],
   },
@@ -362,6 +969,45 @@ const OPTIONS = [
     ],
   },
 ];
+
+const CREDIT_RECOVERY_GROUP = "creditRecovery";
+const CREDIT_RECOVERY_IDS = new Set(
+  OPTIONS.filter((o) => o.group === CREDIT_RECOVERY_GROUP).map((o) => o.id),
+);
+const CREDIT_RECOVERY_CHILDREN = OPTIONS.filter(
+  (o) => o.group === CREDIT_RECOVERY_GROUP,
+);
+const getCreditRecoverySummary = () => {
+  const recommended = CREDIT_RECOVERY_CHILDREN.find((o) => o.recommended);
+  const best = CREDIT_RECOVERY_CHILDREN.reduce((a, b) =>
+    a.score >= b.score ? a : b,
+  );
+  return recommended || best;
+};
+
+/** 옵션 목록을 단독/그룹 블록으로 변환 */
+const buildOptionBlocks = () => {
+  const blocks = [];
+  let creditInserted = false;
+  OPTIONS.forEach((opt) => {
+    if (opt.group === CREDIT_RECOVERY_GROUP) {
+      if (!creditInserted) {
+        blocks.push({
+          type: "group",
+          id: CREDIT_RECOVERY_GROUP,
+          label: "신용회복",
+          children: CREDIT_RECOVERY_CHILDREN,
+          summary: getCreditRecoverySummary(),
+        });
+        creditInserted = true;
+      }
+      return;
+    }
+    blocks.push({ type: "option", option: opt });
+  });
+  return blocks;
+};
+const OPTION_BLOCKS = buildOptionBlocks();
 
 const AI = { repaymentMonths: 84, repaymentAmount: 45 };
 
@@ -499,6 +1145,103 @@ const SMS_TEMPLATES = [
     message: `안녕하세요, 김민수 고객님.\n\n`,
   },
 ];
+
+/* 신용회복(신속·프리·개인워크아웃) 공통 절차 생성 */
+const makeCreditRecoveryProc = ({
+  id,
+  label,
+  color,
+  eligibilityItems,
+  reliefItems,
+  applyNote,
+}) => ({
+  id,
+  label,
+  color,
+  totalMonths: "최대 120개월",
+  steps: [
+    {
+      id: 1,
+      title: "신청 자격 확인",
+      durationLabel: "—",
+      durationWeeks: 0,
+      details: {
+        desc: `신용회복위원회 ${label} 신청 요건을 사전 확인하는 단계입니다.`,
+        items: eligibilityItems,
+        caution: null,
+      },
+    },
+    {
+      id: 2,
+      title: "신청서 접수",
+      durationLabel: "1~2주",
+      durationWeeks: 1.5,
+      details: {
+        desc: "신용회복위원회에 신청서 및 관련 서류를 제출하는 단계입니다.",
+        items: [
+          "신용회복지원(상담) 신청서",
+          "신분증",
+          "소득 증빙자료",
+          "채무·가계수지 현황",
+        ],
+        note: applyNote,
+        caution: null,
+      },
+    },
+    {
+      id: 3,
+      title: "채권자 동의 절차",
+      durationLabel: "1~2개월",
+      durationWeeks: 6,
+      details: {
+        desc: "신용회복위원회가 각 채권 금융기관에 조정안을 통보하고 동의를 받는 단계입니다.",
+        items: [
+          "채권기관별 조정안 검토",
+          "채권기관 동의 여부 통보",
+          "동의율 미달 시 조정 불가",
+        ],
+        caution: "전체 채권기관의 과반수 이상이 동의해야 조정이 확정됩니다.",
+      },
+    },
+    {
+      id: 4,
+      title: "조정 확정",
+      durationLabel: "2~4주",
+      durationWeeks: 3,
+      details: {
+        desc: `채권자 동의를 받아 ${label} 조건이 최종 확정되는 단계입니다.`,
+        items: reliefItems,
+        caution: null,
+      },
+    },
+    {
+      id: 5,
+      title: "분할상환 시작",
+      durationLabel: "확정 조건에 따라 (최대 120개월)",
+      durationWeeks: 480,
+      details: {
+        desc: "확정된 조건에 따라 매월 분할 납부하는 단계입니다.",
+        items: [
+          "매월 정해진 금액 납부",
+          "납부 중 소득 변동 시 재조정 신청 가능",
+          "성실 납부 시 신용 회복 효과",
+        ],
+        caution: "2회 이상 미납 시 조정 취소될 수 있습니다.",
+      },
+    },
+    {
+      id: 6,
+      title: "조정 완료",
+      durationLabel: "—",
+      durationWeeks: 0,
+      details: {
+        desc: `모든 분할상환이 완료되고 ${label} 절차가 종료되는 단계입니다.`,
+        items: ["완납 확인서 수령", "신용정보 회복 확인", "채무 소멸 확인"],
+        caution: null,
+      },
+    },
+  ],
+});
 
 /* ── 절차 데이터 ── */
 const PROCEDURES = {
@@ -655,11 +1398,62 @@ const PROCEDURES = {
       },
     ],
   },
-  debtAdjustment: {
-    id: "debtAdjustment",
-    label: "채무조정(워크아웃)",
+  rapidDebtAdj: makeCreditRecoveryProc({
+    id: "rapidDebtAdj",
+    label: "신속채무조정",
+    color: "#0d9488",
+    eligibilityItems: [
+      "연체 전 또는 연체 30일 이하",
+      "총 채무액 15억원 이하 (무담보 5억·담보 10억)",
+      "채권금융기관이 신용회복지원협약 가입 기관",
+      "최저생계비 이상 수입 또는 상환 가능 인정",
+    ],
+    reliefItems: [
+      "연체이자 감면",
+      "약정이자율 30~50% 범위 인하",
+      "최장 10년 분할상환",
+    ],
+    applyNote: "온라인(신복위) 또는 방문 신청 가능",
+  }),
+  preWorkout: makeCreditRecoveryProc({
+    id: "preWorkout",
+    label: "프리워크아웃",
     color: "#059669",
-    totalMonths: "최대 120개월",
+    eligibilityItems: [
+      "연체 31일 이상 89일 미만",
+      "총 채무액 15억원 이하 (무담보 5억·담보 10억)",
+      "채권금융기관이 신용회복지원협약 가입 기관",
+      "최저생계비 이상 수입 또는 상환 가능 인정",
+    ],
+    reliefItems: [
+      "연체이자 감면",
+      "약정이자율 30~70% 범위 인하",
+      "최장 10년 분할상환 (원금 감면 없음)",
+    ],
+    applyNote: "온라인(신복위) 또는 방문 신청 가능",
+  }),
+  personalWorkout: makeCreditRecoveryProc({
+    id: "personalWorkout",
+    label: "개인워크아웃",
+    color: "#047857",
+    eligibilityItems: [
+      "연체 90일(3개월) 이상",
+      "총 채무액 15억원 이하 (무담보 5억·담보 10억)",
+      "최근 6개월 신규 채무가 총 채무의 30% 미만",
+      "채권금융기관이 신용회복지원협약 가입 기관",
+    ],
+    reliefItems: [
+      "이자 전액 감면",
+      "원금 일부 감면 (상각채권 최대 70%, 취약계층 최대 90%)",
+      "최장 10년 분할상환",
+    ],
+    applyNote: "방문 신청이 원칙 (온라인 제한적)",
+  }),
+  newStartFund: {
+    id: "newStartFund",
+    label: "새출발기금",
+    color: "#d97706",
+    totalMonths: "최장 20년 (신용대출 10년)",
     steps: [
       {
         id: 1,
@@ -667,14 +1461,14 @@ const PROCEDURES = {
         durationLabel: "—",
         durationWeeks: 0,
         details: {
-          desc: "신용회복위원회 채무조정 신청이 가능한 요건을 사전 확인하는 단계입니다.",
+          desc: "소상공인·자영업자 새출발기금 지원 대상 요건을 사전 확인하는 단계입니다.",
           items: [
-            "연체 3개월 이상 또는 연체 우려",
-            "총 채무액 15억원 이하 (담보 포함)",
-            "채권금융기관이 협약기관에 해당",
-            "이전 채무조정 이력 확인",
+            "’20.4월~’25.6월 중 개인사업자·법인 소상공인 사업 영위 (휴업·폐업 포함, 폐업 법인 제외)",
+            "부실차주(3개월 이상 연체) 또는 부실우려차주 해당",
+            "협약 금융회사 대출(사업·가계) 보유, 최대 15억원",
+            "제외 업종·기신청 이력·고액재산가 등 결격 사유 확인",
           ],
-          caution: null,
+          caution: "새출발기금 신청은 원칙적으로 1회만 가능합니다.",
         },
       },
       {
@@ -683,43 +1477,44 @@ const PROCEDURES = {
         durationLabel: "1~2주",
         durationWeeks: 1.5,
         details: {
-          desc: "신용회복위원회에 채무조정 신청서 및 관련 서류를 제출하는 단계입니다.",
+          desc: "온라인(새출발기금.kr) 또는 상담창구(캠코·서민금융통합지원센터)로 신청하는 단계입니다.",
           items: [
-            "채무조정 신청서",
-            "소득 증빙자료",
-            "채무 내역 확인서",
-            "가계수지 현황표",
+            "본인인증 및 정보제공 동의",
+            "신청자격 확인",
+            "채무내역 조회",
+            "추가정보 작성 및 신청접수 완료",
           ],
-          note: "온라인(신복위 홈페이지) 또는 방문 신청 가능",
+          note: "법인 소상공인은 소상공인 확인서 발급 후 신청합니다. 프리랜서·특고는 상담창구 신청이 가능합니다.",
           caution: null,
         },
       },
       {
         id: 3,
-        title: "채권자 동의 절차",
-        durationLabel: "1~2개월",
-        durationWeeks: 6,
+        title: "채무조정 심사",
+        durationLabel: "2~8주",
+        durationWeeks: 5,
         details: {
-          desc: "신용회복위원회가 각 채권 금융기관에 조정안을 통보하고 동의를 받는 단계입니다.",
+          desc: "부실/부실우려 유형에 따라 캠코 또는 신용회복위원회에서 채무조정안을 심사하는 단계입니다.",
           items: [
-            "채권기관별 조정안 검토",
-            "채권기관 동의 여부 통보",
-            "동의율 미달 시 조정 불가",
+            "부실차주 → 새출발기금·캠코 경로로 원금·상환기간 조정 심사",
+            "부실우려차주 → 신용회복위원회를 통한 금리·상환기간 조정 심사",
+            "보유재산·상환능력 반영",
+            "신청 익일부터 추심중단·강제집행 중지",
           ],
-          caution: "전체 채권기관의 과반수 이상이 동의해야 조정이 확정됩니다.",
+          caution: null,
         },
       },
       {
         id: 4,
-        title: "조정 확정",
+        title: "채무조정안 확정",
         durationLabel: "2~4주",
         durationWeeks: 3,
         details: {
-          desc: "채권자 동의를 받아 채무조정 조건이 최종 확정되는 단계입니다.",
+          desc: "심사 결과를 반영해 채무조정 조건이 확정되는 단계입니다.",
           items: [
-            "이자율 감면 (최대 0%)",
-            "상환기간 연장 (최대 10년)",
-            "원금 일부 감면 (신용대출 최대 80%)",
+            "상환기간 조정: 거치 최대 3년(신용대출 1년), 최장 20년 분할상환(신용대출 10년)",
+            "부실차주: 보유재산 반영 원금 조정(0~80%, 취약계층 최대 90%)",
+            "부실우려차주: 금리 조정",
           ],
           caution: null,
         },
@@ -727,16 +1522,16 @@ const PROCEDURES = {
       {
         id: 5,
         title: "분할상환 시작",
-        durationLabel: "확정 조건에 따라 (최대 120개월)",
+        durationLabel: "확정 조건에 따라 (최장 240개월)",
         durationWeeks: 480,
         details: {
-          desc: "확정된 조건에 따라 매월 분할 납부하는 단계입니다.",
+          desc: "확정된 채무조정안에 따라 분할 상환을 이행하는 단계입니다.",
           items: [
             "매월 정해진 금액 납부",
-            "납부 중 소득 변동 시 재조정 신청 가능",
-            "성실 납부 시 신용 회복 효과",
+            "부실우려차주가 90일 이상 미이행 시 부실차주 지원으로 재조정 가능",
+            "성실 상환 시 신용 회복 효과",
           ],
-          caution: "2회 이상 미납 시 조정 취소될 수 있습니다.",
+          caution: "약정 불이행 시 조정 혜택이 취소될 수 있습니다.",
         },
       },
       {
@@ -745,8 +1540,12 @@ const PROCEDURES = {
         durationLabel: "—",
         durationWeeks: 0,
         details: {
-          desc: "모든 분할상환이 완료되고 채무조정 절차가 종료되는 단계입니다.",
-          items: ["완납 확인서 수령", "신용정보 회복 신청", "채무 소멸 확인"],
+          desc: "분할상환이 완료되고 새출발기금 채무조정이 종료되는 단계입니다.",
+          items: [
+            "완납·종결 확인",
+            "신용정보 반영 확인",
+            "잔여 채무 소멸·정리 확인",
+          ],
           caution: null,
         },
       },
@@ -887,9 +1686,21 @@ const STEP_SETTERS = {
     3: { ...SALES_STAFF, at: "2026.06.24 09:40" },
     4: { ...SALES_STAFF, at: "2026.06.25 11:05" },
   },
-  debtAdjustment: {
+  rapidDebtAdj: {
+    1: { ...INTERNAL_STAFF, at: "2026.06.21 09:00" },
+    2: { ...SALES_STAFF, at: "2026.06.22 11:30" },
+  },
+  preWorkout: {
     1: { ...INTERNAL_STAFF, at: "2026.06.21 09:30" },
     2: { ...SALES_STAFF, at: "2026.06.23 13:10" },
+  },
+  personalWorkout: {
+    1: { ...INTERNAL_STAFF, at: "2026.06.21 10:00" },
+    2: { ...SALES_STAFF, at: "2026.06.23 14:00" },
+  },
+  newStartFund: {
+    1: { ...INTERNAL_STAFF, at: "2026.06.21 11:00" },
+    2: { ...SALES_STAFF, at: "2026.06.23 15:20" },
   },
   bankruptcy: {
     1: { ...INTERNAL_STAFF, at: "2026.06.19 10:00" },
@@ -980,6 +1791,10 @@ const SampleDashboardPage = () => {
   const [smsModal, setSmsModal] = useState(null); // null | SMS_TEMPLATES item
   const [smsText, setSmsText] = useState("");
   const [selectedOption, setSelectedOption] = useState("rehabilitation");
+  const [creditRecoveryOpen, setCreditRecoveryOpen] = useState(() =>
+    CREDIT_RECOVERY_CHILDREN.some((o) => o.recommended),
+  );
+  const [procSelectCreditOpen, setProcSelectCreditOpen] = useState(false);
 
   /* 절차 안내 상태 */
   const [procOpenSteps, setProcOpenSteps] = useState(new Set([1]));
@@ -1040,6 +1855,177 @@ const SampleDashboardPage = () => {
   const [procSelectModalOpen, setProcSelectModalOpen] = useState(false);
   const [draftSelectedProc, setDraftSelectedProc] = useState("rehabilitation");
   const pendingPaymentApplyRef = useRef(null);
+
+  /* 채무 구성 자세히보기 / 수정 */
+  const [debtSummary, setDebtSummary] = useState(
+    () => location.state?.debtSummary || DEFAULT_DEBT_SUMMARY,
+  );
+  const [debtModalOpen, setDebtModalOpen] = useState(false);
+  const [debtConfirmOpen, setDebtConfirmOpen] = useState(false);
+  const [debtReanalyzing, setDebtReanalyzing] = useState(false);
+  const [debtDraft, setDebtDraft] = useState(() =>
+    summaryToDebtDraft(location.state?.debtSummary || DEFAULT_DEBT_SUMMARY),
+  );
+
+  const openDebtModal = () => {
+    setDebtDraft(summaryToDebtDraft(debtSummary));
+    setDebtModalOpen(true);
+  };
+
+  const closeDebtModal = () => {
+    setDebtModalOpen(false);
+    setDebtConfirmOpen(false);
+  };
+
+  const setDebtDraftField = (field) => (value) => {
+    setDebtDraft((p) => ({ ...p, [field]: value }));
+  };
+
+  const setDebtDraftInput = (field) => (e) => {
+    setDebtDraft((p) => ({ ...p, [field]: e.target.value }));
+  };
+
+  const switchDebtDraftMode = (nextMode) => {
+    setDebtDraft((p) => {
+      if (p.debtInputMode === nextMode) return p;
+      if (nextMode === "detail") {
+        const hasDetail =
+          p.debts?.some((d) => (parseInt(d.principal) || 0) > 0) ?? false;
+        return {
+          ...p,
+          debtInputMode: "detail",
+          debts: hasDetail ? p.debts : simpleDraftToDetailDebts(p),
+          overduePeriod: hasDetail
+            ? getMaxOverdueMonths(p.debts)
+            : String(parseOverdueMonths(p.overduePeriod)),
+        };
+      }
+      const simplePart = amountByDebtType(
+        (p.debts || []).map((d) => ({
+          debtType: d.debtType,
+          amount: wonToMan(d.principal),
+          overduePeriod: d.overduePeriod,
+        })),
+      );
+      return {
+        ...p,
+        debtInputMode: "simple",
+        ...simplePart,
+        overduePeriod: monthsToOverduePeriod(
+          getMaxOverdueMonths(p.debts) || parseOverdueMonths(p.overduePeriod),
+        ),
+      };
+    });
+  };
+
+  const updateDraftDebt = (id, field, value) => {
+    setDebtDraft((p) => {
+      const debts = p.debts.map((d) =>
+        d.id === id ? { ...d, [field]: value } : d,
+      );
+      return {
+        ...p,
+        debts,
+        overduePeriod: getMaxOverdueMonths(debts),
+      };
+    });
+  };
+
+  const addDraftDebt = () => {
+    setDebtDraft((p) => {
+      const debts = [...p.debts, emptyEditDebt()];
+      return {
+        ...p,
+        debts,
+        overduePeriod: getMaxOverdueMonths(debts),
+      };
+    });
+  };
+
+  const removeDraftDebt = (id) => {
+    setDebtDraft((p) => {
+      if (p.debts.length <= 1) return p;
+      const debts = p.debts.filter((d) => d.id !== id);
+      return {
+        ...p,
+        debts,
+        overduePeriod: getMaxOverdueMonths(debts),
+      };
+    });
+  };
+
+  const draftSimpleTotal =
+    (debtDraft.debtTypes.includes("은행대출")
+      ? parseInt(debtDraft.bankLoan) || 0
+      : 0) +
+    (debtDraft.debtTypes.includes("카드론")
+      ? parseInt(debtDraft.creditCardDebt) || 0
+      : 0) +
+    (debtDraft.debtTypes.includes("캐피탈") ||
+    debtDraft.debtTypes.includes("저축은행")
+      ? parseInt(debtDraft.capitalLoan) || 0
+      : 0) +
+    (debtDraft.debtTypes.includes("사채") ||
+    debtDraft.debtTypes.includes("개인차용")
+      ? parseInt(debtDraft.privateLoan) || 0
+      : 0);
+
+  const draftDetailCalcs = (debtDraft.debts || []).map((debt) => ({
+    debt,
+    calc: calcDebtItem(debt),
+  }));
+  const draftDetailPrincipalWon = draftDetailCalcs.reduce(
+    (s, { debt }) => s + (parseInt(debt.principal) || 0),
+    0,
+  );
+  const draftDetailTotalRepayWon = draftDetailCalcs.reduce(
+    (s, { debt, calc }) =>
+      s + (calc ? calc.totalRepay : parseInt(debt.principal) || 0),
+    0,
+  );
+  const draftDetailTotalInterestWon = draftDetailCalcs.reduce(
+    (s, { calc }) => s + (calc ? calc.totalInterest : 0),
+    0,
+  );
+  const draftDetailMonthlySumWon = draftDetailCalcs.reduce(
+    (s, { calc }) => s + (calc ? calc.monthly : 0),
+    0,
+  );
+
+  const buildEditedDebtSummary = () => {
+    if (debtDraft.debtInputMode === "simple") {
+      return buildDebtSummaryFromSimpleDraft(debtDraft);
+    }
+    return buildDebtSummaryFromDetailRows(debtDraft.debts);
+  };
+
+  const handleDebtApply = () => {
+    setDebtConfirmOpen(true);
+  };
+
+  const applyDebtSummary = (next, { reanalyze }) => {
+    if (reanalyze) {
+      setDebtConfirmOpen(false);
+      setDebtModalOpen(false);
+      setDebtReanalyzing(true);
+      setTimeout(() => {
+        setDebtSummary(next);
+        setDebtReanalyzing(false);
+      }, 1800);
+      return;
+    }
+    setDebtSummary(next);
+    setDebtConfirmOpen(false);
+    setDebtModalOpen(false);
+  };
+
+  const handleDebtSaveOnly = () => {
+    applyDebtSummary(buildEditedDebtSummary(), { reanalyze: false });
+  };
+
+  const handleDebtReanalyze = () => {
+    applyDebtSummary(buildEditedDebtSummary(), { reanalyze: true });
+  };
 
   const startMarkPaid = (seq) => {
     setDateEditSeq(seq);
@@ -1181,6 +2167,10 @@ const SampleDashboardPage = () => {
       return;
 
     setDraftSelectedProc(selectedOption);
+    setProcSelectCreditOpen(
+      CREDIT_RECOVERY_IDS.has(selectedOption) ||
+        CREDIT_RECOVERY_CHILDREN.some((o) => o.recommended),
+    );
     setProcSelectModalOpen(true);
   };
 
@@ -1303,8 +2293,25 @@ const SampleDashboardPage = () => {
     navigate("/checklist");
   };
 
+  const totalDebtPrincipal = debtSummary?.totalDebt ?? CLIENT.totalDebt;
+  const totalDebtWithInterest =
+    debtSummary?.totalDebtWithInterest ??
+    CLIENT.totalDebtWithInterest ??
+    totalDebtPrincipal;
+  const debtBreakdown =
+    debtSummary?.items?.length > 0
+      ? aggregateByDebtType(debtSummary.items)
+      : CLIENT.debtBreakdown;
+
   const totalRepayment = AI.repaymentAmount * AI.repaymentMonths;
-  const exemptDebt = CLIENT.totalDebt - totalRepayment;
+  const exemptDebt = Math.max(
+    0,
+    Math.round(totalDebtPrincipal - totalRepayment),
+  );
+  const exemptDebtWithInterest = Math.max(
+    0,
+    Math.round(totalDebtWithInterest - totalRepayment),
+  );
 
   const paidCount = installments.filter((it) => it.status === "paid").length;
   const canceledCount = installments.filter(
@@ -1617,42 +2624,140 @@ const SampleDashboardPage = () => {
         <section className="sdp-section">
           <p className="sdp-section-label">절차별 성공 가능성</p>
 
-          {/* 바 비교 — 클릭으로 선택 */}
+          {/* 바 비교 — 클릭으로 선택 (신용회복은 그룹 펼침) */}
           <div className="sdp-options">
-            {OPTIONS.map((opt) => (
-              <div
-                key={opt.id}
-                className={`sdp-option-row ${opt.recommended ? "recommended" : ""} ${selectedOption === opt.id ? "selected" : ""}`}
-                onClick={() => setSelectedOption(opt.id)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) =>
-                  e.key === "Enter" && setSelectedOption(opt.id)
-                }
-              >
-                <div className="sdp-option-name">
-                  <span>{opt.label}</span>
-                  {opt.recommended && (
-                    <span className="sdp-option-tag">추천</span>
+            {OPTION_BLOCKS.map((block) => {
+              if (block.type === "option") {
+                const opt = block.option;
+                return (
+                  <div
+                    key={opt.id}
+                    className={`sdp-option-row ${opt.recommended ? "recommended" : ""} ${selectedOption === opt.id ? "selected" : ""}`}
+                    onClick={() => setSelectedOption(opt.id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && setSelectedOption(opt.id)
+                    }
+                  >
+                    <div className="sdp-option-name">
+                      <span>{opt.label}</span>
+                      {opt.recommended && (
+                        <span className="sdp-option-tag">추천</span>
+                      )}
+                    </div>
+                    <div className="sdp-option-bar-wrap">
+                      <div className="sdp-option-bar">
+                        <div
+                          className="sdp-option-fill"
+                          style={{ width: `${opt.score}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="sdp-option-score">
+                      <strong>{opt.score}</strong>
+                      <span>/100</span>
+                    </div>
+                    <span className={`sdp-option-grade g-${opt.grade}`}>
+                      {opt.grade}
+                    </span>
+                  </div>
+                );
+              }
+
+              const summary = block.summary;
+              const groupSelected = CREDIT_RECOVERY_IDS.has(selectedOption);
+              const groupRecommended = block.children.some(
+                (c) => c.recommended,
+              );
+              return (
+                <div
+                  key={block.id}
+                  className={`sdp-option-group ${creditRecoveryOpen ? "open" : ""} ${groupSelected ? "has-selected" : ""}`}
+                >
+                  <div
+                    className={`sdp-option-row sdp-option-group-header ${groupRecommended ? "recommended" : ""} ${groupSelected && !creditRecoveryOpen ? "selected" : ""}`}
+                    onClick={() => setCreditRecoveryOpen((v) => !v)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && setCreditRecoveryOpen((v) => !v)
+                    }
+                  >
+                    <div className="sdp-option-name">
+                      <span className="sdp-option-chevron" aria-hidden>
+                        {creditRecoveryOpen ? "▾" : "▸"}
+                      </span>
+                      <span>{block.label}</span>
+                      {groupRecommended && (
+                        <span className="sdp-option-tag">추천</span>
+                      )}
+                      {!creditRecoveryOpen && groupSelected && (
+                        <span className="sdp-option-sublabel">
+                          {
+                            block.children.find((c) => c.id === selectedOption)
+                              ?.label
+                          }
+                        </span>
+                      )}
+                    </div>
+                    <div className="sdp-option-bar-wrap">
+                      <div className="sdp-option-bar">
+                        <div
+                          className="sdp-option-fill"
+                          style={{ width: `${summary.score}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="sdp-option-score">
+                      <strong>{summary.score}</strong>
+                      <span>/100</span>
+                    </div>
+                    <span className={`sdp-option-grade g-${summary.grade}`}>
+                      {summary.grade}
+                    </span>
+                  </div>
+                  {creditRecoveryOpen && (
+                    <div className="sdp-option-group-children">
+                      {block.children.map((opt) => (
+                        <div
+                          key={opt.id}
+                          className={`sdp-option-row sdp-option-child ${opt.recommended ? "recommended" : ""} ${selectedOption === opt.id ? "selected" : ""}`}
+                          onClick={() => setSelectedOption(opt.id)}
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) =>
+                            e.key === "Enter" && setSelectedOption(opt.id)
+                          }
+                        >
+                          <div className="sdp-option-name">
+                            <span>{opt.label}</span>
+                            {opt.recommended && (
+                              <span className="sdp-option-tag">추천</span>
+                            )}
+                          </div>
+                          <div className="sdp-option-bar-wrap">
+                            <div className="sdp-option-bar">
+                              <div
+                                className="sdp-option-fill"
+                                style={{ width: `${opt.score}%` }}
+                              />
+                            </div>
+                          </div>
+                          <div className="sdp-option-score">
+                            <strong>{opt.score}</strong>
+                            <span>/100</span>
+                          </div>
+                          <span className={`sdp-option-grade g-${opt.grade}`}>
+                            {opt.grade}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
-                <div className="sdp-option-bar-wrap">
-                  <div className="sdp-option-bar">
-                    <div
-                      className="sdp-option-fill"
-                      style={{ width: `${opt.score}%` }}
-                    />
-                  </div>
-                </div>
-                <div className="sdp-option-score">
-                  <strong>{opt.score}</strong>
-                  <span>/100</span>
-                </div>
-                <span className={`sdp-option-grade g-${opt.grade}`}>
-                  {opt.grade}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* 조건 상세 패널 */}
@@ -1763,12 +2868,23 @@ const SampleDashboardPage = () => {
             <p className="sdp-section-label">재무 현황</p>
             <div className="sdp-stat-list">
               <div className="sdp-stat">
-                <span className="sdp-stat-label">총 채무</span>
+                <span className="sdp-stat-label">총 채무 (원금)</span>
                 <span className="sdp-stat-val">
-                  {CLIENT.totalDebt.toLocaleString()}
+                  {totalDebtPrincipal.toLocaleString()}
                   <em>만원</em>
                 </span>
               </div>
+              {totalDebtWithInterest > totalDebtPrincipal && (
+                <div className="sdp-stat">
+                  <span className="sdp-stat-label">
+                    총 상환 예정 (이자 포함)
+                  </span>
+                  <span className="sdp-stat-val">
+                    {Math.round(totalDebtWithInterest).toLocaleString()}
+                    <em>만원</em>
+                  </span>
+                </div>
+              )}
               <div className="sdp-stat">
                 <span className="sdp-stat-label">총 자산</span>
                 <span className="sdp-stat-val">
@@ -1786,17 +2902,34 @@ const SampleDashboardPage = () => {
               <div className="sdp-stat">
                 <span className="sdp-stat-label">연체 기간</span>
                 <span className="sdp-stat-val">
-                  {CLIENT.overduePeriod}
-                  <em>개월</em>
+                  {overduePeriodLabel(debtSummary?.overduePeriod) ? (
+                    overduePeriodLabel(debtSummary.overduePeriod)
+                  ) : (
+                    <>
+                      {parseOverdueMonths(
+                        debtSummary?.overduePeriod ?? CLIENT.overduePeriod,
+                      )}
+                      <em>개월</em>
+                    </>
+                  )}
                 </span>
               </div>
             </div>
 
             <div className="sdp-divider" />
 
-            <p className="sdp-section-label">채무 구성</p>
+            <div className="sdp-debt-section-head">
+              <p className="sdp-section-label">채무 구성</p>
+              <button
+                type="button"
+                className="sdp-debt-detail-btn"
+                onClick={openDebtModal}
+              >
+                자세히 보기
+              </button>
+            </div>
             <div className="sdp-bars">
-              {CLIENT.debtBreakdown.map((d) => (
+              {debtBreakdown.map((d) => (
                 <div key={d.label} className="sdp-bar-row">
                   <span className="sdp-bar-label">{d.label}</span>
                   <div className="sdp-bar-track">
@@ -1808,6 +2941,12 @@ const SampleDashboardPage = () => {
                   <span className="sdp-bar-pct">{d.pct}%</span>
                   <span className="sdp-bar-amt">
                     {d.amount.toLocaleString()}만원
+                    {/* {d.totalRepay != null && d.totalRepay > d.amount && (
+                      <em className="sdp-bar-amt-sub">
+                        {" "}
+                        / 상환 {Math.round(d.totalRepay).toLocaleString()}
+                      </em>
+                    )} */}
                   </span>
                 </div>
               ))}
@@ -1833,11 +2972,25 @@ const SampleDashboardPage = () => {
             </div>
             <div className="sdp-exempt-box">
               <p className="sdp-exempt-label">예상 면책 채무</p>
-              <p className="sdp-exempt-val">
-                약 {exemptDebt.toLocaleString()}만원
-              </p>
+              <div className="sdp-exempt-compare">
+                <div className="sdp-exempt-col">
+                  <span className="sdp-exempt-col-label">원금 기준</span>
+                  <p className="sdp-exempt-val">
+                    약 {exemptDebt.toLocaleString()}
+                    <em>만원</em>
+                  </p>
+                </div>
+                <div className="sdp-exempt-col">
+                  <span className="sdp-exempt-col-label">이자 포함</span>
+                  <p className="sdp-exempt-val">
+                    약 {exemptDebtWithInterest.toLocaleString()}
+                    <em>만원</em>
+                  </p>
+                </div>
+              </div>
               <p className="sdp-exempt-desc">
-                변제 완료 후 법원 결정으로 면책되는 잔여 채무 금액입니다.
+                변제 완료 후 법원 결정으로 면책되는 잔여 채무입니다. 이자 포함은
+                약정 총 상환액 기준 추정값입니다.
               </p>
             </div>
 
@@ -2344,6 +3497,452 @@ const SampleDashboardPage = () => {
           </div>
         </section>
       </div>
+
+      {/* 채무 재분석 오버레이 */}
+      {debtReanalyzing && (
+        <div className="sdp-debt-reanalyzing">
+          <div className="sdp-debt-reanalyzing-card">
+            <p className="sdp-debt-reanalyzing-title">분석 중</p>
+            <p className="sdp-debt-reanalyzing-sub">
+              수정된 채무 정보로 다시 분석하고 있습니다
+            </p>
+            <div className="sdp-debt-reanalyzing-dots">
+              <span />
+              <span />
+              <span />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 채무 자세히보기 / 수정 모달 */}
+      {debtModalOpen && (
+        <div className="sdp-debt-modal-overlay" onClick={closeDebtModal}>
+          <div
+            className="sdp-debt-modal sdp-debt-modal--form"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sdp-debt-modal-head">
+              <div>
+                <p className="sdp-debt-modal-title">채무 상세</p>
+                <p className="sdp-debt-modal-sub">진단 입력과 동일하게 수정할 수 있습니다</p>
+              </div>
+              <button
+                type="button"
+                className="sdp-debt-modal-close"
+                onClick={closeDebtModal}
+                aria-label="닫기"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path
+                    d="M3 3l10 10M13 3L3 13"
+                    stroke="#666"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="sdp-debt-modal-body">
+              <div className="scl-debt-panel">
+                <div className="scl-debt-panel-head">
+                  <div className="scl-debt-panel-title-wrap">
+                    <span className="scl-debt-panel-title">채무 내역</span>
+                    <span className="scl-debt-panel-hint">
+                      {debtDraft.debtInputMode === "simple"
+                        ? "종류별 잔액만 빠르게 입력"
+                        : "채권처·상환방식·금리까지 상세 입력 (원 단위)"}
+                    </span>
+                  </div>
+                  <div className="scl-mode-toggle" role="tablist">
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={debtDraft.debtInputMode === "simple"}
+                      className={`scl-mode-btn ${debtDraft.debtInputMode === "simple" ? "on" : ""}`}
+                      onClick={() => switchDebtDraftMode("simple")}
+                    >
+                      심플
+                    </button>
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={debtDraft.debtInputMode === "detail"}
+                      className={`scl-mode-btn ${debtDraft.debtInputMode === "detail" ? "on" : ""}`}
+                      onClick={() => switchDebtDraftMode("detail")}
+                    >
+                      상세
+                    </button>
+                  </div>
+                </div>
+
+                <div className="scl-debt-panel-body">
+                  {debtDraft.debtInputMode === "simple" ? (
+                    <>
+                      <Field label="채무 종류 (중복 선택 가능)">
+                        <Chips
+                          options={DEBT_TYPE_OPTIONS}
+                          value={debtDraft.debtTypes}
+                          onChange={setDebtDraftField("debtTypes")}
+                          multi
+                        />
+                      </Field>
+                      <p className="scl-note">
+                        ※ 해당 채무의 현재 잔액을 만원 단위로 입력하세요
+                      </p>
+                      <div className="scl-row-2">
+                        {debtDraft.debtTypes.includes("은행대출") && (
+                          <Field label="은행 대출">
+                            <input
+                              className="scl-input"
+                              type="number"
+                              value={debtDraft.bankLoan}
+                              onChange={setDebtDraftInput("bankLoan")}
+                            />
+                          </Field>
+                        )}
+                        {debtDraft.debtTypes.includes("카드론") && (
+                          <Field label="카드론">
+                            <input
+                              className="scl-input"
+                              type="number"
+                              value={debtDraft.creditCardDebt}
+                              onChange={setDebtDraftInput("creditCardDebt")}
+                            />
+                          </Field>
+                        )}
+                        {(debtDraft.debtTypes.includes("캐피탈") ||
+                          debtDraft.debtTypes.includes("저축은행")) && (
+                          <Field label="캐피탈 / 저축은행">
+                            <input
+                              className="scl-input"
+                              type="number"
+                              value={debtDraft.capitalLoan}
+                              onChange={setDebtDraftInput("capitalLoan")}
+                            />
+                          </Field>
+                        )}
+                        {(debtDraft.debtTypes.includes("사채") ||
+                          debtDraft.debtTypes.includes("개인차용")) && (
+                          <Field label="사채 / 개인차용">
+                            <input
+                              className="scl-input"
+                              type="number"
+                              value={debtDraft.privateLoan}
+                              onChange={setDebtDraftInput("privateLoan")}
+                            />
+                          </Field>
+                        )}
+                      </div>
+                      <div className="scl-sum-line">
+                        <span>총 채무 합계</span>
+                        <strong>{draftSimpleTotal.toLocaleString()}만원</strong>
+                      </div>
+                      <Field
+                        label="연체 기간"
+                        hint="여러 채무가 있으면 가장 긴 연체 기준으로"
+                      >
+                        <select
+                          className="scl-input"
+                          value={normalizeSimpleOverdue(debtDraft.overduePeriod)}
+                          onChange={(e) =>
+                            setDebtDraftField("overduePeriod")(e.target.value)
+                          }
+                        >
+                          {OVERDUE_PERIOD_OPTIONS.map((o) => (
+                            <option key={o.value} value={o.value}>
+                              {o.label}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                    </>
+                  ) : (
+                    <div className="scl-debt-grid-wrap">
+                      <table className="scl-debt-grid">
+                        <thead>
+                          <tr>
+                            <th className="col-type">채무종류</th>
+                            <th className="col-lender">채권처</th>
+                            <th className="col-method">상환방식</th>
+                            <th className="col-overdue">연체(개월)</th>
+                            <th className="col-date">대출일</th>
+                            <th className="col-date">만기일</th>
+                            <th className="col-num">금액(원)</th>
+                            <th className="col-rate">금리(%)</th>
+                            <th className="col-calc">기간</th>
+                            <th className="col-calc">월불입</th>
+                            <th className="col-calc">총이자</th>
+                            <th className="col-calc">총상환</th>
+                            <th className="col-act" />
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {debtDraft.debts.map((debt) => {
+                            const calc = calcDebtItem(debt);
+                            return (
+                              <tr key={debt.id}>
+                                <td>
+                                  <select
+                                    className="scl-grid-input scl-grid-select"
+                                    value={debt.debtType || "은행대출"}
+                                    onChange={(e) =>
+                                      updateDraftDebt(
+                                        debt.id,
+                                        "debtType",
+                                        e.target.value,
+                                      )
+                                    }
+                                  >
+                                    {DEBT_TYPE_OPTIONS.map((t) => (
+                                      <option key={t} value={t}>
+                                        {t}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </td>
+                                <td>
+                                  <input
+                                    className="scl-grid-input"
+                                    value={debt.lender}
+                                    onChange={(e) =>
+                                      updateDraftDebt(
+                                        debt.id,
+                                        "lender",
+                                        e.target.value,
+                                      )
+                                    }
+                                    placeholder="예: 국민은행"
+                                  />
+                                </td>
+                                <td>
+                                  <select
+                                    className="scl-grid-input scl-grid-select"
+                                    value={debt.repayMethod || "원리금균등"}
+                                    onChange={(e) =>
+                                      updateDraftDebt(
+                                        debt.id,
+                                        "repayMethod",
+                                        e.target.value,
+                                      )
+                                    }
+                                  >
+                                    {REPAY_METHOD_OPTIONS.map((m) => (
+                                      <option key={m} value={m}>
+                                        {m}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </td>
+                                <td>
+                                  <input
+                                    className="scl-grid-input scl-grid-num"
+                                    type="number"
+                                    min="0"
+                                    inputMode="numeric"
+                                    value={debt.overduePeriod ?? "0"}
+                                    onChange={(e) =>
+                                      updateDraftDebt(
+                                        debt.id,
+                                        "overduePeriod",
+                                        e.target.value.replace(/[^\d]/g, ""),
+                                      )
+                                    }
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    className="scl-grid-input"
+                                    type="date"
+                                    value={debt.loanDate}
+                                    onChange={(e) =>
+                                      updateDraftDebt(
+                                        debt.id,
+                                        "loanDate",
+                                        e.target.value,
+                                      )
+                                    }
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    className="scl-grid-input"
+                                    type="date"
+                                    value={debt.maturityDate}
+                                    onChange={(e) =>
+                                      updateDraftDebt(
+                                        debt.id,
+                                        "maturityDate",
+                                        e.target.value,
+                                      )
+                                    }
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    className="scl-grid-input scl-grid-num"
+                                    type="text"
+                                    inputMode="numeric"
+                                    value={formatComma(debt.principal)}
+                                    onChange={(e) =>
+                                      updateDraftDebt(
+                                        debt.id,
+                                        "principal",
+                                        parseComma(e.target.value),
+                                      )
+                                    }
+                                    placeholder="예: 50,000,000"
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    className="scl-grid-input scl-grid-num"
+                                    type="number"
+                                    step="0.1"
+                                    value={debt.rate}
+                                    onChange={(e) =>
+                                      updateDraftDebt(
+                                        debt.id,
+                                        "rate",
+                                        e.target.value,
+                                      )
+                                    }
+                                    placeholder="예: 15"
+                                  />
+                                </td>
+                                <td className="scl-grid-calc">
+                                  {calc ? `${calc.months}개월` : "—"}
+                                </td>
+                                <td className="scl-grid-calc">
+                                  {calc ? formatWon(calc.monthly) : "—"}
+                                </td>
+                                <td className="scl-grid-calc">
+                                  {calc ? formatWon(calc.totalInterest) : "—"}
+                                </td>
+                                <td className="scl-grid-calc">
+                                  {calc ? formatWon(calc.totalRepay) : "—"}
+                                </td>
+                                <td className="col-act">
+                                  {debtDraft.debts.length > 1 && (
+                                    <button
+                                      type="button"
+                                      className="scl-debt-remove"
+                                      onClick={() => removeDraftDebt(debt.id)}
+                                      title="삭제"
+                                    >
+                                      ×
+                                    </button>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                          <tr className="scl-debt-add-row">
+                            <td colSpan={13}>
+                              <button
+                                type="button"
+                                className="scl-debt-add-btn"
+                                onClick={addDraftDebt}
+                              >
+                                + 행 추가
+                              </button>
+                            </td>
+                          </tr>
+                        </tbody>
+                        {draftDetailTotalRepayWon > 0 && (
+                          <tfoot>
+                            <tr>
+                              <td colSpan={6}>합계</td>
+                              <td className="scl-grid-calc">
+                                {formatWon(draftDetailPrincipalWon)}
+                              </td>
+                              <td />
+                              <td />
+                              <td className="scl-grid-calc">
+                                {formatWon(draftDetailMonthlySumWon)}
+                              </td>
+                              <td className="scl-grid-calc">
+                                {formatWon(draftDetailTotalInterestWon)}
+                              </td>
+                              <td className="scl-grid-calc">
+                                {formatWon(draftDetailTotalRepayWon)}
+                              </td>
+                              <td />
+                            </tr>
+                          </tfoot>
+                        )}
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="sdp-debt-modal-footer">
+              <button
+                type="button"
+                className="sdp-debt-btn-ghost"
+                onClick={closeDebtModal}
+              >
+                닫기
+              </button>
+              <button
+                type="button"
+                className="sdp-debt-btn-primary"
+                onClick={handleDebtApply}
+              >
+                적용하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 채무 수정 후 저장/재분석 확인 */}
+      {debtConfirmOpen && (
+        <div
+          className="sdp-debt-confirm-overlay"
+          onClick={() => setDebtConfirmOpen(false)}
+        >
+          <div
+            className="sdp-debt-confirm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="sdp-debt-confirm-title">
+              수정된 채무를 어떻게 할까요?
+            </p>
+            <p className="sdp-debt-confirm-desc">
+              다시 분석하면 추천 절차·변제 계획이 갱신되고,
+              <br />
+              값만 저장하면 채무 구성만 반영됩니다.
+            </p>
+            <div className="sdp-debt-confirm-actions">
+              <button
+                type="button"
+                className="sdp-debt-btn-ghost"
+                onClick={() => setDebtConfirmOpen(false)}
+              >
+                돌아가기
+              </button>
+              <button
+                type="button"
+                className="sdp-debt-btn-secondary"
+                onClick={handleDebtSaveOnly}
+              >
+                값만 저장
+              </button>
+              <button
+                type="button"
+                className="sdp-debt-btn-primary"
+                onClick={handleDebtReanalyze}
+              >
+                다시 분석
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 문자 전송 모달 */}
       {smsModal && (
@@ -2869,32 +4468,121 @@ const SampleDashboardPage = () => {
                 진행 단계가 시작됩니다.
               </p>
               <div className="sdp-proc-select-list">
-                {OPTIONS.map((opt) => (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    className={`sdp-proc-select-item ${draftSelectedProc === opt.id ? "selected" : ""}`}
-                    onClick={() => setDraftSelectedProc(opt.id)}
-                  >
-                    <div className="sdp-proc-select-item-main">
-                      <span className="sdp-proc-select-item-name">
-                        {opt.label}
-                      </span>
-                      {opt.recommended && (
-                        <span className="sdp-proc-select-rec">추천</span>
-                      )}
+                {OPTION_BLOCKS.map((block) => {
+                  if (block.type === "option") {
+                    const opt = block.option;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        className={`sdp-proc-select-item ${draftSelectedProc === opt.id ? "selected" : ""}`}
+                        onClick={() => setDraftSelectedProc(opt.id)}
+                      >
+                        <div className="sdp-proc-select-item-main">
+                          <span className="sdp-proc-select-item-name">
+                            {opt.label}
+                          </span>
+                          {opt.recommended && (
+                            <span className="sdp-proc-select-rec">추천</span>
+                          )}
+                        </div>
+                        <div className="sdp-proc-select-item-meta">
+                          <span className="sdp-proc-select-score">
+                            {opt.score}
+                            <em>/100</em>
+                          </span>
+                          <span
+                            className={`sdp-proc-select-grade g-${opt.grade}`}
+                          >
+                            {opt.grade}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  }
+
+                  const summary = block.summary;
+                  const groupSelected =
+                    CREDIT_RECOVERY_IDS.has(draftSelectedProc);
+                  const groupRecommended = block.children.some(
+                    (c) => c.recommended,
+                  );
+                  return (
+                    <div
+                      key={block.id}
+                      className={`sdp-proc-select-group ${procSelectCreditOpen ? "open" : ""}`}
+                    >
+                      <button
+                        type="button"
+                        className={`sdp-proc-select-item sdp-proc-select-group-header ${groupRecommended ? "has-rec" : ""} ${groupSelected && !procSelectCreditOpen ? "selected" : ""}`}
+                        onClick={() => setProcSelectCreditOpen((v) => !v)}
+                      >
+                        <div className="sdp-proc-select-item-main">
+                          <span className="sdp-proc-select-chevron" aria-hidden>
+                            {procSelectCreditOpen ? "▾" : "▸"}
+                          </span>
+                          <span className="sdp-proc-select-item-name">
+                            {block.label}
+                          </span>
+                          {groupRecommended && (
+                            <span className="sdp-proc-select-rec">추천</span>
+                          )}
+                          {!procSelectCreditOpen && groupSelected && (
+                            <span className="sdp-proc-select-sub">
+                              {
+                                block.children.find(
+                                  (c) => c.id === draftSelectedProc,
+                                )?.label
+                              }
+                            </span>
+                          )}
+                        </div>
+                        <div className="sdp-proc-select-item-meta">
+                          <span className="sdp-proc-select-score">
+                            {summary.score}
+                            <em>/100</em>
+                          </span>
+                          <span
+                            className={`sdp-proc-select-grade g-${summary.grade}`}
+                          >
+                            {summary.grade}
+                          </span>
+                        </div>
+                      </button>
+                      {procSelectCreditOpen &&
+                        block.children.map((opt) => (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            className={`sdp-proc-select-item sdp-proc-select-child ${draftSelectedProc === opt.id ? "selected" : ""}`}
+                            onClick={() => setDraftSelectedProc(opt.id)}
+                          >
+                            <div className="sdp-proc-select-item-main">
+                              <span className="sdp-proc-select-item-name">
+                                {opt.label}
+                              </span>
+                              {opt.recommended && (
+                                <span className="sdp-proc-select-rec">
+                                  추천
+                                </span>
+                              )}
+                            </div>
+                            <div className="sdp-proc-select-item-meta">
+                              <span className="sdp-proc-select-score">
+                                {opt.score}
+                                <em>/100</em>
+                              </span>
+                              <span
+                                className={`sdp-proc-select-grade g-${opt.grade}`}
+                              >
+                                {opt.grade}
+                              </span>
+                            </div>
+                          </button>
+                        ))}
                     </div>
-                    <div className="sdp-proc-select-item-meta">
-                      <span className="sdp-proc-select-score">
-                        {opt.score}
-                        <em>/100</em>
-                      </span>
-                      <span className={`sdp-proc-select-grade g-${opt.grade}`}>
-                        {opt.grade}
-                      </span>
-                    </div>
-                  </button>
-                ))}
+                  );
+                })}
               </div>
             </div>
             <div className="sdp-proc-select-footer">

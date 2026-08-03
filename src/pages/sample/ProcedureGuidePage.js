@@ -155,10 +155,10 @@ const PROCEDURES = {
     ],
   },
 
-  adjustment: {
-    id: "adjustment",
-    label: "채무조정",
-    color: "#059669",
+  rapidDebtAdj: {
+    id: "rapidDebtAdj",
+    label: "신속채무조정",
+    color: "#0d9488",
     totalMonths: "최대 10년 (120개월)",
     steps: [
       {
@@ -167,12 +167,12 @@ const PROCEDURES = {
         durationLabel: "—",
         durationWeeks: 0,
         details: {
-          desc: "신용회복위원회 채무조정 신청이 가능한 요건을 사전 확인하는 단계입니다.",
+          desc: "신용회복위원회 신속채무조정 신청 요건을 사전 확인하는 단계입니다.",
           items: [
-            "연체 3개월 이상 또는 연체 우려 채무자",
-            "총 채무액 15억원 이하 (담보 포함)",
-            "채권금융기관이 신용회복위원회 협약기관에 해당",
-            "이전 채무조정 이력 확인",
+            "연체 전 또는 연체 30일 이하",
+            "총 채무액 15억원 이하 (무담보 5억·담보 10억)",
+            "채권금융기관이 신용회복지원협약 가입 기관",
+            "최저생계비 이상 수입 또는 상환 가능 인정",
           ],
           caution: null,
         },
@@ -183,14 +183,14 @@ const PROCEDURES = {
         durationLabel: "1~2주",
         durationWeeks: 1.5,
         details: {
-          desc: "신용회복위원회에 채무조정 신청서 및 관련 서류를 제출하는 단계입니다.",
+          desc: "신용회복위원회에 신청서 및 관련 서류를 제출하는 단계입니다.",
           items: [
-            "채무조정 신청서",
+            "신용회복지원(상담) 신청서",
+            "신분증",
             "소득 증빙자료",
-            "채무 내역 확인서",
-            "가계수지 현황표",
+            "채무·가계수지 현황",
           ],
-          note: "온라인(신복위 홈페이지) 또는 방문 신청 가능",
+          note: "온라인(신복위) 또는 방문 신청 가능",
           caution: null,
         },
       },
@@ -215,11 +215,11 @@ const PROCEDURES = {
         durationLabel: "2~4주",
         durationWeeks: 3,
         details: {
-          desc: "채권자 동의를 받아 채무조정 조건이 최종 확정되는 단계입니다.",
+          desc: "채권자 동의를 받아 신속채무조정 조건이 최종 확정되는 단계입니다.",
           items: [
-            "이자율 감면 (최대 0%)",
-            "상환기간 연장 (최대 10년)",
-            "원금 일부 감면 (신용대출 최대 80%)",
+            "연체이자 감면",
+            "약정이자율 30~50% 범위 인하",
+            "최장 10년 분할상환",
           ],
           caution: null,
         },
@@ -228,7 +228,7 @@ const PROCEDURES = {
         id: 5,
         title: "분할상환 시작",
         durationLabel: "확정 조건에 따라 (최대 120개월)",
-        durationWeeks: 120 * 4,
+        durationWeeks: 480,
         details: {
           desc: "확정된 조건에 따라 매월 분할 납부하는 단계입니다.",
           items: [
@@ -245,11 +245,306 @@ const PROCEDURES = {
         durationLabel: "—",
         durationWeeks: 0,
         details: {
-          desc: "모든 분할상환이 완료되고 채무조정 절차가 종료되는 단계입니다.",
+          desc: "모든 분할상환이 완료되고 신속채무조정 절차가 종료되는 단계입니다.",
+          items: ["완납 확인서 수령", "신용정보 회복 확인", "채무 소멸 확인"],
+          caution: null,
+        },
+      },
+    ],
+  },
+
+  preWorkout: {
+    id: "preWorkout",
+    label: "프리워크아웃",
+    color: "#059669",
+    totalMonths: "최대 10년 (120개월)",
+    steps: [
+      {
+        id: 1,
+        title: "신청 자격 확인",
+        durationLabel: "—",
+        durationWeeks: 0,
+        details: {
+          desc: "신용회복위원회 프리워크아웃 신청 요건을 사전 확인하는 단계입니다.",
           items: [
-            "완납 확인서 수령",
-            "신용정보 회복 신청",
-            "채무 소멸 확인",
+            "연체 31일 이상 89일 미만",
+            "총 채무액 15억원 이하 (무담보 5억·담보 10억)",
+            "채권금융기관이 신용회복지원협약 가입 기관",
+            "최저생계비 이상 수입 또는 상환 가능 인정",
+          ],
+          caution: null,
+        },
+      },
+      {
+        id: 2,
+        title: "신청서 접수",
+        durationLabel: "1~2주",
+        durationWeeks: 1.5,
+        details: {
+          desc: "신용회복위원회에 신청서 및 관련 서류를 제출하는 단계입니다.",
+          items: [
+            "신용회복지원(상담) 신청서",
+            "신분증",
+            "소득 증빙자료",
+            "채무·가계수지 현황",
+          ],
+          note: "온라인(신복위) 또는 방문 신청 가능",
+          caution: null,
+        },
+      },
+      {
+        id: 3,
+        title: "채권자 동의 절차",
+        durationLabel: "1~2개월",
+        durationWeeks: 6,
+        details: {
+          desc: "신용회복위원회가 각 채권 금융기관에 조정안을 통보하고 동의를 받는 단계입니다.",
+          items: [
+            "채권기관별 조정안 검토",
+            "채권기관 동의 여부 통보",
+            "동의율 미달 시 조정 불가",
+          ],
+          caution: "전체 채권기관의 과반수 이상이 동의해야 조정이 확정됩니다.",
+        },
+      },
+      {
+        id: 4,
+        title: "조정 확정",
+        durationLabel: "2~4주",
+        durationWeeks: 3,
+        details: {
+          desc: "채권자 동의를 받아 프리워크아웃 조건이 최종 확정되는 단계입니다.",
+          items: [
+            "연체이자 감면",
+            "약정이자율 30~70% 범위 인하",
+            "최장 10년 분할상환 (원금 감면 없음)",
+          ],
+          caution: null,
+        },
+      },
+      {
+        id: 5,
+        title: "분할상환 시작",
+        durationLabel: "확정 조건에 따라 (최대 120개월)",
+        durationWeeks: 480,
+        details: {
+          desc: "확정된 조건에 따라 매월 분할 납부하는 단계입니다.",
+          items: [
+            "매월 정해진 금액 납부",
+            "납부 중 소득 변동 시 재조정 신청 가능",
+            "성실 납부 시 신용 회복 효과",
+          ],
+          caution: "2회 이상 미납 시 조정 취소될 수 있습니다.",
+        },
+      },
+      {
+        id: 6,
+        title: "조정 완료",
+        durationLabel: "—",
+        durationWeeks: 0,
+        details: {
+          desc: "모든 분할상환이 완료되고 프리워크아웃 절차가 종료되는 단계입니다.",
+          items: ["완납 확인서 수령", "신용정보 회복 확인", "채무 소멸 확인"],
+          caution: null,
+        },
+      },
+    ],
+  },
+
+  personalWorkout: {
+    id: "personalWorkout",
+    label: "개인워크아웃",
+    color: "#047857",
+    totalMonths: "최대 10년 (120개월)",
+    steps: [
+      {
+        id: 1,
+        title: "신청 자격 확인",
+        durationLabel: "—",
+        durationWeeks: 0,
+        details: {
+          desc: "신용회복위원회 개인워크아웃 신청 요건을 사전 확인하는 단계입니다.",
+          items: [
+            "연체 90일(3개월) 이상",
+            "총 채무액 15억원 이하 (무담보 5억·담보 10억)",
+            "최근 6개월 신규 채무가 총 채무의 30% 미만",
+            "채권금융기관이 신용회복지원협약 가입 기관",
+          ],
+          caution: null,
+        },
+      },
+      {
+        id: 2,
+        title: "신청서 접수",
+        durationLabel: "1~2주",
+        durationWeeks: 1.5,
+        details: {
+          desc: "신용회복위원회에 신청서 및 관련 서류를 제출하는 단계입니다.",
+          items: [
+            "신용회복지원(상담) 신청서",
+            "신분증",
+            "소득 증빙자료",
+            "채무·가계수지 현황",
+          ],
+          note: "방문 신청이 원칙 (온라인 제한적)",
+          caution: null,
+        },
+      },
+      {
+        id: 3,
+        title: "채권자 동의 절차",
+        durationLabel: "1~2개월",
+        durationWeeks: 6,
+        details: {
+          desc: "신용회복위원회가 각 채권 금융기관에 조정안을 통보하고 동의를 받는 단계입니다.",
+          items: [
+            "채권기관별 조정안 검토",
+            "채권기관 동의 여부 통보",
+            "동의율 미달 시 조정 불가",
+          ],
+          caution: "전체 채권기관의 과반수 이상이 동의해야 조정이 확정됩니다.",
+        },
+      },
+      {
+        id: 4,
+        title: "조정 확정",
+        durationLabel: "2~4주",
+        durationWeeks: 3,
+        details: {
+          desc: "채권자 동의를 받아 개인워크아웃 조건이 최종 확정되는 단계입니다.",
+          items: [
+            "이자 전액 감면",
+            "원금 일부 감면 (상각채권 최대 70%, 취약계층 최대 90%)",
+            "최장 10년 분할상환",
+          ],
+          caution: null,
+        },
+      },
+      {
+        id: 5,
+        title: "분할상환 시작",
+        durationLabel: "확정 조건에 따라 (최대 120개월)",
+        durationWeeks: 480,
+        details: {
+          desc: "확정된 조건에 따라 매월 분할 납부하는 단계입니다.",
+          items: [
+            "매월 정해진 금액 납부",
+            "납부 중 소득 변동 시 재조정 신청 가능",
+            "성실 납부 시 신용 회복 효과",
+          ],
+          caution: "2회 이상 미납 시 조정 취소될 수 있습니다.",
+        },
+      },
+      {
+        id: 6,
+        title: "조정 완료",
+        durationLabel: "—",
+        durationWeeks: 0,
+        details: {
+          desc: "모든 분할상환이 완료되고 개인워크아웃 절차가 종료되는 단계입니다.",
+          items: ["완납 확인서 수령", "신용정보 회복 확인", "채무 소멸 확인"],
+          caution: null,
+        },
+      },
+    ],
+  },
+
+  newStartFund: {
+    id: "newStartFund",
+    label: "새출발기금",
+    color: "#d97706",
+    totalMonths: "최장 20년 (신용대출 10년)",
+    steps: [
+      {
+        id: 1,
+        title: "신청 자격 확인",
+        durationLabel: "—",
+        durationWeeks: 0,
+        details: {
+          desc: "소상공인·자영업자 새출발기금 지원 대상 요건을 사전 확인하는 단계입니다.",
+          items: [
+            "’20.4월~’25.6월 중 개인사업자·법인 소상공인 사업 영위 (휴업·폐업 포함, 폐업 법인 제외)",
+            "부실차주(3개월 이상 연체) 또는 부실우려차주 해당",
+            "협약 금융회사 대출(사업·가계) 보유, 최대 15억원",
+            "제외 업종·기신청 이력·고액재산가 등 결격 사유 확인",
+          ],
+          caution: "새출발기금 신청은 원칙적으로 1회만 가능합니다.",
+        },
+      },
+      {
+        id: 2,
+        title: "신청서 접수",
+        durationLabel: "1~2주",
+        durationWeeks: 1.5,
+        details: {
+          desc: "온라인(새출발기금.kr) 또는 상담창구(캠코·서민금융통합지원센터)로 신청하는 단계입니다.",
+          items: [
+            "본인인증 및 정보제공 동의",
+            "신청자격 확인",
+            "채무내역 조회",
+            "추가정보 작성 및 신청접수 완료",
+          ],
+          note: "법인 소상공인은 소상공인 확인서 발급 후 신청합니다. 프리랜서·특고는 상담창구 신청이 가능합니다.",
+          caution: null,
+        },
+      },
+      {
+        id: 3,
+        title: "채무조정 심사",
+        durationLabel: "2~8주",
+        durationWeeks: 5,
+        details: {
+          desc: "부실/부실우려 유형에 따라 캠코 또는 신용회복위원회에서 채무조정안을 심사하는 단계입니다.",
+          items: [
+            "부실차주 → 새출발기금·캠코 경로로 원금·상환기간 조정 심사",
+            "부실우려차주 → 신용회복위원회를 통한 금리·상환기간 조정 심사",
+            "보유재산·상환능력 반영",
+            "신청 익일부터 추심중단·강제집행 중지",
+          ],
+          caution: null,
+        },
+      },
+      {
+        id: 4,
+        title: "채무조정안 확정",
+        durationLabel: "2~4주",
+        durationWeeks: 3,
+        details: {
+          desc: "심사 결과를 반영해 채무조정 조건이 확정되는 단계입니다.",
+          items: [
+            "상환기간 조정: 거치 최대 3년(신용대출 1년), 최장 20년 분할상환(신용대출 10년)",
+            "부실차주: 보유재산 반영 원금 조정(0~80%, 취약계층 최대 90%)",
+            "부실우려차주: 금리 조정",
+          ],
+          caution: null,
+        },
+      },
+      {
+        id: 5,
+        title: "분할상환 시작",
+        durationLabel: "확정 조건에 따라 (최장 240개월)",
+        durationWeeks: 480,
+        details: {
+          desc: "확정된 채무조정안에 따라 분할 상환을 이행하는 단계입니다.",
+          items: [
+            "매월 정해진 금액 납부",
+            "부실우려차주가 90일 이상 미이행 시 부실차주 지원으로 재조정 가능",
+            "성실 상환 시 신용 회복 효과",
+          ],
+          caution: "약정 불이행 시 조정 혜택이 취소될 수 있습니다.",
+        },
+      },
+      {
+        id: 6,
+        title: "조정 완료",
+        durationLabel: "—",
+        durationWeeks: 0,
+        details: {
+          desc: "분할상환이 완료되고 새출발기금 채무조정이 종료되는 단계입니다.",
+          items: [
+            "완납·종결 확인",
+            "신용정보 반영 확인",
+            "잔여 채무 소멸·정리 확인",
           ],
           caution: null,
         },
@@ -365,16 +660,40 @@ const PROCEDURES = {
 /* 고객 목록 (ChecklistListPage 데이터와 동일) */
 const CLIENTS = [
   { id: 1, name: "김민수", recommended: "개인회생" },
-  { id: 2, name: "이지영", recommended: "채무조정" },
+  { id: 2, name: "이지영", recommended: "프리워크아웃" },
   { id: 3, name: "박철수", recommended: "파산" },
-  { id: 4, name: "최수진", recommended: "채무조정" },
+  { id: 4, name: "최수진", recommended: "신속채무조정" },
   { id: 5, name: "정대호", recommended: "개인회생" },
-  { id: 6, name: "한소희", recommended: "채무조정" },
-  { id: 7, name: "오민준", recommended: "파산" },
+  { id: 6, name: "한소희", recommended: "개인워크아웃" },
+  { id: 7, name: "윤기현", recommended: "새출발기금" },
   { id: 8, name: "강지우", recommended: "개인회생" },
 ];
 
-const PROC_KEY_MAP = { 개인회생: "rehabilitation", 채무조정: "adjustment", 파산: "bankruptcy" };
+const PROC_KEY_MAP = {
+  개인회생: "rehabilitation",
+  신속채무조정: "rapidDebtAdj",
+  프리워크아웃: "preWorkout",
+  개인워크아웃: "personalWorkout",
+  새출발기금: "newStartFund",
+  파산: "bankruptcy",
+};
+
+const CREDIT_RECOVERY_IDS = ["rapidDebtAdj", "preWorkout", "personalWorkout"];
+const CREDIT_RECOVERY_COLOR = "#059669";
+
+const TOP_TABS = [
+  { id: "rehabilitation", label: "개인회생", color: "#2563eb" },
+  {
+    id: "creditRecovery",
+    label: "신용회복",
+    color: CREDIT_RECOVERY_COLOR,
+    children: CREDIT_RECOVERY_IDS,
+  },
+  { id: "newStartFund", label: "새출발기금", color: "#d97706" },
+  { id: "bankruptcy", label: "파산·면책", color: "#dc2626" },
+];
+
+const isCreditRecoveryProc = (procId) => CREDIT_RECOVERY_IDS.includes(procId);
 
 /* localStorage 키 */
 const storageKey = (clientId, procId) => `proc_step_${clientId}_${procId}`;
@@ -582,6 +901,17 @@ const ProcedureGuidePage = () => {
     setOpenSteps(new Set([1]));
   };
 
+  const handleTopTabChange = (tab) => {
+    if (tab.id === "creditRecovery") {
+      setActiveProc(
+        isCreditRecoveryProc(activeProc) ? activeProc : CREDIT_RECOVERY_IDS[0],
+      );
+    } else {
+      setActiveProc(tab.id);
+    }
+    setOpenSteps(new Set([1]));
+  };
+
   const handleClientChange = (e) => {
     const id = parseInt(e.target.value);
     const client = CLIENTS.find((c) => c.id === id) ?? null;
@@ -594,6 +924,10 @@ const ProcedureGuidePage = () => {
       }
     }
   };
+
+  const activeTopTab = isCreditRecoveryProc(activeProc)
+    ? "creditRecovery"
+    : activeProc;
 
   const completedStepIds = new Set(
     currentStepId
@@ -611,7 +945,7 @@ const ProcedureGuidePage = () => {
           <div>
             <h1 className="pgd-page-title">절차 안내</h1>
             <p className="pgd-page-sub">
-              개인회생·채무조정·파산 각 절차를 단계별로 확인하고 고객의 진행 상황을 관리합니다
+              개인회생·신용회복(신속·프리·개인워크아웃)·새출발기금·파산 각 절차를 단계별로 확인하고 고객의 진행 상황을 관리합니다
             </p>
           </div>
           <button className="pgd-back-btn" onClick={() => navigate("/checklist")}>
@@ -641,17 +975,52 @@ const ProcedureGuidePage = () => {
 
         {/* 절차 탭 */}
         <div className="pgd-tabs">
-          {Object.values(PROCEDURES).map((proc) => (
-            <button
-              key={proc.id}
-              className={`pgd-tab ${activeProc === proc.id ? "active" : ""}`}
-              style={activeProc === proc.id ? { borderColor: proc.color, color: proc.color } : {}}
-              onClick={() => handleProcChange(proc.id)}
-            >
-              {proc.label}
-            </button>
-          ))}
+          {TOP_TABS.map((tab) => {
+            const active = activeTopTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                className={`pgd-tab ${active ? "active" : ""}`}
+                style={
+                  active
+                    ? { borderColor: tab.color, color: tab.color }
+                    : undefined
+                }
+                onClick={() => handleTopTabChange(tab)}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
+
+        {isCreditRecoveryProc(activeProc) && (
+          <div className="pgd-subtabs">
+            {CREDIT_RECOVERY_IDS.map((procId) => {
+              const proc = PROCEDURES[procId];
+              const active = activeProc === procId;
+              return (
+                <button
+                  key={procId}
+                  type="button"
+                  className={`pgd-subtab ${active ? "active" : ""}`}
+                  style={
+                    active
+                      ? {
+                          borderColor: proc.color,
+                          color: proc.color,
+                          background: `${proc.color}12`,
+                        }
+                      : undefined
+                  }
+                  onClick={() => handleProcChange(procId)}
+                >
+                  {proc.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* 메인 콘텐츠 */}
         <div className="pgd-content">
