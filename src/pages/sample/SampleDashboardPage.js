@@ -1009,7 +1009,68 @@ const buildOptionBlocks = () => {
 };
 const OPTION_BLOCKS = buildOptionBlocks();
 
-const AI = { repaymentMonths: 84, repaymentAmount: 45 };
+/** 선택 절차별 예상 계획 프로필 */
+const PLAN_BY_OPTION = {
+  rehabilitation: {
+    kind: "repayment",
+    title: "예상 변제 계획",
+    amount: 45,
+    months: 84,
+    periodNote: "7년",
+  },
+  personalWorkout: {
+    kind: "repayment",
+    title: "예상 변제 계획",
+    amount: 50,
+    months: 96,
+    periodNote: "8년",
+  },
+  newStartFund: {
+    kind: "repayment",
+    title: "예상 변제 계획",
+    amount: 48,
+    months: 120,
+    periodNote: "10년",
+  },
+  rapidDebtAdj: {
+    kind: "adjustment",
+    title: "예상 조정 요약",
+    rows: [
+      { label: "조정 방식", value: "이자율 인하 · 분할상환" },
+      { label: "원금 감면", value: "없음" },
+      { label: "상환 기간", value: "최장 10년" },
+    ],
+    note: "원금 감면 없이 이자·기간 조정이 중심이라 월 변제 계획보다 조정 조건이 중요합니다.",
+    // 와이어프레임: 원금은 거의 그대로 상환, 이자만 일부 경감
+    remainRatio: 1,
+    interestReliefRatio: 0.45,
+  },
+  preWorkout: {
+    kind: "adjustment",
+    title: "예상 조정 요약",
+    rows: [
+      { label: "조정 방식", value: "연체이자 감면 · 이자율 조정" },
+      { label: "원금 감면", value: "원칙적으로 없음" },
+      { label: "상환 기간", value: "최장 10년" },
+    ],
+    note: "연체 초기에 유리한 제도로, 장기 연체·고액 감면이 목적이면 개인워크아웃·회생과 비교가 필요합니다.",
+    remainRatio: 1,
+    interestReliefRatio: 0.55,
+  },
+  bankruptcy: {
+    kind: "discharge",
+    title: "예상 면책 결과",
+    rows: [
+      { label: "변제 계획", value: "해당 없음" },
+      { label: "핵심 결과", value: "잔여 채무 면책" },
+      { label: "자산", value: "환가·처분 검토 대상" },
+    ],
+    note: "파산은 월 변제 계획보다 면책 가능 여부와 자산 처분·취업 제한이 핵심입니다.",
+  },
+};
+
+const getPlanProfile = (optionId) =>
+  PLAN_BY_OPTION[optionId] || PLAN_BY_OPTION.rehabilitation;
 
 const SCRIPTS = [
   {
@@ -2303,15 +2364,51 @@ const SampleDashboardPage = () => {
       ? aggregateByDebtType(debtSummary.items)
       : CLIENT.debtBreakdown;
 
-  const totalRepayment = AI.repaymentAmount * AI.repaymentMonths;
-  const exemptDebt = Math.max(
+  const planProfile = getPlanProfile(selectedOption);
+  const interestTotal = Math.max(
     0,
-    Math.round(totalDebtPrincipal - totalRepayment),
+    Math.round(totalDebtWithInterest - totalDebtPrincipal),
   );
-  const exemptDebtWithInterest = Math.max(
-    0,
-    Math.round(totalDebtWithInterest - totalRepayment),
-  );
+
+  let totalRepayment = 0;
+  let exemptDebt = 0;
+  let exemptDebtWithInterest = 0;
+  let showExemptWithInterest = false;
+  let remainDebt = 0;
+
+  if (planProfile.kind === "repayment") {
+    totalRepayment = planProfile.amount * planProfile.months;
+    remainDebt = totalRepayment;
+    exemptDebt = Math.max(0, Math.round(totalDebtPrincipal - totalRepayment));
+    exemptDebtWithInterest = Math.max(
+      0,
+      Math.round(totalDebtWithInterest - totalRepayment),
+    );
+    showExemptWithInterest =
+      totalDebtWithInterest > totalDebtPrincipal &&
+      exemptDebtWithInterest > exemptDebt;
+  } else if (planProfile.kind === "adjustment") {
+    remainDebt = Math.round(
+      totalDebtPrincipal * (planProfile.remainRatio ?? 1),
+    );
+    totalRepayment = remainDebt;
+    const interestRelief = Math.round(
+      interestTotal * (planProfile.interestReliefRatio ?? 0),
+    );
+    exemptDebt = Math.max(0, Math.round(totalDebtPrincipal - remainDebt));
+    exemptDebtWithInterest = exemptDebt + interestRelief;
+    showExemptWithInterest =
+      interestRelief > 0 && totalDebtWithInterest > totalDebtPrincipal;
+  } else {
+    // bankruptcy — 변제계획 없음, 잔여 0에 가깝게 면책
+    remainDebt = 0;
+    totalRepayment = 0;
+    exemptDebt = totalDebtPrincipal;
+    exemptDebtWithInterest = totalDebtWithInterest;
+    showExemptWithInterest =
+      totalDebtWithInterest > totalDebtPrincipal &&
+      exemptDebtWithInterest > exemptDebt;
+  }
 
   const paidCount = installments.filter((it) => it.status === "paid").length;
   const canceledCount = installments.filter(
@@ -2953,46 +3050,111 @@ const SampleDashboardPage = () => {
             </div>
           </section>
 
-          {/* ④ 변제 계획 */}
+          {/* ④ 예상 결과 (절차별) */}
           <section className="sdp-section">
-            <p className="sdp-section-label">예상 변제 계획</p>
-            <div className="sdp-plan-kv">
-              <div className="sdp-kv">
-                <span>월 변제액</span>
-                <strong>{AI.repaymentAmount}만원</strong>
+            <p className="sdp-section-label">{planProfile.title}</p>
+
+            {planProfile.kind === "repayment" && (
+              <div className="sdp-plan-kv">
+                <div className="sdp-kv">
+                  <span>월 변제액</span>
+                  <strong>{planProfile.amount}만원</strong>
+                </div>
+                <div className="sdp-kv">
+                  <span>변제 기간</span>
+                  <strong>
+                    {planProfile.months}개월 ({planProfile.periodNote})
+                  </strong>
+                </div>
+                <div className="sdp-kv">
+                  <span>총 변제액</span>
+                  <strong>{totalRepayment.toLocaleString()}만원</strong>
+                </div>
               </div>
-              <div className="sdp-kv">
-                <span>변제 기간</span>
-                <strong>{AI.repaymentMonths}개월 (7년)</strong>
-              </div>
-              <div className="sdp-kv">
-                <span>총 변제액</span>
-                <strong>{totalRepayment.toLocaleString()}만원</strong>
-              </div>
-            </div>
-            <div className="sdp-exempt-box">
-              <p className="sdp-exempt-label">예상 면책 채무</p>
-              <div className="sdp-exempt-compare">
-                <div className="sdp-exempt-col">
-                  <span className="sdp-exempt-col-label">원금 기준</span>
-                  <p className="sdp-exempt-val">
-                    약 {exemptDebt.toLocaleString()}
+            )}
+
+            {planProfile.kind === "adjustment" && (
+              <>
+                <div className="sdp-plan-kv">
+                  {planProfile.rows.map((row) => (
+                    <div key={row.label} className="sdp-kv">
+                      <span>{row.label}</span>
+                      <strong>{row.value}</strong>
+                    </div>
+                  ))}
+                </div>
+                {planProfile.note && (
+                  <p className="sdp-plan-note">{planProfile.note}</p>
+                )}
+              </>
+            )}
+
+            {planProfile.kind === "discharge" && (
+              <>
+                <div className="sdp-plan-kv">
+                  {planProfile.rows.map((row) => (
+                    <div key={row.label} className="sdp-kv">
+                      <span>{row.label}</span>
+                      <strong>{row.value}</strong>
+                    </div>
+                  ))}
+                </div>
+                {planProfile.note && (
+                  <p className="sdp-plan-note">{planProfile.note}</p>
+                )}
+              </>
+            )}
+
+            {planProfile.kind !== "adjustment" && (
+              <div className="sdp-outcome-box">
+                <div className="sdp-outcome-exempt">
+                  <div className="sdp-outcome-block-head">
+                    <span className="sdp-outcome-block-label">
+                      예상 면책 채무
+                    </span>
+                    <span className="sdp-outcome-block-hint">
+                      변제 완료 후 탕감되는 금액
+                    </span>
+                  </div>
+                  <div
+                    className={`sdp-outcome-exempt-cols ${showExemptWithInterest ? "dual" : ""}`}
+                  >
+                    {showExemptWithInterest && (
+                      <div className="sdp-outcome-col">
+                        <span className="sdp-outcome-col-label">이자 포함</span>
+                        <p className="sdp-outcome-col-val">
+                          약 {exemptDebtWithInterest.toLocaleString()}
+                          <em>만원</em>
+                        </p>
+                      </div>
+                    )}
+                    <div className="sdp-outcome-col">
+                      <span className="sdp-outcome-col-label">원금 기준</span>
+                      <p className="sdp-outcome-col-val">
+                        약 {exemptDebt.toLocaleString()}
+                        <em>만원</em>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="sdp-outcome-remain">
+                  <div className="sdp-outcome-block-head">
+                    <span className="sdp-outcome-block-label">
+                      예상 잔여 채무
+                    </span>
+                    <span className="sdp-outcome-block-hint">
+                      {planProfile.kind === "discharge"
+                        ? "면책 시 갚을 금액 (세금 등 제외채무 별도)"
+                        : "절차 진행 시 갚아야 하는 금액"}
+                    </span>
+                  </div>
+                  <p className="sdp-outcome-col-val">
+                    약 {remainDebt.toLocaleString()}
                     <em>만원</em>
                   </p>
                 </div>
-                <div className="sdp-exempt-col">
-                  <span className="sdp-exempt-col-label">이자 포함</span>
-                  <p className="sdp-exempt-val">
-                    약 {exemptDebtWithInterest.toLocaleString()}
-                    <em>만원</em>
-                  </p>
-                </div>
               </div>
-              <p className="sdp-exempt-desc">
-                변제 완료 후 법원 결정으로 면책되는 잔여 채무입니다. 이자 포함은
-                약정 총 상환액 기준 추정값입니다.
-              </p>
-            </div>
+            )}
 
             <div className="sdp-divider" />
 
