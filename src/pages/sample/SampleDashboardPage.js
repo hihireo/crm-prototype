@@ -91,7 +91,7 @@ const DEBT_TYPE_OPTIONS = [
 ];
 const REPAY_METHOD_OPTIONS = ["원리금균등", "원금균등", "만기일시"];
 
-/** 심플 모드 연체기간 (OverduePeriod) */
+/** 간편 모드 연체기간 (OverduePeriod) */
 const OverduePeriod = {
   None: "none",
   Under3Months: "under_3_months",
@@ -3563,7 +3563,7 @@ const SampleDashboardPage = () => {
                       className={`scl-mode-btn ${debtDraft.debtInputMode === "simple" ? "on" : ""}`}
                       onClick={() => switchDebtDraftMode("simple")}
                     >
-                      심플
+                      간편
                     </button>
                     <button
                       type="button"

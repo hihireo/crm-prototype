@@ -426,23 +426,14 @@ const payProgressPct = (payment) => {
   return Math.round((payment.paidCount / payment.count) * 100);
 };
 
-const CREDIT_RECOVERY_LABELS = [
-  "신속채무조정",
-  "프리워크아웃",
-  "개인워크아웃",
-];
+const CREDIT_RECOVERY_LABELS = ["신속채무조정", "프리워크아웃", "개인워크아웃"];
 
-const PROC_FILTERS = [
-  "전체",
-  "개인회생",
-  "신용회복",
-  "새출발기금",
-  "파산",
-];
+const PROC_FILTERS = ["전체", "개인회생", "신용회복", "새출발기금", "파산"];
 
 const matchesProcFilter = (recommended, filter) => {
   if (filter === "전체") return true;
-  if (filter === "신용회복") return CREDIT_RECOVERY_LABELS.includes(recommended);
+  if (filter === "신용회복")
+    return CREDIT_RECOVERY_LABELS.includes(recommended);
   return recommended === filter;
 };
 
@@ -484,8 +475,7 @@ const NEWS_ITEMS = [
     source: "매일경제",
     date: "07.24",
     headline: "프리워크아웃과 개인워크아웃의 차이",
-    summary:
-      "연체 기간별 선택 기준과 상담 시 자주 나오는 질문을 정리했습니다.",
+    summary: "연체 기간별 선택 기준과 상담 시 자주 나오는 질문을 정리했습니다.",
     query: "프리워크아웃 개인워크아웃 차이",
   },
   {
@@ -526,7 +516,8 @@ const NEWS_ITEMS = [
     source: "헤럴드경제",
     date: "07.20",
     headline: "카드론·현금서비스도 개인워크아웃 대상일까",
-    summary: "금융채무와 비금융채무 구분, 상담 시 자주 헷갈리는 사례를 모았습니다.",
+    summary:
+      "금융채무와 비금융채무 구분, 상담 시 자주 헷갈리는 사례를 모았습니다.",
     query: "개인워크아웃 카드론 현금서비스",
   },
   {
@@ -681,7 +672,7 @@ const ChecklistListPage = () => {
         {/* 페이지 헤더 */}
         <div className="cll-page-header">
           <div>
-            <h1 className="cll-page-title">회생·파산 진단 목록</h1>
+            <h1 className="cll-page-title">채무조정 진단 목록</h1>
             <p className="cll-page-sub">
               총 {totalCount}건 · 이번 달 {thisMonth}건 상담
             </p>

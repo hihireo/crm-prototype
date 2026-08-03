@@ -22,7 +22,7 @@ const SECTIONS = [
   {
     id: "misc",
     label: "기타 사항",
-    desc: "신청 이력, 소송 여부 등을 확인합니다",
+    desc: "새출발기금 자격, 신청 이력, 소송 여부를 확인합니다",
   },
 ];
 
@@ -82,7 +82,7 @@ const DEBT_TYPE_OPTIONS = [
 
 const REPAY_METHOD_OPTIONS = ["원리금균등", "원금균등", "만기일시"];
 
-/** 심플 모드 연체기간 (OverduePeriod) */
+/** 간편 모드 연체기간 (OverduePeriod) */
 const OverduePeriod = {
   None: "none",
   Under3Months: "under_3_months",
@@ -399,7 +399,7 @@ const SampleChecklistPage = () => {
     0,
   );
 
-  // 사이드바·심플 합계는 만원 단위 유지 / 상세는 원 → 만원 환산
+  // 사이드바·간편 합계는 만원 단위 유지 / 상세는 원 → 만원 환산
   const totalDebt =
     form.debtInputMode === "detail"
       ? wonToMan(detailPrincipalWon)
@@ -996,7 +996,7 @@ const SampleChecklistPage = () => {
                             }))
                           }
                         >
-                          심플
+                          간편
                         </button>
                         <button
                           type="button"
@@ -1436,131 +1436,171 @@ const SampleChecklistPage = () => {
 
               {activeSection === "misc" && (
                 <>
-                  <p className="scl-sub-heading">새출발기금 자격 확인</p>
-                  <p className="scl-note">
-                    ※ 해당 기간 사업 영위 시에만 상세 문항이 표시됩니다
-                    (휴업·폐업 포함)
-                  </p>
-                  <Field
-                    label="’20.4월 ~ ’25.6월 중 개인사업자·소상공인으로 사업 영위한 적 있음"
-                    hint="현재 고용 형태와 무관"
-                  >
-                    <Chips
-                      options={[
-                        { value: "yes", label: "예" },
-                        { value: "no", label: "아니오" },
-                      ]}
-                      value={form.businessPeriodEligible ? "yes" : "no"}
-                      onChange={(v) =>
-                        setForm((p) => {
-                          const eligible = v === "yes";
-                          if (!eligible) {
-                            return {
-                              ...p,
-                              businessPeriodEligible: false,
-                              businessStatus: "해당없음",
-                              distressTypes: ["해당없음"],
-                              excludedIndustry: false,
-                              previousNewStartFund: false,
-                            };
-                          }
-                          return {
-                            ...p,
-                            businessPeriodEligible: true,
-                            businessStatus:
-                              p.businessStatus === "해당없음"
-                                ? "영업중"
-                                : p.businessStatus || "영업중",
-                            distressTypes:
-                              !p.distressTypes.length ||
-                              p.distressTypes.includes("해당없음")
-                                ? ["3개월 이상 연체"]
-                                : p.distressTypes,
-                          };
-                        })
-                      }
-                    />
-                  </Field>
-
-                  {form.businessPeriodEligible && (
-                    <>
-                      <Field label="현재 사업 상태">
-                        <Chips
-                          options={[
-                            "영업중",
-                            "휴업",
-                            "폐업(개인)",
-                            "법인 폐업",
-                          ]}
-                          value={form.businessStatus}
-                          onChange={set("businessStatus")}
-                        />
-                      </Field>
-                      <Field
-                        label="부실·부실우려 해당 여부"
-                        hint="중복 선택 가능"
-                      >
-                        <Chips
-                          options={[
-                            "3개월 이상 연체",
-                            "만기연장·상환유예",
-                            "국세·지방세 체납",
-                            "신용평점 하위",
-                            "해당없음",
-                          ]}
-                          value={form.distressTypes}
-                          onChange={(next) => {
-                            if (
-                              next.includes("해당없음") &&
-                              !form.distressTypes.includes("해당없음")
-                            ) {
-                              set("distressTypes")(["해당없음"]);
-                            } else {
-                              set("distressTypes")(
-                                next.filter((x) => x !== "해당없음"),
-                              );
-                            }
-                          }}
-                          multi
-                        />
-                      </Field>
-                      <div className="scl-check-list">
-                        {[
-                          {
-                            field: "excludedIndustry",
-                            label:
-                              "새출발기금 제외 업종 해당 (부동산 임대업, 법무·회계·세무 등)",
-                          },
-                          {
-                            field: "previousNewStartFund",
-                            label:
-                              "새출발기금 이전 신청 이력 있음 (원칙적으로 1회만 신청 가능)",
-                          },
-                        ].map(({ field, label }) => (
-                          <div
-                            key={field}
-                            className={`scl-check-card ${form[field] ? "expanded" : ""}`}
-                          >
-                            <label className="scl-check-row">
-                              <span>{label}</span>
-                              <div
-                                className={`scl-switch ${form[field] ? "on" : ""}`}
-                                onClick={() =>
-                                  setForm((p) => ({
-                                    ...p,
-                                    [field]: !p[field],
-                                  }))
-                                }
-                              >
-                                <div className="scl-switch-thumb" />
-                              </div>
-                            </label>
-                          </div>
-                        ))}
+                  <div className="scl-nsf-panel">
+                    <div className="scl-nsf-panel-head">
+                      <div className="scl-nsf-panel-title-wrap">
+                        <span className="scl-nsf-badge">새출발기금</span>
                       </div>
-                    </>
-                  )}
+                      <span
+                        className={`scl-nsf-status ${form.businessPeriodEligible ? "eligible" : "ineligible"}`}
+                      ></span>
+                    </div>
 
+                    <div className="scl-nsf-panel-body">
+                      <div className="scl-nsf-gate">
+                        <div className="scl-nsf-step">
+                          <div className="scl-nsf-step-body">
+                            <Field
+                              label="’20.4월 ~ ’25.6월 중 개인사업자·소상공인으로 사업 영위한 적 있음"
+                              hint="현재 고용 형태와 무관 · 휴업·폐업 포함"
+                            >
+                              <Chips
+                                options={[
+                                  { value: "yes", label: "예" },
+                                  { value: "no", label: "아니오" },
+                                ]}
+                                value={
+                                  form.businessPeriodEligible ? "yes" : "no"
+                                }
+                                onChange={(v) =>
+                                  setForm((p) => {
+                                    const eligible = v === "yes";
+                                    if (!eligible) {
+                                      return {
+                                        ...p,
+                                        businessPeriodEligible: false,
+                                        businessStatus: "해당없음",
+                                        distressTypes: ["해당없음"],
+                                        excludedIndustry: false,
+                                        previousNewStartFund: false,
+                                      };
+                                    }
+                                    return {
+                                      ...p,
+                                      businessPeriodEligible: true,
+                                      businessStatus:
+                                        p.businessStatus === "해당없음"
+                                          ? "영업중"
+                                          : p.businessStatus || "영업중",
+                                      distressTypes:
+                                        !p.distressTypes.length ||
+                                        p.distressTypes.includes("해당없음")
+                                          ? ["3개월 이상 연체"]
+                                          : p.distressTypes,
+                                    };
+                                  })
+                                }
+                              />
+                            </Field>
+                          </div>
+                        </div>
+                      </div>
+
+                      {form.businessPeriodEligible ? (
+                        <div className="scl-nsf-followup">
+                          <p className="scl-nsf-followup-label">
+                            사업 영위 해당 시 추가 확인
+                          </p>
+                          <div className="scl-nsf-step">
+                            <span className="scl-nsf-step-num">2</span>
+                            <div className="scl-nsf-step-body">
+                              <Field label="현재 사업 상태">
+                                <Chips
+                                  options={[
+                                    "영업중",
+                                    "휴업",
+                                    "폐업(개인)",
+                                    "법인 폐업",
+                                  ]}
+                                  value={form.businessStatus}
+                                  onChange={set("businessStatus")}
+                                />
+                              </Field>
+                            </div>
+                          </div>
+                          <div className="scl-nsf-step">
+                            <span className="scl-nsf-step-num">3</span>
+                            <div className="scl-nsf-step-body">
+                              <Field
+                                label="부실·부실우려 해당 여부"
+                                hint="중복 선택 가능"
+                              >
+                                <Chips
+                                  options={[
+                                    "3개월 이상 연체",
+                                    "만기연장·상환유예",
+                                    "국세·지방세 체납",
+                                    "신용평점 하위",
+                                    "해당없음",
+                                  ]}
+                                  value={form.distressTypes}
+                                  onChange={(next) => {
+                                    if (
+                                      next.includes("해당없음") &&
+                                      !form.distressTypes.includes("해당없음")
+                                    ) {
+                                      set("distressTypes")(["해당없음"]);
+                                    } else {
+                                      set("distressTypes")(
+                                        next.filter((x) => x !== "해당없음"),
+                                      );
+                                    }
+                                  }}
+                                  multi
+                                />
+                              </Field>
+                            </div>
+                          </div>
+                          <div className="scl-nsf-step">
+                            <span className="scl-nsf-step-num">4</span>
+                            <div className="scl-nsf-step-body">
+                              <p className="scl-nsf-inline-label">
+                                결격·이력 확인
+                              </p>
+                              <div className="scl-check-list">
+                                {[
+                                  {
+                                    field: "excludedIndustry",
+                                    label:
+                                      "제외 업종 해당 (부동산 임대업, 법무·회계·세무 등)",
+                                  },
+                                  {
+                                    field: "previousNewStartFund",
+                                    label:
+                                      "이전 신청 이력 있음 (원칙적으로 1회만 신청 가능)",
+                                  },
+                                ].map(({ field, label }) => (
+                                  <div
+                                    key={field}
+                                    className={`scl-check-card ${form[field] ? "expanded" : ""}`}
+                                  >
+                                    <label className="scl-check-row">
+                                      <span>{label}</span>
+                                      <div
+                                        className={`scl-switch ${form[field] ? "on" : ""}`}
+                                        onClick={() =>
+                                          setForm((p) => ({
+                                            ...p,
+                                            [field]: !p[field],
+                                          }))
+                                        }
+                                      >
+                                        <div className="scl-switch-thumb" />
+                                      </div>
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <></>
+                      )}
+                    </div>
+                  </div>
+
+                  <p className="scl-sub-heading">기타 확인 사항</p>
                   <div className="scl-check-list">
                     {[
                       {
