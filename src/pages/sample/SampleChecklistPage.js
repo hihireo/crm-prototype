@@ -126,13 +126,15 @@ const normalizeSimpleOverdue = (value) => {
   if (value === "3~6개월") return OverduePeriod.From3To6Months;
   if (value === "6~12개월") return OverduePeriod.From6To12Months;
   if (value === "1년 이상") return OverduePeriod.Over1Year;
-  return monthsToOverduePeriod(parseInt(String(value ?? "").replace(/[^\d]/g, ""), 10) || 0);
+  return monthsToOverduePeriod(
+    parseInt(String(value ?? "").replace(/[^\d]/g, ""), 10) || 0,
+  );
 };
 
-const overduePeriodLabel = (value) => {
-  const opt = OVERDUE_PERIOD_OPTIONS.find((o) => o.value === value);
-  return opt?.label ?? null;
-};
+// const overduePeriodLabel = (value) => {
+//   const opt = OVERDUE_PERIOD_OPTIONS.find((o) => o.value === value);
+//   return opt?.label ?? null;
+// };
 
 const parseOverdueMonths = (value) => {
   if (value == null || value === "" || value === "없음") return 0;
