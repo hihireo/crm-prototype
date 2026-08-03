@@ -290,8 +290,7 @@ const calcDebtItem = (debt) => {
 
 const buildDebtSummaryFromDetailRows = (rows) => {
   const items = rows.map((row, idx) => {
-    const principalWon =
-      parseInt(row.principalWon ?? row.principal) || 0;
+    const principalWon = parseInt(row.principalWon ?? row.principal) || 0;
     const n = monthsBetween(row.loanDate, row.maturityDate);
     const calc = n
       ? calcRepayment(principalWon, row.rate, n, row.repayMethod)
@@ -373,7 +372,10 @@ const buildDebtSummaryFromSimpleDraft = (draft) => {
   return buildDebtSummaryFromSimpleRows(rows, draft.overduePeriod);
 };
 
-const buildDebtSummaryFromSimpleRows = (rows, overduePeriod = OverduePeriod.None) => {
+const buildDebtSummaryFromSimpleRows = (
+  rows,
+  overduePeriod = OverduePeriod.None,
+) => {
   const items = rows
     .map((row, idx) => ({
       id: row.id || `s${idx}`,
@@ -457,9 +459,7 @@ const amountByDebtType = (items) => {
     }
   });
   return {
-    debtTypes: types.length
-      ? types
-      : ["은행대출", "카드론", "캐피탈"],
+    debtTypes: types.length ? types : ["은행대출", "카드론", "캐피탈"],
     ...amounts,
   };
 };
@@ -3525,7 +3525,6 @@ const SampleDashboardPage = () => {
             <div className="sdp-debt-modal-head">
               <div>
                 <p className="sdp-debt-modal-title">채무 상세</p>
-                <p className="sdp-debt-modal-sub">진단 입력과 동일하게 수정할 수 있습니다</p>
               </div>
               <button
                 type="button"
@@ -3645,7 +3644,9 @@ const SampleDashboardPage = () => {
                       >
                         <select
                           className="scl-input"
-                          value={normalizeSimpleOverdue(debtDraft.overduePeriod)}
+                          value={normalizeSimpleOverdue(
+                            debtDraft.overduePeriod,
+                          )}
                           onChange={(e) =>
                             setDebtDraftField("overduePeriod")(e.target.value)
                           }
