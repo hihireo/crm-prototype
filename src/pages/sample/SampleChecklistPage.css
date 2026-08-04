@@ -107,19 +107,6 @@
 
 .scl-step-label { font-size: 12px; color: #444; letter-spacing: -0.01em; }
 
-/* 분析하기 버튼 래퍼 */
-.scl-analyze-wrap {
-  padding: 14px 0 4px;
-  border-top: 1px solid #e0e0e0;
-  margin-top: 4px;
-}
-
-/* 데스크탑: sidebar-body 안 — 항상 표시 */
-.scl-analyze-desktop { display: block; }
-
-/* 모바일: sidebar 직계 자식 — 기본 숨김, 모바일에서만 표시 */
-.scl-analyze-mobile { display: none; }
-
 /* 레인보우 테두리를 위한 CSS custom property 애니메이션 */
 @property --scl-angle {
   syntax: '<angle>';
@@ -129,31 +116,6 @@
 
 @keyframes scl-rainbow-spin {
   to { --scl-angle: 360deg; }
-}
-
-.scl-analyze-btn {
-  width: 100%;
-  padding: 12px 0;
-  color: #111;
-  border-radius: 12px;
-  font-size: 13px; font-weight: 700;
-  cursor: pointer; letter-spacing: -0.01em;
-  display: flex; align-items: center; justify-content: center;
-  /* 흰 배경 + 파스텔 레인보우 테두리 (은은하게) */
-  background:
-    linear-gradient(#fff, #fff) padding-box,
-    conic-gradient(from var(--scl-angle), #ddd6fe, #bfdbfe, #a5f3d0, #fde68a, #fecaca, #f5d0fe, #ddd6fe) border-box;
-  border: 1.5px solid transparent;
-  animation: scl-rainbow-spin 10s linear infinite;
-  box-shadow: 0 1px 6px rgba(139,92,246,0.08);
-  transition: box-shadow 0.2s;
-}
-.scl-analyze-btn:hover {
-  background:
-    linear-gradient(#f8f7ff, #f8f7ff) padding-box,
-    conic-gradient(from var(--scl-angle), #ddd6fe, #bfdbfe, #a5f3d0, #fde68a, #fecaca, #f5d0fe, #ddd6fe) border-box;
-  border: 1.5px solid transparent;
-  box-shadow: 0 3px 14px rgba(139,92,246,0.14);
 }
 
 /* X 닫기 버튼 — 정보 수정 모드 */
@@ -815,7 +777,7 @@
     overflow: visible;
   }
 
-  /* 모바일 탑바: 단계 정보(좌) + 분석하기 버튼(우) + 화살표(하단 중앙) */
+  /* 모바일 탑바: 단계 정보(좌) + 화살표(하단 중앙) */
   .scl-mobile-topbar {
     display: flex;
     align-items: center;
@@ -855,25 +817,6 @@
     white-space: nowrap;
   }
 
-  /* 탑바 내 분석하기 버튼 */
-  .scl-mobile-analyze-btn {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-    padding: 6px 12px;
-    background:
-      linear-gradient(#fff, #fff) padding-box,
-      conic-gradient(from var(--scl-angle), #ddd6fe, #bfdbfe, #a5f3d0, #fde68a, #fecaca, #f5d0fe, #ddd6fe) border-box;
-    border: 1.5px solid transparent;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 700;
-    color: #111;
-    cursor: pointer;
-    letter-spacing: -0.01em;
-    animation: scl-rainbow-spin 10s linear infinite;
-  }
-
   /* 열고 닫기 화살표 — 하단 중앙 절대 위치 */
   .scl-mobile-toggle {
     position: absolute;
@@ -900,10 +843,6 @@
     padding: 14px 16px 16px;
   }
   .scl-sidebar.mobile-open .scl-sidebar-body { display: flex; }
-
-  /* 분석하기 버튼: 탑바 내부로 통합됐으므로 기존 외부 영역 숨김 */
-  .scl-analyze-desktop { display: none; }
-  .scl-analyze-mobile { display: none; }
 
   /* X 버튼: 모바일 위치 */
   .scl-close-btn {
@@ -946,27 +885,108 @@
     margin-top: 16px;
   }
   .scl-btn-prev,
-  .scl-btn-next { flex: 1; text-align: center; padding: 14px; }
+  .scl-btn-next {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+  }
+  .scl-nav-analyze {
+    padding: 12px 14px;
+    font-size: 12px;
+  }
 }
 
 /* Bottom nav */
 .scl-nav-btns {
-  display: flex; gap: 8px; justify-content: flex-end;
-  padding-top: 28px; margin-top: auto;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding-top: 28px;
+  margin-top: auto;
 }
-.scl-btn-prev {
-  padding: 12px 22px; border: 1px solid #e0e0e0; border-radius: 10px;
-  background: #fff; font-size: 13px; font-weight: 600; color: #555;
-  cursor: pointer; letter-spacing: -0.01em; transition: background 0.12s;
-}
-.scl-btn-prev:hover { background: #f5f5f5; }
 
-.scl-btn-next {
-  padding: 12px 28px;
-  background: #111; color: #fff; border: none;
-  border-radius: 10px; font-size: 13px; font-weight: 700;
-  cursor: pointer; letter-spacing: -0.01em;
-  transition: background 0.12s;
+.scl-nav-center {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.scl-btn-next:hover { background: #333; }
+
+.scl-btn-prev,
+.scl-btn-next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid #e8e8e8;
+  border-radius: 50%;
+  background: #fff;
+  color: #555;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.scl-btn-prev:hover:not(:disabled),
+.scl-btn-next:hover:not(:disabled) {
+  background: #f5f5f5;
+  color: #111;
+  border-color: #ddd;
+}
+.scl-btn-prev:disabled,
+.scl-btn-next:disabled {
+  color: #ccc;
+  border-color: #eee;
+  background: #fafafa;
+  cursor: not-allowed;
+}
+
+.scl-nav-analyze {
+  grid-column: 3;
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 18px;
+  color: #111;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    conic-gradient(
+      from var(--scl-angle),
+      #ddd6fe,
+      #bfdbfe,
+      #a5f3d0,
+      #fde68a,
+      #fecaca,
+      #f5d0fe,
+      #ddd6fe
+    )
+    border-box;
+  border: 1.5px solid transparent;
+  animation: scl-rainbow-spin 10s linear infinite;
+  box-shadow: 0 1px 6px rgba(139, 92, 246, 0.08);
+  transition: box-shadow 0.2s, background 0.2s;
+}
+.scl-nav-analyze:hover {
+  background:
+    linear-gradient(#f8f7ff, #f8f7ff) padding-box,
+    conic-gradient(
+      from var(--scl-angle),
+      #ddd6fe,
+      #bfdbfe,
+      #a5f3d0,
+      #fde68a,
+      #fecaca,
+      #f5d0fe,
+      #ddd6fe
+    )
+    border-box;
+  box-shadow: 0 3px 14px rgba(139, 92, 246, 0.14);
+}
 

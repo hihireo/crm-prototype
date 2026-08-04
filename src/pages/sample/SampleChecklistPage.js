@@ -613,32 +613,6 @@ const SampleChecklistPage = () => {
                 {currentSection.label}
               </span>
             </div>
-            {/* 분석하기 버튼 (우) */}
-            <button className="scl-mobile-analyze-btn" onClick={goToResult}>
-              <svg
-                width="11"
-                height="11"
-                viewBox="0 0 14 14"
-                fill="none"
-                style={{ marginRight: 5, flexShrink: 0 }}
-              >
-                <path
-                  d="M7 0C7.2 2.8 8.2 4.8 10.5 6C8.2 7.2 7.2 9.2 7 12C6.8 9.2 5.8 7.2 3.5 6C5.8 4.8 6.8 2.8 7 0Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M12 4C12.1 5.2 12.6 6 13.5 6.5C12.6 7 12.1 7.8 12 9C11.9 7.8 11.4 7 10.5 6.5C11.4 6 11.9 5.2 12 4Z"
-                  fill="currentColor"
-                  opacity="0.5"
-                />
-                <path
-                  d="M2 8C2.1 8.8 2.5 9.3 3 9.5C2.5 9.7 2.1 10.2 2 11C1.9 10.2 1.5 9.7 1 9.5C1.5 9.3 1.9 8.8 2 8Z"
-                  fill="currentColor"
-                  opacity="0.5"
-                />
-              </svg>
-              분석하기
-            </button>
             {/* 열고 닫기 — 전체 바 클릭 영역 */}
             <button
               className={`scl-mobile-toggle ${sidebarOpen ? "open" : ""}`}
@@ -735,64 +709,6 @@ const SampleChecklistPage = () => {
                 );
               })}
             </nav>
-
-            {/* 분석하기 버튼 — 데스크탑: 단계 메뉴 바로 아래 */}
-            <div className="scl-analyze-wrap scl-analyze-desktop">
-              <button className="scl-analyze-btn" onClick={goToResult}>
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 14 14"
-                  fill="none"
-                  style={{ marginRight: 7, flexShrink: 0 }}
-                >
-                  <path
-                    d="M7 0C7.2 2.8 8.2 4.8 10.5 6C8.2 7.2 7.2 9.2 7 12C6.8 9.2 5.8 7.2 3.5 6C5.8 4.8 6.8 2.8 7 0Z"
-                    fill="currentColor"
-                  />
-                  <path
-                    d="M12 4C12.1 5.2 12.6 6 13.5 6.5C12.6 7 12.1 7.8 12 9C11.9 7.8 11.4 7 10.5 6.5C11.4 6 11.9 5.2 12 4Z"
-                    fill="currentColor"
-                    opacity="0.7"
-                  />
-                  <path
-                    d="M2.5 1C2.55 1.9 2.9 2.5 3.5 2.8C2.9 3.1 2.55 3.7 2.5 4.5C2.45 3.7 2.1 3.1 1.5 2.8C2.1 2.5 2.45 1.9 2.5 1Z"
-                    fill="currentColor"
-                    opacity="0.5"
-                  />
-                </svg>
-                분석하기
-              </button>
-            </div>
-          </div>
-
-          {/* 분석하기 버튼 — 모바일: 단계 인디케이터 바로 아래 항상 노출 */}
-          <div className="scl-analyze-wrap scl-analyze-mobile">
-            <button className="scl-analyze-btn" onClick={goToResult}>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 14 14"
-                fill="none"
-                style={{ marginRight: 7, flexShrink: 0 }}
-              >
-                <path
-                  d="M7 0C7.2 2.8 8.2 4.8 10.5 6C8.2 7.2 7.2 9.2 7 12C6.8 9.2 5.8 7.2 3.5 6C5.8 4.8 6.8 2.8 7 0Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M12 4C12.1 5.2 12.6 6 13.5 6.5C12.6 7 12.1 7.8 12 9C11.9 7.8 11.4 7 10.5 6.5C11.4 6 11.9 5.2 12 4Z"
-                  fill="currentColor"
-                  opacity="0.7"
-                />
-                <path
-                  d="M2.5 1C2.55 1.9 2.9 2.5 3.5 2.8C2.9 3.1 2.55 3.7 2.5 4.5C2.45 3.7 2.1 3.1 1.5 2.8C2.1 2.5 2.45 1.9 2.5 1Z"
-                  fill="currentColor"
-                  opacity="0.5"
-                />
-              </svg>
-              분석하기
-            </button>
           </div>
         </aside>
 
@@ -1663,16 +1579,83 @@ const SampleChecklistPage = () => {
 
             {/* 하단 버튼 */}
             <div className="scl-nav-btns">
-              {currentIdx > 0 && (
-                <button className="scl-btn-prev" onClick={handlePrev}>
-                  이전
+              <div className="scl-nav-center">
+                <button
+                  type="button"
+                  className="scl-btn-prev"
+                  onClick={handlePrev}
+                  disabled={currentIdx === 0}
+                  aria-label="이전"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M10 3L5 8l5 5"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </button>
-              )}
-              {!isLast && (
-                <button className="scl-btn-next" onClick={handleNext}>
-                  다음
+                <button
+                  type="button"
+                  className="scl-btn-next"
+                  onClick={handleNext}
+                  disabled={isLast}
+                  aria-label="다음"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M6 3l5 5-5 5"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </button>
-              )}
+              </div>
+              <button
+                type="button"
+                className="scl-nav-analyze"
+                onClick={goToResult}
+              >
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M7 0C7.2 2.8 8.2 4.8 10.5 6C8.2 7.2 7.2 9.2 7 12C6.8 9.2 5.8 7.2 3.5 6C5.8 4.8 6.8 2.8 7 0Z"
+                    fill="currentColor"
+                  />
+                  <path
+                    d="M12 4C12.1 5.2 12.6 6 13.5 6.5C12.6 7 12.1 7.8 12 9C11.9 7.8 11.4 7 10.5 6.5C11.4 6 11.9 5.2 12 4Z"
+                    fill="currentColor"
+                    opacity="0.7"
+                  />
+                  <path
+                    d="M2.5 1C2.55 1.9 2.9 2.5 3.5 2.8C2.9 3.1 2.55 3.7 2.5 4.5C2.45 3.7 2.1 3.1 1.5 2.8C2.1 2.5 2.45 1.9 2.5 1Z"
+                    fill="currentColor"
+                    opacity="0.5"
+                  />
+                </svg>
+                분석하기
+              </button>
             </div>
           </div>
         </main>
