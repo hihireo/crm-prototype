@@ -1,6 +1,10 @@
 /* ===== Checklist — Modern B&W, max-width controlled ===== */
 
-*, *::before, *::after { box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
 .scl-page {
   height: calc(100vh - 44px); /* 44px = 글로벌 헤더 높이 */
@@ -8,16 +12,19 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  font-family: -apple-system, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+  font-family: -apple-system, "Pretendard", "Apple SD Gothic Neo", sans-serif;
 }
 
 /* ── Progress ── */
 .scl-progress-track {
-  height: 2px; background: #e8e8e8; flex-shrink: 0;
+  height: 2px;
+  background: #e8e8e8;
+  flex-shrink: 0;
 }
 .scl-progress-fill {
-  height: 100%; background: #111;
-  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  height: 100%;
+  background: #111;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ── Layout ── */
@@ -54,68 +61,147 @@
   gap: 20px;
 }
 
-.scl-client-row { display: flex; align-items: center; gap: 10px; }
+.scl-client-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
 .scl-avatar {
-  width: 36px; height: 36px;
-  background: #111; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 15px; font-weight: 700; flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  background: #111;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
-.scl-client-name { font-size: 14px; font-weight: 700; color: #111; letter-spacing: -0.02em; }
-.scl-client-sub  { font-size: 11px; color: #999; margin-top: 1px; }
+.scl-client-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+.scl-client-sub {
+  font-size: 11px;
+  color: #999;
+  margin-top: 1px;
+}
 
 .scl-kpi-grid {
-  display: flex; flex-direction: column;
-  border: 1px solid #ebebeb; border-radius: 12px;
-  overflow: hidden; background: #fff;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ebebeb;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
 }
 .scl-kpi {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 11px 14px; border-bottom: 1px solid #f5f5f5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 14px;
+  border-bottom: 1px solid #f5f5f5;
 }
-.scl-kpi:last-child { border-bottom: none; }
-.scl-kpi-label { font-size: 11px; color: #aaa; }
+.scl-kpi:last-child {
+  border-bottom: none;
+}
+.scl-kpi-label {
+  font-size: 11px;
+  color: #aaa;
+}
 .scl-kpi-val {
-  font-size: 14px; font-weight: 700; color: #111; letter-spacing: -0.02em;
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
 }
-.scl-kpi-val.neg { color: #888; }
-.scl-kpi-val em { font-style: normal; font-size: 10px; font-weight: 400; color: #bbb; margin-left: 2px; }
+.scl-kpi-val.neg {
+  color: #888;
+}
+.scl-kpi-val em {
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 400;
+  color: #bbb;
+  margin-left: 2px;
+}
 
 /* Steps nav */
-.scl-steps { display: flex; flex-direction: column; gap: 2px; }
+.scl-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 
 .scl-step-item {
-  display: flex; align-items: center; gap: 9px;
-  padding: 8px 10px; border: none; border-radius: 8px;
-  background: transparent; cursor: pointer; text-align: left; width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
   transition: background 0.12s;
 }
-.scl-step-item:hover { background: #efefef; }
-.scl-step-item.active { background: #111; }
-.scl-step-item.active .scl-step-label { color: #fff; font-weight: 600; }
-.scl-step-item.active .scl-step-dot { background: rgba(255,255,255,0.2); color: #fff; }
-.scl-step-item.done:not(.active) .scl-step-dot { background: #111; color: #fff; }
-
-.scl-step-dot {
-  width: 20px; height: 20px; border-radius: 50%;
-  background: #e8e8e8; color: #999;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10px; font-weight: 700; flex-shrink: 0;
+.scl-step-item:hover {
+  background: #efefef;
+}
+.scl-step-item.active {
+  background: #111;
+}
+.scl-step-item.active .scl-step-label {
+  color: #fff;
+  font-weight: 600;
+}
+.scl-step-item.active .scl-step-dot {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+.scl-step-item.done:not(.active) .scl-step-dot {
+  background: #111;
+  color: #fff;
 }
 
-.scl-step-label { font-size: 12px; color: #444; letter-spacing: -0.01em; }
+.scl-step-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #e8e8e8;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.scl-step-label {
+  font-size: 12px;
+  color: #444;
+  letter-spacing: -0.01em;
+}
 
 /* 레인보우 테두리를 위한 CSS custom property 애니메이션 */
 @property --scl-angle {
-  syntax: '<angle>';
+  syntax: "<angle>";
   initial-value: 0deg;
   inherits: false;
 }
 
 @keyframes scl-rainbow-spin {
-  to { --scl-angle: 360deg; }
+  to {
+    --scl-angle: 360deg;
+  }
 }
 
 /* X 닫기 버튼 — 정보 수정 모드 */
@@ -156,47 +242,96 @@
   gap: 0;
 }
 
-.scl-section-head { margin-bottom: 28px; }
+.scl-section-head {
+  margin-bottom: 28px;
+}
 
 .scl-section-title {
-  font-size: 22px; font-weight: 800; color: #111;
-  letter-spacing: -0.03em; margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.03em;
+  margin: 0 0 6px;
 }
 .scl-section-desc {
-  font-size: 13px; color: #aaa; margin: 0; letter-spacing: -0.01em;
+  font-size: 13px;
+  color: #aaa;
+  margin: 0;
+  letter-spacing: -0.01em;
 }
 
 /* ── Form ── */
-.scl-form { display: flex; flex-direction: column; gap: 22px; flex: 1; }
+.scl-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  flex: 1;
+}
 
-.scl-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.scl-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.scl-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.scl-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+}
 
-.scl-field { display: flex; flex-direction: column; gap: 8px; }
+.scl-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
 .scl-label {
-  font-size: 12px; font-weight: 600; color: #777;
-  letter-spacing: 0.02em; text-transform: uppercase;
-  display: flex; align-items: center; gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #777;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-.scl-hint { font-size: 11px; color: #bbb; font-weight: 400; text-transform: none; letter-spacing: 0; }
+.scl-hint {
+  font-size: 11px;
+  color: #bbb;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
 
 /* 칩 선택 */
-.scl-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.scl-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
 
 .scl-chip {
   padding: 8px 14px;
   border: 1.5px solid #e8e8e8;
   border-radius: 20px;
   background: #fff;
-  font-size: 13px; font-weight: 500; color: #666;
-  cursor: pointer; letter-spacing: -0.01em;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  letter-spacing: -0.01em;
   transition: all 0.13s;
   white-space: nowrap;
 }
-.scl-chip:hover { border-color: #bbb; color: #333; }
+.scl-chip:hover {
+  border-color: #bbb;
+  color: #333;
+}
 .scl-chip.on {
-  background: #111; border-color: #111; color: #fff; font-weight: 600;
+  background: #111;
+  border-color: #111;
+  color: #fff;
+  font-weight: 600;
 }
 
 /* Input */
@@ -205,40 +340,88 @@
   background: #f6f6f6;
   border: 2px solid transparent;
   border-radius: 10px;
-  font-size: 14px; color: #111;
-  width: 100%; outline: none;
-  font-family: inherit; letter-spacing: -0.01em;
-  transition: background 0.15s, border-color 0.15s;
+  font-size: 14px;
+  color: #111;
+  width: 100%;
+  outline: none;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
   -webkit-appearance: none;
 }
-.scl-input:focus { background: #fff; border-color: #111; }
-.scl-input::placeholder { color: #ccc; }
+.scl-input:focus {
+  background: #fff;
+  border-color: #111;
+}
+.scl-input::placeholder {
+  color: #ccc;
+}
 
-.scl-textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
-.scl-sub-input { background: #f6f6f6; }
+.scl-textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.6;
+}
+.scl-sub-input {
+  background: #f6f6f6;
+}
 
 /* Switch */
 .scl-switch-row {
-  display: flex; justify-content: space-between; align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 2px 0;
-  font-size: 13px; color: #333; font-weight: 500; cursor: pointer; letter-spacing: -0.01em;
+  font-size: 13px;
+  color: #333;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: -0.01em;
 }
 .scl-switch {
-  width: 40px; height: 24px; background: #e0e0e0; border-radius: 12px;
-  position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+  width: 40px;
+  height: 24px;
+  background: #e0e0e0;
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
 }
-.scl-switch.on { background: #111; }
+.scl-switch.on {
+  background: #111;
+}
 .scl-switch-thumb {
-  position: absolute; top: 3px; left: 3px;
-  width: 18px; height: 18px; background: #fff; border-radius: 50%;
-  transition: transform 0.2s cubic-bezier(0.4,0,0.2,1);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
-.scl-switch.on .scl-switch-thumb { transform: translateX(16px); }
+.scl-switch.on .scl-switch-thumb {
+  transform: translateX(16px);
+}
 
 /* Note / sub heading */
-.scl-note { font-size: 12px; color: #bbb; margin: 0; letter-spacing: -0.01em; }
-.scl-sub-heading { font-size: 13px; font-weight: 700; color: #555; margin: 0; letter-spacing: -0.01em; }
+.scl-note {
+  font-size: 12px;
+  color: #bbb;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.scl-sub-heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: #555;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
 
 /* ── 새출발기금 자격 패널 ── */
 .scl-nsf-panel {
@@ -382,12 +565,24 @@
 
 /* Sum line */
 .scl-sum-line {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 0; border-top: 1px solid #f0f0f0;
-  font-size: 13px; color: #aaa;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-top: 1px solid #f0f0f0;
+  font-size: 13px;
+  color: #aaa;
 }
-.scl-sum-line strong { font-size: 18px; font-weight: 800; color: #111; letter-spacing: -0.03em; }
-.scl-sum-line.scl-sum-sub strong { font-size: 15px; font-weight: 700; }
+.scl-sum-line strong {
+  font-size: 18px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.03em;
+}
+.scl-sum-line.scl-sum-sub strong {
+  font-size: 15px;
+  font-weight: 700;
+}
 
 /* Debt input panel (간편/상세 통합) */
 .scl-debt-panel {
@@ -550,21 +745,113 @@
   color: #111;
   padding: 10px 8px;
 }
-.scl-debt-grid .col-type { width: 8%; }
-.scl-debt-grid .col-lender { width: 9%; }
-.scl-debt-grid .col-method { width: 8%; }
-.scl-debt-grid .col-overdue { width: 8%; }
-.scl-debt-grid .col-date { width: 11%; min-width: 132px; }
-.scl-debt-grid .col-num { width: 10%; }
-.scl-debt-grid .col-rate { width: 6%; }
-.scl-debt-grid .col-calc { width: 7.5%; }
-.scl-debt-grid .col-act { width: 36px; text-align: center; }
+.scl-debt-grid .col-type {
+  width: 7%;
+}
+.scl-debt-grid .col-secured {
+  width: 7%;
+}
+.scl-debt-grid .col-lender {
+  width: 8%;
+}
+.scl-debt-grid .col-method {
+  width: 8%;
+}
+.scl-debt-grid .col-overdue {
+  width: 7%;
+}
+.scl-debt-grid .col-date {
+  width: 10%;
+  min-width: 132px;
+}
+.scl-debt-grid .col-num {
+  width: 10%;
+}
+.scl-debt-grid .col-rate {
+  width: 6%;
+}
+.scl-debt-grid .col-calc {
+  width: 7%;
+}
+.scl-debt-grid .col-act {
+  width: 36px;
+  text-align: center;
+}
 
-.scl-debt-grid td:nth-child(5) .scl-grid-input,
-.scl-debt-grid td:nth-child(6) .scl-grid-input {
+.scl-debt-grid td:nth-child(6) .scl-grid-input,
+.scl-debt-grid td:nth-child(7) .scl-grid-input {
   min-width: 124px;
   font-size: 12px;
   padding: 7px 6px;
+}
+
+.scl-debt-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.scl-debt-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+}
+
+.scl-debt-summary-item.total {
+  background: #111;
+  border-color: #111;
+}
+
+.scl-debt-summary-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #999;
+  letter-spacing: -0.01em;
+}
+
+.scl-debt-summary-item.total .scl-debt-summary-label {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.scl-debt-summary-val {
+  font-size: 16px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.scl-debt-summary-item.total .scl-debt-summary-val {
+  color: #fff;
+}
+
+.scl-debt-summary-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.scl-debt-summary-meta span {
+  font-size: 12px;
+  font-weight: 500;
+  color: #888;
+  letter-spacing: -0.01em;
+}
+
+.scl-debt-summary-item.total .scl-debt-summary-meta span {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 720px) {
+  .scl-debt-summary {
+    grid-template-columns: 1fr;
+  }
 }
 
 .scl-grid-input {
@@ -622,7 +909,9 @@
   padding: 2px 6px;
   line-height: 1;
 }
-.scl-debt-remove:hover { color: #dc2626; }
+.scl-debt-remove:hover {
+  color: #dc2626;
+}
 
 .scl-debt-add-row td {
   padding: 0 !important;
@@ -649,29 +938,68 @@
 
 /* Income summary */
 .scl-income-summary {
-  border-radius: 12px; background: #fafafa; border: 1px solid #f0f0f0; overflow: hidden;
+  border-radius: 12px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  overflow: hidden;
 }
 .scl-income-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 12px 16px; font-size: 13px; color: #666;
-  border-bottom: 1px solid #f5f5f5; letter-spacing: -0.01em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #666;
+  border-bottom: 1px solid #f5f5f5;
+  letter-spacing: -0.01em;
 }
-.scl-income-row:last-child { border-bottom: none; }
-.scl-income-row.total { background: #fff; font-size: 14px; font-weight: 600; color: #111; }
-.scl-income-row.total strong { font-size: 16px; font-weight: 800; color: #111; letter-spacing: -0.02em; }
-.scl-income-row.total strong.warn { color: #888; }
+.scl-income-row:last-child {
+  border-bottom: none;
+}
+.scl-income-row.total {
+  background: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+}
+.scl-income-row.total strong {
+  font-size: 16px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+.scl-income-row.total strong.warn {
+  color: #888;
+}
 
 /* Check cards */
-.scl-check-list { display: flex; flex-direction: column; gap: 9px; }
-.scl-check-card {
-  border: 1px solid #ebebeb; border-radius: 12px;
-  padding: 14px 16px; background: #fff;
-  transition: border-color 0.15s; display: flex; flex-direction: column; gap: 10px;
+.scl-check-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
 }
-.scl-check-card.expanded { border-color: #111; }
+.scl-check-card {
+  border: 1px solid #ebebeb;
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: #fff;
+  transition: border-color 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.scl-check-card.expanded {
+  border-color: #111;
+}
 .scl-check-row {
-  display: flex; justify-content: space-between; align-items: center;
-  font-size: 13px; color: #222; font-weight: 500; letter-spacing: -0.01em; cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #222;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  cursor: pointer;
 }
 
 /* ── AI 분석 로딩 오버레이 ── */
@@ -681,7 +1009,7 @@
   align-items: center;
   justify-content: center;
   background: #fff;
-  font-family: -apple-system, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+  font-family: -apple-system, "Pretendard", "Apple SD Gothic Neo", sans-serif;
 }
 
 .scl-analyzing-card {
@@ -697,7 +1025,9 @@
 }
 
 @keyframes scl-rotate {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .scl-spinner-arc {
@@ -733,22 +1063,35 @@
   background: #ccc;
   animation: scl-dot-pulse 1.2s ease-in-out infinite;
 }
-.scl-analyzing-dots span:nth-child(2) { animation-delay: 0.2s; }
-.scl-analyzing-dots span:nth-child(3) { animation-delay: 0.4s; }
+.scl-analyzing-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.scl-analyzing-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
 
 @keyframes scl-dot-pulse {
-  0%, 80%, 100% { background: #ccc; transform: scale(1); }
-  40%           { background: #111; transform: scale(1.3); }
+  0%,
+  80%,
+  100% {
+    background: #ccc;
+    transform: scale(1);
+  }
+  40% {
+    background: #111;
+    transform: scale(1.3);
+  }
 }
 
 /* ─── 모바일 전용 사이드바 상단 바 (데스크탑에서 숨김) ─── */
-.scl-mobile-topbar { display: none; }
+.scl-mobile-topbar {
+  display: none;
+}
 
 /* ═══════════════════════════════════
    MOBILE  (max-width: 768px)
 ═══════════════════════════════════ */
 @media (max-width: 768px) {
-
   /* 페이지: 고정 높이 + 내부만 스크롤 */
   .scl-page {
     height: calc(100vh - 44px);
@@ -833,16 +1176,24 @@
     justify-content: center;
     transition: color 0.15s;
   }
-  .scl-mobile-toggle:hover { color: #888; }
-  .scl-mobile-toggle.open svg { transform: rotate(180deg); }
-  .scl-mobile-toggle svg { transition: transform 0.2s; }
+  .scl-mobile-toggle:hover {
+    color: #888;
+  }
+  .scl-mobile-toggle.open svg {
+    transform: rotate(180deg);
+  }
+  .scl-mobile-toggle svg {
+    transition: transform 0.2s;
+  }
 
   /* 사이드바 본문: 기본 숨김, 열렸을 때 표시 */
   .scl-sidebar-body {
     display: none;
     padding: 14px 16px 16px;
   }
-  .scl-sidebar.mobile-open .scl-sidebar-body { display: flex; }
+  .scl-sidebar.mobile-open .scl-sidebar-body {
+    display: flex;
+  }
 
   /* X 버튼: 모바일 위치 */
   .scl-close-btn {
@@ -860,20 +1211,30 @@
   }
 
   /* 섹션 제목 숨김 — 상단 바에 이미 단계명 표시됨 */
-  .scl-section-head { display: none; }
+  .scl-section-head {
+    display: none;
+  }
 
   /* 폼 래퍼: 컨테이너 높이만큼 늘려서 nav가 항상 하단에 위치 */
-  .scl-form-wrap { min-height: 100%; }
+  .scl-form-wrap {
+    min-height: 100%;
+  }
 
   /* 폼 상단 여백 */
-  .scl-form { padding-top: 20px; }
+  .scl-form {
+    padding-top: 20px;
+  }
 
   /* 그리드 행: 단일 열 */
   .scl-row-2,
-  .scl-row-3 { grid-template-columns: 1fr; }
+  .scl-row-3 {
+    grid-template-columns: 1fr;
+  }
 
   /* 칩 줄바꿈 */
-  .scl-chips { flex-wrap: wrap; }
+  .scl-chips {
+    flex-wrap: wrap;
+  }
 
   /* 하단 버튼: sticky로 항상 화면 하단에 표시 */
   .scl-nav-btns {
@@ -926,7 +1287,10 @@
   background: #fff;
   color: #555;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s,
+    border-color 0.12s;
 }
 .scl-btn-prev:hover:not(:disabled),
 .scl-btn-next:hover:not(:disabled) {
@@ -958,35 +1322,36 @@
   background:
     linear-gradient(#fff, #fff) padding-box,
     conic-gradient(
-      from var(--scl-angle),
-      #ddd6fe,
-      #bfdbfe,
-      #a5f3d0,
-      #fde68a,
-      #fecaca,
-      #f5d0fe,
-      #ddd6fe
-    )
-    border-box;
+        from var(--scl-angle),
+        #ddd6fe,
+        #bfdbfe,
+        #a5f3d0,
+        #fde68a,
+        #fecaca,
+        #f5d0fe,
+        #ddd6fe
+      )
+      border-box;
   border: 1.5px solid transparent;
   animation: scl-rainbow-spin 10s linear infinite;
   box-shadow: 0 1px 6px rgba(139, 92, 246, 0.08);
-  transition: box-shadow 0.2s, background 0.2s;
+  transition:
+    box-shadow 0.2s,
+    background 0.2s;
 }
 .scl-nav-analyze:hover {
   background:
     linear-gradient(#f8f7ff, #f8f7ff) padding-box,
     conic-gradient(
-      from var(--scl-angle),
-      #ddd6fe,
-      #bfdbfe,
-      #a5f3d0,
-      #fde68a,
-      #fecaca,
-      #f5d0fe,
-      #ddd6fe
-    )
-    border-box;
+        from var(--scl-angle),
+        #ddd6fe,
+        #bfdbfe,
+        #a5f3d0,
+        #fde68a,
+        #fecaca,
+        #f5d0fe,
+        #ddd6fe
+      )
+      border-box;
   box-shadow: 0 3px 14px rgba(139, 92, 246, 0.14);
 }
-

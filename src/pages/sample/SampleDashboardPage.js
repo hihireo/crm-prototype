@@ -51,6 +51,7 @@ const nextEditDebtId = () => {
 const emptyEditDebt = () => ({
   id: nextEditDebtId(),
   debtType: "은행대출",
+  secured: false,
   lender: "",
   loanDate: "",
   maturityDate: "",
@@ -165,6 +166,7 @@ const DEFAULT_DEBT_ITEMS = [
   {
     id: "d1",
     debtType: "은행대출",
+    secured: true,
     lender: "국민은행",
     loanDate: "2022-03-15",
     maturityDate: "2029-03-15",
@@ -176,6 +178,7 @@ const DEFAULT_DEBT_ITEMS = [
   {
     id: "d2",
     debtType: "카드론",
+    secured: false,
     lender: "신한카드",
     loanDate: "2023-06-01",
     maturityDate: "2027-06-01",
@@ -187,6 +190,7 @@ const DEFAULT_DEBT_ITEMS = [
   {
     id: "d3",
     debtType: "캐피탈",
+    secured: false,
     lender: "현대캐피탈",
     loanDate: "2023-01-10",
     maturityDate: "2028-01-10",
@@ -198,6 +202,7 @@ const DEFAULT_DEBT_ITEMS = [
   {
     id: "d4",
     debtType: "사채",
+    secured: false,
     lender: "개인",
     loanDate: "2024-02-01",
     maturityDate: "2026-02-01",
@@ -302,6 +307,7 @@ const buildDebtSummaryFromDetailRows = (rows) => {
         ? `${row.lender}${row.debtType ? ` (${row.debtType})` : ""}`
         : row.debtType || "미입력",
       debtType: row.debtType || "",
+      secured: !!row.secured,
       lender: row.lender || "",
       amount,
       principalWon,
@@ -317,6 +323,12 @@ const buildDebtSummaryFromDetailRows = (rows) => {
     };
   });
   const totalDebt = items.reduce((s, i) => s + (i.amount || 0), 0);
+  const securedDebt = items
+    .filter((i) => i.secured)
+    .reduce((s, i) => s + (i.amount || 0), 0);
+  const unsecuredDebt = items
+    .filter((i) => !i.secured)
+    .reduce((s, i) => s + (i.amount || 0), 0);
   const totalDebtWithInterest = items.reduce(
     (s, i) => s + (i.totalRepay || i.amount || 0),
     0,
@@ -325,6 +337,8 @@ const buildDebtSummaryFromDetailRows = (rows) => {
   return {
     mode: "detail",
     totalDebt,
+    securedDebt,
+    unsecuredDebt,
     totalDebtWithInterest,
     totalInterest: totalDebtWithInterest - totalDebt,
     overduePeriod,
@@ -473,6 +487,7 @@ const itemsToDetailDebts = (items) => {
     return {
       id: item.id || `edit-${idx}`,
       debtType: item.debtType || "은행대출",
+      secured: !!item.secured,
       lender: item.lender || "",
       loanDate: item.loanDate || "",
       maturityDate: item.maturityDate || "",
@@ -2184,9 +2199,28 @@ const SampleDashboardPage = () => {
     (s, { debt }) => s + (parseInt(debt.principal) || 0),
     0,
   );
-  const draftDetailTotalRepayWon = draftDetailCalcs.reduce(
+  const draftDetailSecuredWon = draftDetailCalcs.reduce(
+    (s, { debt }) => s + (debt.secured ? parseInt(debt.principal) || 0 : 0),
+    0,
+  );
+  const draftDetailUnsecuredWon =
+    draftDetailPrincipalWon - draftDetailSecuredWon;
+  const draftDetailSecuredMonthlyWon = draftDetailCalcs.reduce(
+    (s, { debt, calc }) => s + (debt.secured && calc ? calc.monthly : 0),
+    0,
+  );
+  const draftDetailUnsecuredMonthlyWon = draftDetailCalcs.reduce(
+    (s, { debt, calc }) => s + (!debt.secured && calc ? calc.monthly : 0),
+    0,
+  );
+  const draftDetailSecuredInterestWon = draftDetailCalcs.reduce(
     (s, { debt, calc }) =>
-      s + (calc ? calc.totalRepay : parseInt(debt.principal) || 0),
+      s + (debt.secured && calc ? calc.totalInterest : 0),
+    0,
+  );
+  const draftDetailUnsecuredInterestWon = draftDetailCalcs.reduce(
+    (s, { debt, calc }) =>
+      s + (!debt.secured && calc ? calc.totalInterest : 0),
     0,
   );
   const draftDetailTotalInterestWon = draftDetailCalcs.reduce(
@@ -3023,7 +3057,12 @@ const SampleDashboardPage = () => {
                       onClick={openRefModal}
                     >
                       제도 안내
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 12 12"
+                        fill="none"
+                      >
                         <path
                           d="M4.5 2.5h5v5M9.5 2.5L2.5 9.5"
                           stroke="currentColor"
@@ -4104,63 +4143,81 @@ const SampleDashboardPage = () => {
                       </Field>
                     </>
                   ) : (
-                    <div className="scl-debt-grid-wrap">
-                      <table className="scl-debt-grid">
-                        <thead>
-                          <tr>
-                            <th className="col-type">채무종류</th>
-                            <th className="col-lender">채권처</th>
-                            <th className="col-method">상환방식</th>
-                            <th className="col-overdue">연체(개월)</th>
-                            <th className="col-date">대출일</th>
-                            <th className="col-date">만기일</th>
-                            <th className="col-num">금액(원)</th>
-                            <th className="col-rate">금리(%)</th>
-                            <th className="col-calc">기간</th>
-                            <th className="col-calc">월불입</th>
-                            <th className="col-calc">총이자</th>
-                            <th className="col-calc">총상환</th>
-                            <th className="col-act" />
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {debtDraft.debts.map((debt) => {
-                            const calc = calcDebtItem(debt);
-                            return (
-                              <tr key={debt.id}>
-                                <td>
-                                  <select
-                                    className="scl-grid-input scl-grid-select"
-                                    value={debt.debtType || "은행대출"}
-                                    onChange={(e) =>
-                                      updateDraftDebt(
-                                        debt.id,
-                                        "debtType",
-                                        e.target.value,
-                                      )
-                                    }
-                                  >
-                                    {DEBT_TYPE_OPTIONS.map((t) => (
-                                      <option key={t} value={t}>
-                                        {t}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </td>
-                                <td>
-                                  <input
-                                    className="scl-grid-input"
-                                    value={debt.lender}
-                                    onChange={(e) =>
-                                      updateDraftDebt(
-                                        debt.id,
-                                        "lender",
-                                        e.target.value,
-                                      )
-                                    }
-                                    placeholder="예: 국민은행"
-                                  />
-                                </td>
+                    <>
+                      <div className="scl-debt-grid-wrap">
+                        <table className="scl-debt-grid">
+                          <thead>
+                            <tr>
+                              <th className="col-type">채무종류</th>
+                              <th className="col-secured">담보</th>
+                              <th className="col-lender">채권처</th>
+                              <th className="col-method">상환방식</th>
+                              <th className="col-overdue">연체(개월)</th>
+                              <th className="col-date">대출일</th>
+                              <th className="col-date">만기일</th>
+                              <th className="col-num">금액(원)</th>
+                              <th className="col-rate">금리(%)</th>
+                              <th className="col-calc">기간</th>
+                              <th className="col-calc">월불입</th>
+                              <th className="col-calc">총이자</th>
+                              <th className="col-calc">총상환</th>
+                              <th className="col-act" />
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {debtDraft.debts.map((debt) => {
+                              const calc = calcDebtItem(debt);
+                              return (
+                                <tr key={debt.id}>
+                                  <td>
+                                    <select
+                                      className="scl-grid-input scl-grid-select"
+                                      value={debt.debtType || "은행대출"}
+                                      onChange={(e) =>
+                                        updateDraftDebt(
+                                          debt.id,
+                                          "debtType",
+                                          e.target.value,
+                                        )
+                                      }
+                                    >
+                                      {DEBT_TYPE_OPTIONS.map((t) => (
+                                        <option key={t} value={t}>
+                                          {t}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </td>
+                                  <td>
+                                    <select
+                                      className="scl-grid-input scl-grid-select"
+                                      value={debt.secured ? "담보" : "무담보"}
+                                      onChange={(e) =>
+                                        updateDraftDebt(
+                                          debt.id,
+                                          "secured",
+                                          e.target.value === "담보",
+                                        )
+                                      }
+                                    >
+                                      <option value="무담보">무담보</option>
+                                      <option value="담보">담보</option>
+                                    </select>
+                                  </td>
+                                  <td>
+                                    <input
+                                      className="scl-grid-input"
+                                      value={debt.lender}
+                                      onChange={(e) =>
+                                        updateDraftDebt(
+                                          debt.id,
+                                          "lender",
+                                          e.target.value,
+                                        )
+                                      }
+                                      placeholder="예: 국민은행"
+                                    />
+                                  </td>
                                 <td>
                                   <select
                                     className="scl-grid-input scl-grid-select"
@@ -4284,7 +4341,7 @@ const SampleDashboardPage = () => {
                             );
                           })}
                           <tr className="scl-debt-add-row">
-                            <td colSpan={13}>
+                            <td colSpan={14}>
                               <button
                                 type="button"
                                 className="scl-debt-add-btn"
@@ -4295,30 +4352,62 @@ const SampleDashboardPage = () => {
                             </td>
                           </tr>
                         </tbody>
-                        {draftDetailTotalRepayWon > 0 && (
-                          <tfoot>
-                            <tr>
-                              <td colSpan={6}>합계</td>
-                              <td className="scl-grid-calc">
-                                {formatWon(draftDetailPrincipalWon)}
-                              </td>
-                              <td />
-                              <td />
-                              <td className="scl-grid-calc">
-                                {formatWon(draftDetailMonthlySumWon)}
-                              </td>
-                              <td className="scl-grid-calc">
-                                {formatWon(draftDetailTotalInterestWon)}
-                              </td>
-                              <td className="scl-grid-calc">
-                                {formatWon(draftDetailTotalRepayWon)}
-                              </td>
-                              <td />
-                            </tr>
-                          </tfoot>
-                        )}
                       </table>
                     </div>
+                    {draftDetailPrincipalWon > 0 && (
+                      <div className="scl-debt-summary">
+                        <div className="scl-debt-summary-item">
+                          <span className="scl-debt-summary-label">
+                            담보대출 합산
+                          </span>
+                          <strong className="scl-debt-summary-val">
+                            {formatWon(draftDetailSecuredWon)}
+                          </strong>
+                          <div className="scl-debt-summary-meta">
+                            <span>
+                              월불입 {formatWon(draftDetailSecuredMonthlyWon)}
+                            </span>
+                            <span>
+                              총이자 {formatWon(draftDetailSecuredInterestWon)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="scl-debt-summary-item">
+                          <span className="scl-debt-summary-label">
+                            무담보대출 합산
+                          </span>
+                          <strong className="scl-debt-summary-val">
+                            {formatWon(draftDetailUnsecuredWon)}
+                          </strong>
+                          <div className="scl-debt-summary-meta">
+                            <span>
+                              월불입 {formatWon(draftDetailUnsecuredMonthlyWon)}
+                            </span>
+                            <span>
+                              총이자{" "}
+                              {formatWon(draftDetailUnsecuredInterestWon)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="scl-debt-summary-item total">
+                          <span className="scl-debt-summary-label">
+                            총 합산
+                          </span>
+                          <strong className="scl-debt-summary-val">
+                            {formatWon(draftDetailPrincipalWon)}
+                          </strong>
+                          <div className="scl-debt-summary-meta">
+                            <span>
+                              월불입 {formatWon(draftDetailMonthlySumWon)}
+                            </span>
+                            <span>
+                              총이자 {formatWon(draftDetailTotalInterestWon)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    </>
                   )}
                 </div>
               </div>

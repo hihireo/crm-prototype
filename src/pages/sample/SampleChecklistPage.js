@@ -156,6 +156,7 @@ const SAMPLE_DETAIL_DEBTS = [
   {
     id: "d1",
     debtType: "은행대출",
+    secured: true,
     lender: "국민은행",
     loanDate: "2022-03-15",
     maturityDate: "2029-03-15",
@@ -167,6 +168,7 @@ const SAMPLE_DETAIL_DEBTS = [
   {
     id: "d2",
     debtType: "카드론",
+    secured: false,
     lender: "신한카드",
     loanDate: "2023-06-01",
     maturityDate: "2027-06-01",
@@ -178,6 +180,7 @@ const SAMPLE_DETAIL_DEBTS = [
   {
     id: "d3",
     debtType: "캐피탈",
+    secured: false,
     lender: "현대캐피탈",
     loanDate: "2023-01-10",
     maturityDate: "2028-01-10",
@@ -189,6 +192,7 @@ const SAMPLE_DETAIL_DEBTS = [
   {
     id: "d4",
     debtType: "사채",
+    secured: false,
     lender: "개인",
     loanDate: "2024-02-01",
     maturityDate: "2026-02-01",
@@ -202,6 +206,7 @@ const SAMPLE_DETAIL_DEBTS = [
 const emptyDebt = () => ({
   id: nextDebtId(),
   debtType: "은행대출",
+  secured: false,
   lender: "",
   loanDate: "",
   maturityDate: "",
@@ -386,6 +391,31 @@ const SampleChecklistPage = () => {
     (sum, d) => sum + (parseInt(d.principal) || 0),
     0,
   );
+  const detailSecuredWon = (form.debts || []).reduce(
+    (sum, d) => sum + (d.secured ? parseInt(d.principal) || 0 : 0),
+    0,
+  );
+  const detailUnsecuredWon = detailPrincipalWon - detailSecuredWon;
+  const detailSecuredMonthlyWon = detailCalcs.reduce(
+    (sum, { debt, calc }) =>
+      sum + (debt.secured && calc ? calc.monthly : 0),
+    0,
+  );
+  const detailUnsecuredMonthlyWon = detailCalcs.reduce(
+    (sum, { debt, calc }) =>
+      sum + (!debt.secured && calc ? calc.monthly : 0),
+    0,
+  );
+  const detailSecuredInterestWon = detailCalcs.reduce(
+    (sum, { debt, calc }) =>
+      sum + (debt.secured && calc ? calc.totalInterest : 0),
+    0,
+  );
+  const detailUnsecuredInterestWon = detailCalcs.reduce(
+    (sum, { debt, calc }) =>
+      sum + (!debt.secured && calc ? calc.totalInterest : 0),
+    0,
+  );
   const detailTotalRepayWon = detailCalcs.reduce(
     (sum, { calc }) => sum + (calc?.totalRepay || 0),
     0,
@@ -413,6 +443,7 @@ const SampleChecklistPage = () => {
           ? `${debt.lender}${debt.debtType ? ` (${debt.debtType})` : ""}`
           : debt.debtType || "미입력",
         debtType: debt.debtType || "",
+        secured: !!debt.secured,
         lender: debt.lender || "",
         amount: wonToMan(debt.principal),
         principalWon: parseInt(debt.principal) || 0,
@@ -430,6 +461,8 @@ const SampleChecklistPage = () => {
       return {
         mode: "detail",
         totalDebt: wonToMan(detailPrincipalWon),
+        securedDebt: wonToMan(detailSecuredWon),
+        unsecuredDebt: wonToMan(detailUnsecuredWon),
         totalDebtWithInterest: wonToMan(detailTotalRepayWon),
         totalInterest: wonToMan(detailTotalInterestWon),
         monthlySum: wonToMan(detailMonthlySumWon),
@@ -1020,6 +1053,7 @@ const SampleChecklistPage = () => {
                               <thead>
                                 <tr>
                                   <th className="col-type">채무종류</th>
+                                  <th className="col-secured">담보</th>
                                   <th className="col-lender">채권처</th>
                                   <th className="col-method">상환방식</th>
                                   <th className="col-overdue">연체(개월)</th>
@@ -1056,6 +1090,24 @@ const SampleChecklistPage = () => {
                                               {t}
                                             </option>
                                           ))}
+                                        </select>
+                                      </td>
+                                      <td>
+                                        <select
+                                          className="scl-grid-input scl-grid-select"
+                                          value={
+                                            debt.secured ? "담보" : "무담보"
+                                          }
+                                          onChange={(e) =>
+                                            updateDebt(
+                                              debt.id,
+                                              "secured",
+                                              e.target.value === "담보",
+                                            )
+                                          }
+                                        >
+                                          <option value="무담보">무담보</option>
+                                          <option value="담보">담보</option>
                                         </select>
                                       </td>
                                       <td>
@@ -1204,7 +1256,7 @@ const SampleChecklistPage = () => {
                                   );
                                 })}
                                 <tr className="scl-debt-add-row">
-                                  <td colSpan={13}>
+                                  <td colSpan={14}>
                                     <button
                                       type="button"
                                       className="scl-debt-add-btn"
@@ -1215,30 +1267,62 @@ const SampleChecklistPage = () => {
                                   </td>
                                 </tr>
                               </tbody>
-                              {detailTotalRepayWon > 0 && (
-                                <tfoot>
-                                  <tr>
-                                    <td colSpan={6}>합계</td>
-                                    <td className="scl-grid-calc">
-                                      {formatWon(detailPrincipalWon)}
-                                    </td>
-                                    <td />
-                                    <td />
-                                    <td className="scl-grid-calc">
-                                      {formatWon(detailMonthlySumWon)}
-                                    </td>
-                                    <td className="scl-grid-calc">
-                                      {formatWon(detailTotalInterestWon)}
-                                    </td>
-                                    <td className="scl-grid-calc">
-                                      {formatWon(detailTotalRepayWon)}
-                                    </td>
-                                    <td />
-                                  </tr>
-                                </tfoot>
-                              )}
                             </table>
                           </div>
+                          {detailPrincipalWon > 0 && (
+                            <div className="scl-debt-summary">
+                              <div className="scl-debt-summary-item">
+                                <span className="scl-debt-summary-label">
+                                  담보대출 합산
+                                </span>
+                                <strong className="scl-debt-summary-val">
+                                  {formatWon(detailSecuredWon)}
+                                </strong>
+                                <div className="scl-debt-summary-meta">
+                                  <span>
+                                    월불입 {formatWon(detailSecuredMonthlyWon)}
+                                  </span>
+                                  <span>
+                                    총이자 {formatWon(detailSecuredInterestWon)}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="scl-debt-summary-item">
+                                <span className="scl-debt-summary-label">
+                                  무담보대출 합산
+                                </span>
+                                <strong className="scl-debt-summary-val">
+                                  {formatWon(detailUnsecuredWon)}
+                                </strong>
+                                <div className="scl-debt-summary-meta">
+                                  <span>
+                                    월불입{" "}
+                                    {formatWon(detailUnsecuredMonthlyWon)}
+                                  </span>
+                                  <span>
+                                    총이자{" "}
+                                    {formatWon(detailUnsecuredInterestWon)}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="scl-debt-summary-item total">
+                                <span className="scl-debt-summary-label">
+                                  총 합산
+                                </span>
+                                <strong className="scl-debt-summary-val">
+                                  {formatWon(detailPrincipalWon)}
+                                </strong>
+                                <div className="scl-debt-summary-meta">
+                                  <span>
+                                    월불입 {formatWon(detailMonthlySumWon)}
+                                  </span>
+                                  <span>
+                                    총이자 {formatWon(detailTotalInterestWon)}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </>
                       )}
                     </div>
