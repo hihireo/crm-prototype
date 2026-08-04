@@ -1072,6 +1072,123 @@ const PLAN_BY_OPTION = {
 const getPlanProfile = (optionId) =>
   PLAN_BY_OPTION[optionId] || PLAN_BY_OPTION.rehabilitation;
 
+/** 절차별 제도 참고자료 (슬라이드 순서) */
+const PROCEDURE_REFERENCES = [
+  {
+    id: "rehabilitation",
+    label: "개인회생",
+    summary: "법원을 통해 채무를 조정하고 가용소득으로 분할 변제하는 제도",
+    eligibility: [
+      "무담보 10억 이하 / 담보 15억 이하",
+      "장래 계속적·반복적 수입 가능",
+      "채무초과 상태 (채무 > 재산)",
+    ],
+    rules: [
+      "변제계획안 제출 및 법원 인가 필요",
+      "인가 후 채권자 추심·강제집행 제한",
+      "이전 면책 후 일정 기간 재신청 제한",
+    ],
+    relief: "가용소득 기준 월 변제 · 변제 완료 후 잔여 채무 면책",
+    duration: "통상 3~5년 (최장 5년, 실무상 최대 7년 사례 있음)",
+    caution: "소득·재산 허위 신고 시 면책 취소·형사 리스크",
+  },
+  {
+    id: "rapidDebtAdj",
+    label: "신속채무조정",
+    summary: "연체 초기 채무의 이자·기간을 조정하는 신용회복위원회 제도",
+    eligibility: [
+      "연체 30일 이하 (단기 연체)",
+      "총 채무 일정 한도 이내 (무담보·담보 기준)",
+      "협약 금융회사 채무 중심",
+    ],
+    rules: [
+      "원금 감면 없음이 원칙",
+      "이자율 인하·분할상환 중심",
+      "채권기관 동의 절차 필요",
+    ],
+    relief: "연체이자·약정이자 조정 · 원금은 원칙적으로 전액 상환",
+    duration: "최장 10년 분할상환",
+    caution: "장기 연체·고액 감면이 목표면 개인워크아웃·회생과 비교 필요",
+  },
+  {
+    id: "preWorkout",
+    label: "프리워크아웃",
+    summary: "연체 31~89일 구간의 이자·기간 조정을 위한 신용회복 제도",
+    eligibility: [
+      "연체 31일 이상 89일 미만",
+      "총 채무 15억 이하 (무담보 5억·담보 10억)",
+      "협약 가입 금융기관 채무",
+    ],
+    rules: [
+      "원금 감면은 원칙적으로 없음",
+      "연체이자 감면·이자율 조정이 중심",
+      "채권기관 동의율 충족 필요",
+    ],
+    relief: "연체이자 감면 · 이자율 조정 · 분할상환",
+    duration: "최장 10년 분할상환",
+    caution: "연체 기간이 길어지면 개인워크아웃 전환을 검토",
+  },
+  {
+    id: "personalWorkout",
+    label: "개인워크아웃",
+    summary: "연체 90일 이상 채무의 이자·원금 일부를 조정하는 신용회복 제도",
+    eligibility: [
+      "연체 90일 이상",
+      "총 채무 15억 이하",
+      "최저생계비 이상 수입 또는 상환 가능성",
+    ],
+    rules: [
+      "이자 전액 감면·원금 일부 감면 검토 가능",
+      "사채·비협약 채무는 대상 제외될 수 있음",
+      "성실 납부 시 신용 회복에 유리",
+    ],
+    relief: "이자 감면 + 원금 일부 감면 후 분할상환",
+    duration: "최장 8~10년 분할상환 (조건에 따라 상이)",
+    caution: "감면 폭·대상 채무 범위는 사전 확인 필수",
+  },
+  {
+    id: "newStartFund",
+    label: "새출발기금",
+    summary: "코로나 시기 개인사업자·소상공인 대상 채무조정 제도",
+    eligibility: [
+      "’20.4~’25.6 중 개인사업자·소상공인 사업 영위",
+      "부실·부실우려 요건 해당",
+      "제외 업종·기신청 이력 없을 것",
+    ],
+    rules: [
+      "원칙적으로 1회만 신청 가능",
+      "협약 금융회사 사업·가계대출 중심",
+      "사업 상태(영업·휴업·폐업)에 따라 조건 상이",
+    ],
+    relief: "원금·이자 조정 후 장기 분할상환 (소득·재산에 따라 감면율 변동)",
+    duration: "최장 10년 분할상환",
+    caution: "제외 업종·법인 폐업·기신청 여부를 반드시 확인",
+  },
+  {
+    id: "bankruptcy",
+    label: "파산",
+    summary: "지급불능 상태에서 채무를 정리하고 면책을 받는 법원 절차",
+    eligibility: [
+      "지급불능 상태 (소득·재산으로 변제 곤란)",
+      "채무초과",
+      "면책 불허가 사유 해당 여부 검토",
+    ],
+    rules: [
+      "월 변제계획보다 면책·자산 환가가 핵심",
+      "일부 직종 취업 제한 가능",
+      "세금·양육비 등 면책 제외 채무 존재",
+    ],
+    relief: "면책결정 시 잔여 채무 소멸 (제외채무 제외)",
+    duration: "통상 수개월~1년 내외 (사안별 상이)",
+    caution: "가용소득이 있으면 파산보다 개인회생이 권고되는 경우가 많음",
+  },
+];
+
+const getReferenceIndexByOption = (optionId) => {
+  const idx = PROCEDURE_REFERENCES.findIndex((r) => r.id === optionId);
+  return idx >= 0 ? idx : 0;
+};
+
 const SCRIPTS = [
   {
     phase: "첫 설명",
@@ -1856,6 +1973,34 @@ const SampleDashboardPage = () => {
     CREDIT_RECOVERY_CHILDREN.some((o) => o.recommended),
   );
   const [procSelectCreditOpen, setProcSelectCreditOpen] = useState(false);
+
+  /* 절차 참고자료 모달 */
+  const [refModalOpen, setRefModalOpen] = useState(false);
+  const [refSlideIdx, setRefSlideIdx] = useState(0);
+
+  const openRefModal = () => {
+    setRefSlideIdx(getReferenceIndexByOption(selectedOption));
+    setRefModalOpen(true);
+  };
+
+  const closeRefModal = () => setRefModalOpen(false);
+
+  const goRefSlide = (nextIdx) => {
+    const len = PROCEDURE_REFERENCES.length;
+    if (nextIdx < 0 || nextIdx >= len) return;
+    setRefSlideIdx(nextIdx);
+  };
+
+  useEffect(() => {
+    if (!refModalOpen) return undefined;
+    const onKey = (e) => {
+      if (e.key === "Escape") closeRefModal();
+      if (e.key === "ArrowLeft") goRefSlide(refSlideIdx - 1);
+      if (e.key === "ArrowRight") goRefSlide(refSlideIdx + 1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [refModalOpen, refSlideIdx]);
 
   /* 절차 안내 상태 */
   const [procOpenSteps, setProcOpenSteps] = useState(new Set([1]));
@@ -2868,9 +3013,27 @@ const SampleDashboardPage = () => {
             return (
               <div className="sdp-condition-panel">
                 <div className="sdp-condition-header">
-                  <span className="sdp-condition-title">
-                    {opt.label} 조건 분석
-                  </span>
+                  <div className="sdp-condition-title-row">
+                    <span className="sdp-condition-title">
+                      {opt.label} 조건 분석
+                    </span>
+                    <button
+                      type="button"
+                      className="sdp-ref-link-btn"
+                      onClick={openRefModal}
+                    >
+                      제도 안내
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <path
+                          d="M4.5 2.5h5v5M9.5 2.5L2.5 9.5"
+                          stroke="currentColor"
+                          strokeWidth="1.4"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                   <div className="sdp-condition-legend">
                     <span className="sdp-cond-badge pass">충족</span>
                     <span className="sdp-cond-badge caution">보충 필요</span>
@@ -3659,6 +3822,125 @@ const SampleDashboardPage = () => {
           </div>
         </section>
       </div>
+
+      {/* 절차 참고자료 모달 */}
+      {refModalOpen && (
+        <div className="sdp-ref-overlay" onClick={closeRefModal}>
+          <div
+            className="sdp-ref-modal"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="절차 참고자료"
+          >
+            {(() => {
+              const ref = PROCEDURE_REFERENCES[refSlideIdx];
+              const total = PROCEDURE_REFERENCES.length;
+              return (
+                <>
+                  <div className="sdp-ref-head">
+                    <div className="sdp-ref-head-left">
+                      <h2 className="sdp-ref-title">{ref.label}</h2>
+                      <span className="sdp-ref-count">
+                        {refSlideIdx + 1}/{total}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="sdp-ref-close"
+                      onClick={closeRefModal}
+                      aria-label="닫기"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        fill="none"
+                      >
+                        <path
+                          d="M3 3l10 10M13 3L3 13"
+                          stroke="#666"
+                          strokeWidth="1.6"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div className="sdp-ref-body">
+                    <p className="sdp-ref-summary">{ref.summary}</p>
+
+                    <div className="sdp-ref-block">
+                      <p className="sdp-ref-block-label">대상 / 자격</p>
+                      <ul className="sdp-ref-list">
+                        {ref.eligibility.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="sdp-ref-block">
+                      <p className="sdp-ref-block-label">핵심 규칙</p>
+                      <ul className="sdp-ref-list">
+                        {ref.rules.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="sdp-ref-kv">
+                      <div className="sdp-ref-kv-row">
+                        <span>감면·변제 구조</span>
+                        <strong>{ref.relief}</strong>
+                      </div>
+                      <div className="sdp-ref-kv-row">
+                        <span>기간</span>
+                        <strong>{ref.duration}</strong>
+                      </div>
+                      <div className="sdp-ref-kv-row">
+                        <span>주의</span>
+                        <strong>{ref.caution}</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="sdp-ref-footer">
+                    <button
+                      type="button"
+                      className="sdp-ref-nav-btn"
+                      onClick={() => goRefSlide(refSlideIdx - 1)}
+                      disabled={refSlideIdx === 0}
+                    >
+                      ‹ 이전
+                    </button>
+                    <div className="sdp-ref-dots" role="tablist">
+                      {PROCEDURE_REFERENCES.map((item, i) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          role="tab"
+                          aria-selected={i === refSlideIdx}
+                          aria-label={`${item.label} (${i + 1}/${total})`}
+                          className={`sdp-ref-dot ${i === refSlideIdx ? "on" : ""}`}
+                          onClick={() => goRefSlide(i)}
+                        />
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      className="sdp-ref-nav-btn"
+                      onClick={() => goRefSlide(refSlideIdx + 1)}
+                      disabled={refSlideIdx === total - 1}
+                    >
+                      다음 ›
+                    </button>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        </div>
+      )}
 
       {/* 채무 재분석 오버레이 */}
       {debtReanalyzing && (
