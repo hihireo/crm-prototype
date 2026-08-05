@@ -397,13 +397,11 @@ const SampleChecklistPage = () => {
   );
   const detailUnsecuredWon = detailPrincipalWon - detailSecuredWon;
   const detailSecuredMonthlyWon = detailCalcs.reduce(
-    (sum, { debt, calc }) =>
-      sum + (debt.secured && calc ? calc.monthly : 0),
+    (sum, { debt, calc }) => sum + (debt.secured && calc ? calc.monthly : 0),
     0,
   );
   const detailUnsecuredMonthlyWon = detailCalcs.reduce(
-    (sum, { debt, calc }) =>
-      sum + (!debt.secured && calc ? calc.monthly : 0),
+    (sum, { debt, calc }) => sum + (!debt.secured && calc ? calc.monthly : 0),
     0,
   );
   const detailSecuredInterestWon = detailCalcs.reduce(
@@ -1498,11 +1496,7 @@ const SampleChecklistPage = () => {
 
                       {form.businessPeriodEligible ? (
                         <div className="scl-nsf-followup">
-                          <p className="scl-nsf-followup-label">
-                            사업 영위 해당 시 추가 확인
-                          </p>
                           <div className="scl-nsf-step">
-                            <span className="scl-nsf-step-num">2</span>
                             <div className="scl-nsf-step-body">
                               <Field label="현재 사업 상태">
                                 <Chips
@@ -1519,7 +1513,6 @@ const SampleChecklistPage = () => {
                             </div>
                           </div>
                           <div className="scl-nsf-step">
-                            <span className="scl-nsf-step-num">3</span>
                             <div className="scl-nsf-step-body">
                               <Field
                                 label="부실·부실우려 해당 여부"
@@ -1552,7 +1545,6 @@ const SampleChecklistPage = () => {
                             </div>
                           </div>
                           <div className="scl-nsf-step">
-                            <span className="scl-nsf-step-num">4</span>
                             <div className="scl-nsf-step-body">
                               <p className="scl-nsf-inline-label">
                                 결격·이력 확인
