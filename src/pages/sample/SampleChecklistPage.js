@@ -1,6 +1,20 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./SampleChecklistPage.css";
+import DebtGrid, { DebtModeToggle, DebtTotals } from "./DebtGrid";
+import CustomerInfoModal from "../../components/CustomerInfoModal";
+import {
+  ASSET_KINDS,
+  buildDebtSummaryFromRows,
+  emptyDebt,
+  ensureRows,
+  formatComma,
+  linkedDebtsOf,
+  parseComma,
+  sortDebtsForDisplay,
+  sumPrincipalWon,
+  wonToMan,
+} from "./debtModel";
 
 const SECTIONS = [
   { id: "basic", label: "기본 정보", desc: "고객의 인적사항을 확인합니다" },
@@ -17,7 +31,7 @@ const SECTIONS = [
   {
     id: "income",
     label: "소득 / 지출",
-    desc: "월 소득과 고정 지출을 계산합니다",
+    desc: "월 소득과 추정 생계비를 기준으로 상환여력을 계산합니다",
   },
   {
     id: "misc",
@@ -65,98 +79,74 @@ const Field = ({ label, hint, children }) => (
   </div>
 );
 
-let debtIdSeq = 4;
-const nextDebtId = () => {
-  debtIdSeq += 1;
-  return `d${debtIdSeq}`;
-};
-
-const DEBT_TYPE_OPTIONS = [
-  "은행대출",
-  "카드론",
-  "캐피탈",
-  "저축은행",
-  "사채",
-  "개인차용",
-];
-
-const REPAY_METHOD_OPTIONS = ["원리금균등", "원금균등", "만기일시"];
-
-/** 간편 모드 연체기간 (OverduePeriod) */
-const OverduePeriod = {
-  None: "none",
-  Under3Months: "under_3_months",
-  From3To6Months: "3_to_6_months",
-  From6To12Months: "6_to_12_months",
-  Over1Year: "over_1_year",
-};
-
-const OVERDUE_PERIOD_OPTIONS = [
-  { value: OverduePeriod.None, label: "없음" },
-  { value: OverduePeriod.Under3Months, label: "3개월 미만" },
-  { value: OverduePeriod.From3To6Months, label: "3~6개월" },
-  { value: OverduePeriod.From6To12Months, label: "6~12개월" },
-  { value: OverduePeriod.Over1Year, label: "1년 이상" },
-];
-
-const OVERDUE_PERIOD_TO_MONTHS = {
-  [OverduePeriod.None]: 0,
-  [OverduePeriod.Under3Months]: 2,
-  [OverduePeriod.From3To6Months]: 4,
-  [OverduePeriod.From6To12Months]: 8,
-  [OverduePeriod.Over1Year]: 12,
-};
-
-const isOverduePeriodEnum = (value) =>
-  OVERDUE_PERIOD_OPTIONS.some((o) => o.value === value);
-
-const monthsToOverduePeriod = (months) => {
-  const n = Number(months) || 0;
-  if (n <= 0) return OverduePeriod.None;
-  if (n < 3) return OverduePeriod.Under3Months;
-  if (n < 6) return OverduePeriod.From3To6Months;
-  if (n < 12) return OverduePeriod.From6To12Months;
-  return OverduePeriod.Over1Year;
-};
-
-const normalizeSimpleOverdue = (value) => {
-  if (isOverduePeriodEnum(value)) return value;
-  if (value === "없음") return OverduePeriod.None;
-  if (value === "3개월 미만") return OverduePeriod.Under3Months;
-  if (value === "3~6개월") return OverduePeriod.From3To6Months;
-  if (value === "6~12개월") return OverduePeriod.From6To12Months;
-  if (value === "1년 이상") return OverduePeriod.Over1Year;
-  return monthsToOverduePeriod(
-    parseInt(String(value ?? "").replace(/[^\d]/g, ""), 10) || 0,
+/** 만원 단위 직접입력 + 퀵버튼 */
+const AmountQuickInput = ({ value, onChange, presets, placeholder = "0" }) => {
+  const current = String(value ?? "").replace(/[^\d]/g, "");
+  return (
+    <div className="scl-amount-quick">
+      <div className="scl-amount-quick-input-wrap">
+        <input
+          className="scl-input scl-amount-quick-input"
+          type="text"
+          inputMode="numeric"
+          value={formatComma(current)}
+          onChange={(e) => onChange(parseComma(e.target.value))}
+          placeholder={placeholder}
+        />
+        <span className="scl-amount-quick-unit">만원</span>
+      </div>
+      <div className="scl-amount-quick-presets">
+        {presets.map((n) => {
+          const selected = current !== "" && Number(current) === n;
+          return (
+            <button
+              key={n}
+              type="button"
+              className={`scl-amount-quick-btn ${selected ? "on" : ""}`}
+              onClick={() => onChange(String(n))}
+            >
+              {n.toLocaleString("ko-KR")}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 };
 
-// const overduePeriodLabel = (value) => {
-//   const opt = OVERDUE_PERIOD_OPTIONS.find((o) => o.value === value);
-//   return opt?.label ?? null;
-// };
+const INCOME_PRESETS = [100, 150, 200, 250, 300, 400, 500];
 
-const parseOverdueMonths = (value) => {
-  if (value == null || value === "" || value === "없음") return 0;
-  if (isOverduePeriodEnum(value)) return OVERDUE_PERIOD_TO_MONTHS[value] ?? 0;
-  const n = parseInt(String(value).replace(/[^\d]/g, ""), 10);
-  return Number.isNaN(n) ? 0 : n;
+/** 부양가족 → 가구원 수 (본인 포함) */
+const householdSizeFromDependents = (dependents) => {
+  if (dependents === "없음" || !dependents) return 1;
+  if (dependents === "1명") return 2;
+  if (dependents === "2명") return 3;
+  if (dependents === "3명") return 4;
+  if (dependents === "4명 이상") return 5;
+  return 1;
 };
 
-const getMaxOverdue = (debts) => {
-  let max = 0;
-  (debts || []).forEach((d) => {
-    const n = parseOverdueMonths(d.overduePeriod);
-    if (n > max) max = n;
-  });
-  return String(max);
+/** 추정 생계비 (만원/월) — 절차 공통 참고용 간이 기준 */
+const ESTIMATED_LIVING_COST_BY_HOUSEHOLD = {
+  1: 120,
+  2: 200,
+  3: 260,
+  4: 320,
+  5: 370,
+  6: 420,
 };
 
-const SAMPLE_DETAIL_DEBTS = [
+const estimatedLivingCostFor = (dependents) => {
+  const n = householdSizeFromDependents(dependents);
+  return ESTIMATED_LIVING_COST_BY_HOUSEHOLD[Math.min(n, 6)] || 120;
+};
+
+const SAMPLE_DEBTS = [
   {
     id: "d1",
     debtType: "은행대출",
     secured: true,
+    collateralAssetId: "home",
     lender: "국민은행",
     loanDate: "2022-03-15",
     maturityDate: "2029-03-15",
@@ -169,6 +159,7 @@ const SAMPLE_DETAIL_DEBTS = [
     id: "d2",
     debtType: "카드론",
     secured: false,
+    collateralAssetId: null,
     lender: "신한카드",
     loanDate: "2023-06-01",
     maturityDate: "2027-06-01",
@@ -181,6 +172,7 @@ const SAMPLE_DETAIL_DEBTS = [
     id: "d3",
     debtType: "캐피탈",
     secured: false,
+    collateralAssetId: null,
     lender: "현대캐피탈",
     loanDate: "2023-01-10",
     maturityDate: "2028-01-10",
@@ -193,6 +185,7 @@ const SAMPLE_DETAIL_DEBTS = [
     id: "d4",
     debtType: "사채",
     secured: false,
+    collateralAssetId: null,
     lender: "개인",
     loanDate: "2024-02-01",
     maturityDate: "2026-02-01",
@@ -203,109 +196,108 @@ const SAMPLE_DETAIL_DEBTS = [
   },
 ];
 
-const emptyDebt = () => ({
-  id: nextDebtId(),
-  debtType: "은행대출",
-  secured: false,
-  lender: "",
-  loanDate: "",
-  maturityDate: "",
-  principal: "",
-  rate: "",
-  repayMethod: "원리금균등",
-  overduePeriod: "0",
-});
-
-/** 대출일~만기일 개월 수 (최소 1) */
-const monthsBetween = (startStr, endStr) => {
-  if (!startStr || !endStr) return null;
-  const start = new Date(startStr);
-  const end = new Date(endStr);
-  if (
-    Number.isNaN(start.getTime()) ||
-    Number.isNaN(end.getTime()) ||
-    end <= start
-  )
-    return null;
-  const months =
-    (end.getFullYear() - start.getFullYear()) * 12 +
-    (end.getMonth() - start.getMonth());
-  return Math.max(1, months);
+/** 자산 종류별 금액 필드 (담보 참조 키는 자산 종류 id와 같다) */
+const ASSET_VALUE_FIELD = {
+  home: "homeValue",
+  land: "landValue",
+  deposit: "depositValue",
+  vehicle: "vehicleValue",
+  financial: "financialValue",
 };
+
+const assetValueMan = (form, kindId) =>
+  parseInt(form[ASSET_VALUE_FIELD[kindId]]) || 0;
 
 /**
- * 상환 계산 (원)
- * - 원리금균등: 매월 납입액 고정
- * - 원금균등: 매월 원금 고정, 월불입은 평균액
- * - 만기일시: 기간 중 이자만, 원금은 만기 상환 (월불입=월이자)
+ * 자산 1건 블록: 시가 입력 + 그 자산에 걸린 담보 대출 + 순자산.
+ *
+ * 담보 대출은 채무 현황과 같은 DebtGrid로 입력받고 form.debts에 바로 쓴다.
+ * 여기 보이는 행은 form.debts를 collateralAssetId로 필터링한 결과다.
  */
-const calcRepayment = (principalWon, annualRatePct, n, method) => {
-  const P = Number(principalWon);
-  const rate = Number(annualRatePct);
-  if (!P || P <= 0 || !n || n < 1 || Number.isNaN(rate) || rate < 0)
-    return null;
-  const r = rate / 12 / 100;
-  const mode = method || "원리금균등";
+const AssetBlock = ({
+  kind,
+  valueMan,
+  onValueChange,
+  linked,
+  debtMode,
+  onDebtModeChange,
+  onUpdateDebt,
+  onAddDebt,
+  onRemoveDebt,
+  onClearCollateral,
+}) => {
+  const balanceMan = wonToMan(sumPrincipalWon(linked));
+  const equityMan = valueMan - balanceMan;
+  const over = valueMan > 0 && balanceMan > valueMan;
+  const hasCollateral = linked.length > 0;
 
-  if (mode === "만기일시") {
-    const monthlyInterest = P * r;
-    const totalInterest = monthlyInterest * n;
-    return {
-      months: n,
-      monthly: Math.round(monthlyInterest),
-      totalRepay: Math.round(P + totalInterest),
-      totalInterest: Math.round(totalInterest),
-    };
-  }
+  return (
+    <div className="scl-asset-block">
+      <div className="scl-asset-block-head">
+        <span className="scl-asset-block-title">
+          {kind.icon} {kind.label}
+        </span>
+        <div className="scl-asset-block-value">
+          <input
+            className="scl-input scl-asset-value-input"
+            type="text"
+            inputMode="numeric"
+            value={formatComma(valueMan)}
+            onChange={(e) => onValueChange(parseComma(e.target.value))}
+            placeholder="0"
+            aria-label={`${kind.label} ${kind.unit} (만원)`}
+          />
+          <span className="scl-asset-value-unit">만원</span>
+        </div>
+      </div>
 
-  if (mode === "원금균등") {
-    const principalPart = P / n;
-    let totalInterest = 0;
-    for (let k = 0; k < n; k++) {
-      totalInterest += (P - principalPart * k) * r;
-    }
-    const totalRepay = P + totalInterest;
-    return {
-      months: n,
-      monthly: Math.round(totalRepay / n),
-      totalRepay: Math.round(totalRepay),
-      totalInterest: Math.round(totalInterest),
-    };
-  }
+      {kind.collateral && (
+        <div className="scl-asset-collateral">
+          <div className="scl-asset-collateral-head">
+            <span className="scl-asset-collateral-title">담보 대출</span>
+            <div className="scl-asset-collateral-actions">
+              {hasCollateral && (
+                <DebtModeToggle mode={debtMode} onChange={onDebtModeChange} />
+              )}
+              <div
+                className={`scl-switch ${hasCollateral ? "on" : ""}`}
+                onClick={() =>
+                  hasCollateral ? onClearCollateral() : onAddDebt()
+                }
+                role="switch"
+                aria-checked={hasCollateral}
+                aria-label="담보 대출"
+              >
+                <div className="scl-switch-thumb" />
+              </div>
+            </div>
+          </div>
+          {hasCollateral && (
+            <DebtGrid
+              rows={linked}
+              mode={debtMode}
+              showCollateral={false}
+              minRows={0}
+              onUpdate={onUpdateDebt}
+              onAdd={onAddDebt}
+              onRemove={onRemoveDebt}
+              addLabel="+ 담보 대출 추가"
+            />
+          )}
+        </div>
+      )}
 
-  // 원리금균등 (기본)
-  let monthly;
-  if (r === 0) monthly = P / n;
-  else {
-    const pow = Math.pow(1 + r, n);
-    monthly = (P * r * pow) / (pow - 1);
-  }
-  const totalRepay = monthly * n;
-  return {
-    months: n,
-    monthly: Math.round(monthly),
-    totalRepay: Math.round(totalRepay),
-    totalInterest: Math.round(totalRepay - P),
-  };
-};
-
-const wonToMan = (won) => Math.round((Number(won) || 0) / 10000);
-const formatWon = (n) => `${Math.round(Number(n) || 0).toLocaleString()}원`;
-const formatComma = (value) => {
-  const digits = String(value ?? "").replace(/[^\d]/g, "");
-  if (!digits) return "";
-  return Number(digits).toLocaleString("ko-KR");
-};
-const parseComma = (value) => String(value ?? "").replace(/[^\d]/g, "");
-
-const calcDebtItem = (debt) => {
-  const n = monthsBetween(debt.loanDate, debt.maturityDate);
-  if (n == null) return null;
-  return calcRepayment(
-    debt.principal,
-    debt.rate,
-    n,
-    debt.repayMethod || "원리금균등",
+      {hasCollateral && (
+        <div className="scl-collateral-equity">
+          <span>
+            시가 {valueMan.toLocaleString()} − 담보 {balanceMan.toLocaleString()}
+          </span>
+          <strong className={over ? "neg" : ""}>
+            순자산 {Math.max(0, equityMan).toLocaleString()}만원
+          </strong>
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -317,26 +309,20 @@ const initialForm = {
   employmentType: "자영업",
   dependents: "2명",
   hasSpouseIncome: false,
-  realEstateType: "없음",
-  realEstateDetail: "",
-  financialAssetRange: "500만~2천만",
-  vehicleRange: "500만~2천만",
+  // 보유 자산: 선택된 종류만 블록으로 표시. 담보 참조 키(collateralAssetId)와 id를 공유
+  assetKinds: ["home", "vehicle", "financial"],
+  homeValue: "35000",
+  landValue: "",
+  depositValue: "",
+  vehicleValue: "500",
+  financialValue: "1000",
+  // 채무는 간편/상세 모두 debts[] 한 곳에만 저장하고, 모드는 보이는 컬럼만 결정한다
   debtInputMode: "simple",
-  debtTypes: ["은행대출", "카드론", "캐피탈"],
-  bankLoan: "15000",
-  creditCardDebt: "8000",
-  capitalLoan: "5000",
-  privateLoan: "0",
-  debts: SAMPLE_DETAIL_DEBTS,
-  overduePeriod: OverduePeriod.From6To12Months,
+  debts: SAMPLE_DEBTS,
   debtCause: ["사업실패"],
-  incomeRange: "200~300만",
+  monthlyIncome: "250",
   housingType: "월세",
-  monthlyRent: "70",
-  monthlyFood: "40",
-  monthlyEducation: "30",
-  monthlyTransport: "15",
-  monthlyEtc: "20",
+  additionalLivingCost: "50",
   previousFiling: false,
   previousFilingYear: "",
   hasSurety: false,
@@ -352,12 +338,35 @@ const initialForm = {
   memo: "",
 };
 
-const INCOME_RANGES = {
-  "100만 이하": 80,
-  "100~200만": 150,
-  "200~300만": 250,
-  "300~400만": 350,
-  "400만 이상": 450,
+/** 이 진단에 연결된 기존 고객 레코드 (없으면 null) */
+const LINKED_CUSTOMER_DATA = {
+  id: 1,
+  name: "김민수",
+  phone: "010-3842-5917",
+  applicationNumber: "APP-001",
+  consultations: [
+    {
+      id: 3,
+      author: "박지훈",
+      category: "재상담",
+      content: "소득 증빙 서류 추가 제출 예정. 사채 3천만원은 금융기관 대출이 아닌 점 참고 요망.",
+      timestamp: "2026-06-28 15:42:00",
+    },
+    {
+      id: 2,
+      author: "박지훈",
+      category: "결제유력",
+      content: "고객 이번 주 내 계약 의사 있음. 개인회생 방향으로 진행 검토 중.",
+      timestamp: "2026-06-27 09:10:00",
+    },
+    {
+      id: 1,
+      author: "박지훈",
+      category: "무료방안내",
+      content: "무료 상담 안내 완료. 채무 총액 3.1억, 소득 220만원 확인.",
+      timestamp: "2026-06-26 14:00:00",
+    },
+  ],
 };
 
 const SampleChecklistPage = () => {
@@ -372,196 +381,100 @@ const SampleChecklistPage = () => {
   );
   const [analyzing, setAnalyzing] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
 
   const set = (field) => (val) => setForm((p) => ({ ...p, [field]: val }));
   const setInput = (field) => (e) =>
     setForm((p) => ({ ...p, [field]: e.target.value }));
 
-  const simpleTotalDebt =
-    (parseInt(form.bankLoan) || 0) +
-    (parseInt(form.creditCardDebt) || 0) +
-    (parseInt(form.capitalLoan) || 0) +
-    (parseInt(form.privateLoan) || 0);
+  // 보유 자산 (선택된 종류만) + 자산별 담보 채무 연결
+  const heldAssets = ASSET_KINDS.filter((k) =>
+    (form.assetKinds || []).includes(k.id),
+  );
+  const assetRows = heldAssets.map((kind) => {
+    const linked = kind.collateral ? linkedDebtsOf(form.debts, kind.id) : [];
+    const valueMan = assetValueMan(form, kind.id);
+    const balanceMan = wonToMan(sumPrincipalWon(linked));
+    return { kind, linked, valueMan, balanceMan, equityMan: valueMan - balanceMan };
+  });
 
-  const detailCalcs = (form.debts || []).map((d) => ({
-    debt: d,
-    calc: calcDebtItem(d),
-  }));
-  const detailPrincipalWon = (form.debts || []).reduce(
-    (sum, d) => sum + (parseInt(d.principal) || 0),
+  const collateralDebtMan = wonToMan(
+    sumPrincipalWon((form.debts || []).filter((d) => d.collateralAssetId)),
+  );
+  const assetMarketValueMan = assetRows.reduce((s, a) => s + a.valueMan, 0);
+  // 청산가치 관점: 담보가 시가를 넘어도 초과분이 다른 자산을 깎지 않으므로 자산별로 0 하한
+  const netAssetMan = assetRows.reduce(
+    (s, a) => s + Math.max(0, a.equityMan),
     0,
   );
-  const detailSecuredWon = (form.debts || []).reduce(
-    (sum, d) => sum + (d.secured ? parseInt(d.principal) || 0 : 0),
-    0,
-  );
-  const detailUnsecuredWon = detailPrincipalWon - detailSecuredWon;
-  const detailSecuredMonthlyWon = detailCalcs.reduce(
-    (sum, { debt, calc }) => sum + (debt.secured && calc ? calc.monthly : 0),
-    0,
-  );
-  const detailUnsecuredMonthlyWon = detailCalcs.reduce(
-    (sum, { debt, calc }) => sum + (!debt.secured && calc ? calc.monthly : 0),
-    0,
-  );
-  const detailSecuredInterestWon = detailCalcs.reduce(
-    (sum, { debt, calc }) =>
-      sum + (debt.secured && calc ? calc.totalInterest : 0),
-    0,
-  );
-  const detailUnsecuredInterestWon = detailCalcs.reduce(
-    (sum, { debt, calc }) =>
-      sum + (!debt.secured && calc ? calc.totalInterest : 0),
-    0,
-  );
-  const detailTotalRepayWon = detailCalcs.reduce(
-    (sum, { calc }) => sum + (calc?.totalRepay || 0),
-    0,
-  );
-  const detailTotalInterestWon = detailCalcs.reduce(
-    (sum, { calc }) => sum + (calc?.totalInterest || 0),
-    0,
-  );
-  const detailMonthlySumWon = detailCalcs.reduce(
-    (sum, { calc }) => sum + (calc?.monthly || 0),
-    0,
-  );
+  const debtSummary = buildDebtSummaryFromRows(form.debts);
+  const totalDebt = debtSummary.totalDebt;
+  const displayDebts = sortDebtsForDisplay(form.debts);
 
-  // 사이드바·간편 합계는 만원 단위 유지 / 상세는 원 → 만원 환산
-  const totalDebt =
-    form.debtInputMode === "detail"
-      ? wonToMan(detailPrincipalWon)
-      : simpleTotalDebt;
+  const updateDebt = (id, patch) =>
+    setForm((p) => ({
+      ...p,
+      debts: p.debts.map((d) => (d.id === id ? { ...d, ...patch } : d)),
+    }));
 
-  const buildDebtSummary = () => {
-    if (form.debtInputMode === "detail") {
-      const items = detailCalcs.map(({ debt, calc }) => ({
-        id: debt.id,
-        label: debt.lender
-          ? `${debt.lender}${debt.debtType ? ` (${debt.debtType})` : ""}`
-          : debt.debtType || "미입력",
-        debtType: debt.debtType || "",
-        secured: !!debt.secured,
-        lender: debt.lender || "",
-        amount: wonToMan(debt.principal),
-        principalWon: parseInt(debt.principal) || 0,
-        totalRepay: calc ? wonToMan(calc.totalRepay) : null,
-        totalInterest: calc ? wonToMan(calc.totalInterest) : null,
-        monthly: calc ? wonToMan(calc.monthly) : null,
-        months: calc?.months ?? null,
-        rate: debt.rate,
-        overduePeriod: String(parseOverdueMonths(debt.overduePeriod)),
-        repayMethod: debt.repayMethod || "원리금균등",
-        loanDate: debt.loanDate || "",
-        maturityDate: debt.maturityDate || "",
-      }));
-      const maxOverdue = getMaxOverdue(form.debts);
-      return {
-        mode: "detail",
-        totalDebt: wonToMan(detailPrincipalWon),
-        securedDebt: wonToMan(detailSecuredWon),
-        unsecuredDebt: wonToMan(detailUnsecuredWon),
-        totalDebtWithInterest: wonToMan(detailTotalRepayWon),
-        totalInterest: wonToMan(detailTotalInterestWon),
-        monthlySum: wonToMan(detailMonthlySumWon),
-        maxOverdue,
-        overduePeriod: maxOverdue,
-        items,
-      };
-    }
-    const items = [
-      {
-        label: "은행 대출",
-        debtType: "은행대출",
-        amount: parseInt(form.bankLoan) || 0,
-      },
-      {
-        label: "카드론",
-        debtType: "카드론",
-        amount: parseInt(form.creditCardDebt) || 0,
-      },
-      {
-        label: "캐피탈",
-        debtType: "캐피탈",
-        amount: parseInt(form.capitalLoan) || 0,
-      },
-      {
-        label: "사채",
-        debtType: "사채",
-        amount: parseInt(form.privateLoan) || 0,
-      },
-    ].filter((i) => i.amount > 0);
-    const principal = items.reduce((s, i) => s + i.amount, 0);
-    const overdue = normalizeSimpleOverdue(form.overduePeriod);
-    return {
-      mode: "simple",
-      totalDebt: principal,
-      totalDebtWithInterest: principal,
-      totalInterest: 0,
-      monthlySum: null,
-      maxOverdue: overdue,
-      overduePeriod: overdue,
-      items,
-    };
+  const addDebt = (overrides) =>
+    setForm((p) => ({ ...p, debts: [...p.debts, emptyDebt(overrides)] }));
+
+  const removeDebt = (id) =>
+    setForm((p) => ({
+      ...p,
+      debts: ensureRows(p.debts.filter((d) => d.id !== id)),
+    }));
+
+  const clearAssetCollateral = (assetId) => {
+    const linked = linkedDebtsOf(form.debts, assetId);
+    const hasInput = linked.some(
+      (d) => d.lender || (parseInt(d.principal) || 0) > 0,
+    );
+    if (hasInput && !window.confirm("이 자산의 담보 대출을 삭제할까요?")) return;
+    setForm((p) => ({
+      ...p,
+      debts: ensureRows(
+        p.debts.filter((d) => d.collateralAssetId !== assetId),
+      ),
+    }));
   };
 
-  const updateDebt = (id, field, value) => {
+  const setDebtMode = (mode) => setForm((p) => ({ ...p, debtInputMode: mode }));
+
+  /**
+   * 보유 자산 선택 변경.
+   * 해제한 자산에 걸려 있던 담보 채무는 연결만 끊고 목록에는 남긴다.
+   * (입력한 채무가 소리 없이 사라지면 총 채무액이 조용히 줄어든다)
+   */
+  const setAssetKinds = (kinds) =>
     setForm((p) => {
-      const debts = p.debts.map((d) =>
-        d.id === id ? { ...d, [field]: value } : d,
-      );
-      return {
-        ...p,
-        debts,
-        ...(p.debtInputMode === "detail"
-          ? { overduePeriod: getMaxOverdue(debts) }
-          : {}),
-      };
+      const dropped = (p.assetKinds || []).filter((k) => !kinds.includes(k));
+      const debts = dropped.length
+        ? p.debts.map((d) =>
+            dropped.includes(d.collateralAssetId)
+              ? { ...d, collateralAssetId: null, secured: true }
+              : d,
+          )
+        : p.debts;
+      return { ...p, assetKinds: kinds, debts };
     });
-  };
 
-  const addDebt = () => {
-    setForm((p) => {
-      const debts = [...p.debts, emptyDebt()];
-      return {
-        ...p,
-        debts,
-        ...(p.debtInputMode === "detail"
-          ? { overduePeriod: getMaxOverdue(debts) }
-          : {}),
-      };
-    });
-  };
+  const setAssetValue = (kindId) => (val) =>
+    setForm((p) => ({ ...p, [ASSET_VALUE_FIELD[kindId]]: val }));
 
-  const removeDebt = (id) => {
-    setForm((p) => {
-      if (p.debts.length <= 1) return p;
-      const debts = p.debts.filter((d) => d.id !== id);
-      return {
-        ...p,
-        debts,
-        ...(p.debtInputMode === "detail"
-          ? { overduePeriod: getMaxOverdue(debts) }
-          : {}),
-      };
-    });
-  };
-
-  const approxIncome = INCOME_RANGES[form.incomeRange] || 0;
-  const approxExpenses =
-    (parseInt(form.monthlyRent) || 0) +
-    (parseInt(form.monthlyFood) || 0) +
-    (parseInt(form.monthlyEducation) || 0) +
-    (parseInt(form.monthlyTransport) || 0) +
-    (parseInt(form.monthlyEtc) || 0);
-  const disposable = approxIncome - approxExpenses;
+  const approxIncome = parseInt(form.monthlyIncome) || 0;
+  const householdSize = householdSizeFromDependents(form.dependents);
+  const estimatedLivingCost = estimatedLivingCostFor(form.dependents);
+  const additionalLivingCost = parseInt(form.additionalLivingCost) || 0;
+  const repaymentCapacity =
+    approxIncome - estimatedLivingCost - additionalLivingCost;
 
   const completionRate = Math.round(
     (completedSections.size / SECTIONS.length) * 100,
   );
 
   const goToResult = () => {
-    const debtSummary = buildDebtSummary();
     setAnalyzing(true);
     setTimeout(
       () => navigate("/checklist/result", { state: { debtSummary } }),
@@ -621,6 +534,7 @@ const SampleChecklistPage = () => {
   }
 
   return (
+    <>
     <div className="scl-page">
       {/* 진행률 바 — 페이지 상단 */}
       <div className="scl-progress-track">
@@ -670,9 +584,42 @@ const SampleChecklistPage = () => {
               <div className="scl-avatar">
                 {form.name ? form.name.charAt(0) : "?"}
               </div>
-              <div>
-                <div className="scl-client-name">
-                  {form.name || "고객명 미입력"}
+              <div className="scl-client-info">
+                <div className="scl-client-name-row">
+                  <span className="scl-client-name">
+                    {form.name || "고객명 미입력"}
+                  </span>
+                  {LINKED_CUSTOMER_DATA && (
+                    <button
+                      type="button"
+                      className="scl-client-link-btn"
+                      onClick={() => setShowCustomerModal(true)}
+                      title="고객 등록 정보 보기"
+                      aria-label="연결된 고객 정보 보기"
+                    >
+                      <svg
+                        width="13"
+                        height="13"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                      >
+                        <path
+                          d="M8.5 11.5a4.5 4.5 0 006.364 0l2-2a4.5 4.5 0 00-6.364-6.364L9 4.636"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M11.5 8.5a4.5 4.5 0 00-6.364 0l-2 2a4.5 4.5 0 006.364 6.364L11 15.364"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  )}
                 </div>
                 <div className="scl-client-sub">
                   {form.ageGroup} · {form.gender} · {form.employmentType}
@@ -689,17 +636,19 @@ const SampleChecklistPage = () => {
                 </span>
               </div>
               <div className="scl-kpi">
-                <span className="scl-kpi-label">월 소득(추정)</span>
+                <span className="scl-kpi-label">월 소득</span>
                 <span className="scl-kpi-val">
                   {approxIncome}
                   <em>만원</em>
                 </span>
               </div>
               <div className="scl-kpi">
-                <span className="scl-kpi-label">월 가용소득</span>
-                <span className={`scl-kpi-val ${disposable < 0 ? "neg" : ""}`}>
-                  {disposable >= 0 ? "+" : ""}
-                  {disposable}
+                <span className="scl-kpi-label">추정 상환여력</span>
+                <span
+                  className={`scl-kpi-val ${repaymentCapacity < 0 ? "neg" : ""}`}
+                >
+                  {repaymentCapacity >= 0 ? "+" : ""}
+                  {repaymentCapacity}
                   <em>만원</em>
                 </span>
               </div>
@@ -864,54 +813,49 @@ const SampleChecklistPage = () => {
 
               {activeSection === "assets" && (
                 <>
-                  <Field label="부동산 보유 여부">
+                  <Field label="보유 자산">
                     <Chips
-                      options={[
-                        "없음",
-                        "자가 소유",
-                        "전세 보증금",
-                        "임대 수익",
-                      ]}
-                      value={form.realEstateType}
-                      onChange={set("realEstateType")}
+                      options={ASSET_KINDS.map((k) => ({
+                        value: k.id,
+                        label: `${k.icon} ${k.label}`,
+                      }))}
+                      value={form.assetKinds}
+                      onChange={setAssetKinds}
+                      multi
                     />
                   </Field>
-                  {form.realEstateType !== "없음" && (
-                    <Field label="부동산 시가 (만원)">
-                      <input
-                        className="scl-input"
-                        type="number"
-                        value={form.realEstateDetail}
-                        onChange={setInput("realEstateDetail")}
-                        placeholder="시가 직접 입력"
-                      />
-                    </Field>
+
+                  {assetRows.map(({ kind, linked, valueMan }) => (
+                    <AssetBlock
+                      key={kind.id}
+                      kind={kind}
+                      valueMan={valueMan}
+                      onValueChange={setAssetValue(kind.id)}
+                      linked={linked}
+                      debtMode={form.debtInputMode}
+                      onDebtModeChange={setDebtMode}
+                      onUpdateDebt={updateDebt}
+                      onAddDebt={() =>
+                        addDebt({
+                          debtType: kind.defaultDebtType,
+                          secured: true,
+                          collateralAssetId: kind.id,
+                        })
+                      }
+                      onRemoveDebt={removeDebt}
+                      onClearCollateral={() => clearAssetCollateral(kind.id)}
+                    />
+                  ))}
+
+                  {assetRows.length > 0 && (
+                    <div className="scl-asset-summary">
+                      <span>
+                        시가 {assetMarketValueMan.toLocaleString()} − 담보{" "}
+                        {collateralDebtMan.toLocaleString()}
+                      </span>
+                      <strong>{netAssetMan.toLocaleString()}만원</strong>
+                    </div>
                   )}
-                  <Field label="금융 자산 (예·적금 + 주식 등)">
-                    <Chips
-                      options={[
-                        "없음",
-                        "500만 미만",
-                        "500만~2천만",
-                        "2천만~5천만",
-                        "5천만 이상",
-                      ]}
-                      value={form.financialAssetRange}
-                      onChange={set("financialAssetRange")}
-                    />
-                  </Field>
-                  <Field label="차량 보유">
-                    <Chips
-                      options={[
-                        "없음",
-                        "500만 미만",
-                        "500만~2천만",
-                        "2천만 이상",
-                      ]}
-                      value={form.vehicleRange}
-                      onChange={set("vehicleRange")}
-                    />
-                  </Field>
                 </>
               )}
 
@@ -919,414 +863,29 @@ const SampleChecklistPage = () => {
                 <>
                   <div className="scl-debt-panel">
                     <div className="scl-debt-panel-head">
-                      <div className="scl-debt-panel-title-wrap">
-                        <span className="scl-debt-panel-title">채무 내역</span>
-                        <span className="scl-debt-panel-hint">
-                          {form.debtInputMode === "simple"
-                            ? "종류별 잔액만 빠르게 입력"
-                            : "채권처·상환방식·금리까지 상세 입력 (원 단위)"}
-                        </span>
-                      </div>
-                      <div className="scl-mode-toggle" role="tablist">
-                        <button
-                          type="button"
-                          role="tab"
-                          aria-selected={form.debtInputMode === "simple"}
-                          className={`scl-mode-btn ${form.debtInputMode === "simple" ? "on" : ""}`}
-                          onClick={() =>
-                            setForm((p) => ({
-                              ...p,
-                              debtInputMode: "simple",
-                              overduePeriod: monthsToOverduePeriod(
-                                getMaxOverdue(p.debts),
-                              ),
-                            }))
-                          }
-                        >
-                          간편
-                        </button>
-                        <button
-                          type="button"
-                          role="tab"
-                          aria-selected={form.debtInputMode === "detail"}
-                          className={`scl-mode-btn ${form.debtInputMode === "detail" ? "on" : ""}`}
-                          onClick={() =>
-                            setForm((p) => ({
-                              ...p,
-                              debtInputMode: "detail",
-                              overduePeriod: getMaxOverdue(p.debts),
-                            }))
-                          }
-                        >
-                          상세
-                        </button>
-                      </div>
+                      <span className="scl-debt-panel-title">채무 내역</span>
+                      <DebtModeToggle
+                        mode={form.debtInputMode}
+                        onChange={setDebtMode}
+                      />
                     </div>
 
                     <div className="scl-debt-panel-body">
-                      {form.debtInputMode === "simple" ? (
-                        <>
-                          <Field label="채무 종류 (중복 선택 가능)">
-                            <Chips
-                              options={DEBT_TYPE_OPTIONS}
-                              value={form.debtTypes}
-                              onChange={set("debtTypes")}
-                              multi
-                            />
-                          </Field>
-                          <p className="scl-note">
-                            ※ 해당 채무의 현재 잔액을 만원 단위로 입력하세요
-                          </p>
-                          <div className="scl-row-2">
-                            {form.debtTypes.includes("은행대출") && (
-                              <Field label="은행 대출">
-                                <input
-                                  className="scl-input"
-                                  type="number"
-                                  value={form.bankLoan}
-                                  onChange={setInput("bankLoan")}
-                                />
-                              </Field>
-                            )}
-                            {form.debtTypes.includes("카드론") && (
-                              <Field label="카드론">
-                                <input
-                                  className="scl-input"
-                                  type="number"
-                                  value={form.creditCardDebt}
-                                  onChange={setInput("creditCardDebt")}
-                                />
-                              </Field>
-                            )}
-                            {(form.debtTypes.includes("캐피탈") ||
-                              form.debtTypes.includes("저축은행")) && (
-                              <Field label="캐피탈 / 저축은행">
-                                <input
-                                  className="scl-input"
-                                  type="number"
-                                  value={form.capitalLoan}
-                                  onChange={setInput("capitalLoan")}
-                                />
-                              </Field>
-                            )}
-                            {(form.debtTypes.includes("사채") ||
-                              form.debtTypes.includes("개인차용")) && (
-                              <Field label="사채 / 개인차용">
-                                <input
-                                  className="scl-input"
-                                  type="number"
-                                  value={form.privateLoan}
-                                  onChange={setInput("privateLoan")}
-                                />
-                              </Field>
-                            )}
-                          </div>
-                          <div className="scl-sum-line">
-                            <span>총 채무 합계</span>
-                            <strong>{totalDebt.toLocaleString()}만원</strong>
-                          </div>
-                          <Field
-                            label="연체 기간"
-                            hint="여러 채무가 있으면 가장 긴 연체 기준으로"
-                          >
-                            <select
-                              className="scl-input"
-                              value={normalizeSimpleOverdue(form.overduePeriod)}
-                              onChange={(e) =>
-                                set("overduePeriod")(e.target.value)
-                              }
-                            >
-                              {OVERDUE_PERIOD_OPTIONS.map((o) => (
-                                <option key={o.value} value={o.value}>
-                                  {o.label}
-                                </option>
-                              ))}
-                            </select>
-                          </Field>
-                        </>
-                      ) : (
-                        <>
-                          <div className="scl-debt-grid-wrap">
-                            <table className="scl-debt-grid">
-                              <thead>
-                                <tr>
-                                  <th className="col-type">채무종류</th>
-                                  <th className="col-secured">담보</th>
-                                  <th className="col-lender">채권처</th>
-                                  <th className="col-method">상환방식</th>
-                                  <th className="col-overdue">연체(개월)</th>
-                                  <th className="col-date">대출일</th>
-                                  <th className="col-date">만기일</th>
-                                  <th className="col-num">금액(원)</th>
-                                  <th className="col-rate">금리(%)</th>
-                                  <th className="col-calc">기간</th>
-                                  <th className="col-calc">월불입</th>
-                                  <th className="col-calc">총이자</th>
-                                  <th className="col-calc">총상환</th>
-                                  <th className="col-act" />
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {form.debts.map((debt) => {
-                                  const calc = calcDebtItem(debt);
-                                  return (
-                                    <tr key={debt.id}>
-                                      <td>
-                                        <select
-                                          className="scl-grid-input scl-grid-select"
-                                          value={debt.debtType || "은행대출"}
-                                          onChange={(e) =>
-                                            updateDebt(
-                                              debt.id,
-                                              "debtType",
-                                              e.target.value,
-                                            )
-                                          }
-                                        >
-                                          {DEBT_TYPE_OPTIONS.map((t) => (
-                                            <option key={t} value={t}>
-                                              {t}
-                                            </option>
-                                          ))}
-                                        </select>
-                                      </td>
-                                      <td>
-                                        <select
-                                          className="scl-grid-input scl-grid-select"
-                                          value={
-                                            debt.secured ? "담보" : "무담보"
-                                          }
-                                          onChange={(e) =>
-                                            updateDebt(
-                                              debt.id,
-                                              "secured",
-                                              e.target.value === "담보",
-                                            )
-                                          }
-                                        >
-                                          <option value="무담보">무담보</option>
-                                          <option value="담보">담보</option>
-                                        </select>
-                                      </td>
-                                      <td>
-                                        <input
-                                          className="scl-grid-input"
-                                          value={debt.lender}
-                                          onChange={(e) =>
-                                            updateDebt(
-                                              debt.id,
-                                              "lender",
-                                              e.target.value,
-                                            )
-                                          }
-                                          placeholder="예: 국민은행"
-                                        />
-                                      </td>
-                                      <td>
-                                        <select
-                                          className="scl-grid-input scl-grid-select"
-                                          value={
-                                            debt.repayMethod || "원리금균등"
-                                          }
-                                          onChange={(e) =>
-                                            updateDebt(
-                                              debt.id,
-                                              "repayMethod",
-                                              e.target.value,
-                                            )
-                                          }
-                                        >
-                                          {REPAY_METHOD_OPTIONS.map((m) => (
-                                            <option key={m} value={m}>
-                                              {m}
-                                            </option>
-                                          ))}
-                                        </select>
-                                      </td>
-                                      <td>
-                                        <input
-                                          className="scl-grid-input scl-grid-num"
-                                          type="number"
-                                          min="0"
-                                          inputMode="numeric"
-                                          value={debt.overduePeriod ?? "0"}
-                                          onChange={(e) =>
-                                            updateDebt(
-                                              debt.id,
-                                              "overduePeriod",
-                                              e.target.value.replace(
-                                                /[^\d]/g,
-                                                "",
-                                              ),
-                                            )
-                                          }
-                                        />
-                                      </td>
-                                      <td>
-                                        <input
-                                          className="scl-grid-input"
-                                          type="date"
-                                          value={debt.loanDate}
-                                          onChange={(e) =>
-                                            updateDebt(
-                                              debt.id,
-                                              "loanDate",
-                                              e.target.value,
-                                            )
-                                          }
-                                        />
-                                      </td>
-                                      <td>
-                                        <input
-                                          className="scl-grid-input"
-                                          type="date"
-                                          value={debt.maturityDate}
-                                          onChange={(e) =>
-                                            updateDebt(
-                                              debt.id,
-                                              "maturityDate",
-                                              e.target.value,
-                                            )
-                                          }
-                                        />
-                                      </td>
-                                      <td>
-                                        <input
-                                          className="scl-grid-input scl-grid-num"
-                                          type="text"
-                                          inputMode="numeric"
-                                          value={formatComma(debt.principal)}
-                                          onChange={(e) =>
-                                            updateDebt(
-                                              debt.id,
-                                              "principal",
-                                              parseComma(e.target.value),
-                                            )
-                                          }
-                                          placeholder="예: 50,000,000"
-                                        />
-                                      </td>
-                                      <td>
-                                        <input
-                                          className="scl-grid-input scl-grid-num"
-                                          type="number"
-                                          step="0.1"
-                                          value={debt.rate}
-                                          onChange={(e) =>
-                                            updateDebt(
-                                              debt.id,
-                                              "rate",
-                                              e.target.value,
-                                            )
-                                          }
-                                          placeholder="예: 15"
-                                        />
-                                      </td>
-                                      <td className="scl-grid-calc">
-                                        {calc ? `${calc.months}개월` : "—"}
-                                      </td>
-                                      <td className="scl-grid-calc">
-                                        {calc ? formatWon(calc.monthly) : "—"}
-                                      </td>
-                                      <td className="scl-grid-calc">
-                                        {calc
-                                          ? formatWon(calc.totalInterest)
-                                          : "—"}
-                                      </td>
-                                      <td className="scl-grid-calc">
-                                        {calc
-                                          ? formatWon(calc.totalRepay)
-                                          : "—"}
-                                      </td>
-                                      <td className="col-act">
-                                        {form.debts.length > 1 && (
-                                          <button
-                                            type="button"
-                                            className="scl-debt-remove"
-                                            onClick={() => removeDebt(debt.id)}
-                                            title="삭제"
-                                          >
-                                            ×
-                                          </button>
-                                        )}
-                                      </td>
-                                    </tr>
-                                  );
-                                })}
-                                <tr className="scl-debt-add-row">
-                                  <td colSpan={14}>
-                                    <button
-                                      type="button"
-                                      className="scl-debt-add-btn"
-                                      onClick={addDebt}
-                                    >
-                                      + 행 추가
-                                    </button>
-                                  </td>
-                                </tr>
-                              </tbody>
-                            </table>
-                          </div>
-                          {detailPrincipalWon > 0 && (
-                            <div className="scl-debt-summary">
-                              <div className="scl-debt-summary-item">
-                                <span className="scl-debt-summary-label">
-                                  담보대출 합산
-                                </span>
-                                <strong className="scl-debt-summary-val">
-                                  {formatWon(detailSecuredWon)}
-                                </strong>
-                                <div className="scl-debt-summary-meta">
-                                  <span>
-                                    월불입 {formatWon(detailSecuredMonthlyWon)}
-                                  </span>
-                                  <span>
-                                    총이자 {formatWon(detailSecuredInterestWon)}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="scl-debt-summary-item">
-                                <span className="scl-debt-summary-label">
-                                  무담보대출 합산
-                                </span>
-                                <strong className="scl-debt-summary-val">
-                                  {formatWon(detailUnsecuredWon)}
-                                </strong>
-                                <div className="scl-debt-summary-meta">
-                                  <span>
-                                    월불입{" "}
-                                    {formatWon(detailUnsecuredMonthlyWon)}
-                                  </span>
-                                  <span>
-                                    총이자{" "}
-                                    {formatWon(detailUnsecuredInterestWon)}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="scl-debt-summary-item total">
-                                <span className="scl-debt-summary-label">
-                                  총 합산
-                                </span>
-                                <strong className="scl-debt-summary-val">
-                                  {formatWon(detailPrincipalWon)}
-                                </strong>
-                                <div className="scl-debt-summary-meta">
-                                  <span>
-                                    월불입 {formatWon(detailMonthlySumWon)}
-                                  </span>
-                                  <span>
-                                    총이자 {formatWon(detailTotalInterestWon)}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      )}
+                      <DebtGrid
+                        rows={displayDebts}
+                        mode={form.debtInputMode}
+                        onUpdate={updateDebt}
+                        onAdd={() => addDebt()}
+                        onRemove={removeDebt}
+                      />
+                      <DebtTotals
+                        rows={form.debts}
+                        mode={form.debtInputMode}
+                      />
                     </div>
                   </div>
 
-                  <Field label="채무 발생 원인 (중복 선택 가능)">
+                  <Field label="채무 발생 원인">
                     <Chips
                       options={[
                         "사업실패",
@@ -1347,16 +906,10 @@ const SampleChecklistPage = () => {
               {activeSection === "income" && (
                 <>
                   <Field label="월 소득 (세후 실수령 기준)">
-                    <Chips
-                      options={[
-                        "100만 이하",
-                        "100~200만",
-                        "200~300만",
-                        "300~400만",
-                        "400만 이상",
-                      ]}
-                      value={form.incomeRange}
-                      onChange={set("incomeRange")}
+                    <AmountQuickInput
+                      value={form.monthlyIncome}
+                      onChange={set("monthlyIncome")}
+                      presets={INCOME_PRESETS}
                     />
                   </Field>
                   <Field label="주거 형태">
@@ -1366,66 +919,48 @@ const SampleChecklistPage = () => {
                       onChange={set("housingType")}
                     />
                   </Field>
-                  <p className="scl-sub-heading">월 고정 지출 (만원)</p>
-                  <p className="scl-note">※ 해당 없으면 0으로 입력</p>
-                  <div className="scl-row-3">
-                    <Field label="주거비">
-                      <input
-                        className="scl-input"
-                        type="number"
-                        value={form.monthlyRent}
-                        onChange={setInput("monthlyRent")}
-                      />
-                    </Field>
-                    <Field label="식비">
-                      <input
-                        className="scl-input"
-                        type="number"
-                        value={form.monthlyFood}
-                        onChange={setInput("monthlyFood")}
-                      />
-                    </Field>
-                    <Field label="교육비">
-                      <input
-                        className="scl-input"
-                        type="number"
-                        value={form.monthlyEducation}
-                        onChange={setInput("monthlyEducation")}
-                      />
-                    </Field>
-                  </div>
-                  <div className="scl-row-2">
-                    <Field label="교통비">
-                      <input
-                        className="scl-input"
-                        type="number"
-                        value={form.monthlyTransport}
-                        onChange={setInput("monthlyTransport")}
-                      />
-                    </Field>
-                    <Field label="기타 고정지출">
-                      <input
-                        className="scl-input"
-                        type="number"
-                        value={form.monthlyEtc}
-                        onChange={setInput("monthlyEtc")}
-                      />
-                    </Field>
-                  </div>
+
                   <div className="scl-income-summary">
                     <div className="scl-income-row">
-                      <span>월 소득 (추정)</span>
-                      <span>+{approxIncome}만원</span>
+                      <span>월 소득</span>
+                      <span>+{approxIncome.toLocaleString()}만원</span>
                     </div>
                     <div className="scl-income-row">
-                      <span>총 지출</span>
-                      <span>−{approxExpenses}만원</span>
+                      <div className="scl-income-row-label">
+                        <span>법정 생계비</span>
+                        <em>가구원 {householdSize}인 기준</em>
+                      </div>
+                      <span>−{estimatedLivingCost.toLocaleString()}만원</span>
+                    </div>
+                    <div className="scl-income-row scl-income-row-extra">
+                      <div className="scl-income-row-label">
+                        <span>추가 필수지출</span>
+                        <em>
+                          주거비, 의료비 등 추가로 인정될 수 있는 필수
+                          지출입니다.
+                        </em>
+                      </div>
+                      <div className="scl-income-extra">
+                        <input
+                          className="scl-input scl-income-extra-input"
+                          type="text"
+                          inputMode="numeric"
+                          value={formatComma(form.additionalLivingCost)}
+                          onChange={(e) =>
+                            set("additionalLivingCost")(
+                              parseComma(e.target.value),
+                            )
+                          }
+                          placeholder="0"
+                        />
+                        <span className="scl-income-extra-unit">만원</span>
+                      </div>
                     </div>
                     <div className="scl-income-row total">
                       <span>월 가용 소득</span>
-                      <strong className={disposable < 30 ? "warn" : ""}>
-                        {disposable >= 0 ? "+" : ""}
-                        {disposable}만원
+                      <strong className={repaymentCapacity < 30 ? "warn" : ""}>
+                        {repaymentCapacity >= 0 ? "+" : ""}
+                        {repaymentCapacity.toLocaleString()}만원
                       </strong>
                     </div>
                   </div>
@@ -1737,6 +1272,14 @@ const SampleChecklistPage = () => {
         </main>
       </div>
     </div>
+    {showCustomerModal && (
+      <CustomerInfoModal
+        isOpen={showCustomerModal}
+        customerData={LINKED_CUSTOMER_DATA}
+        onClose={() => setShowCustomerModal(false)}
+      />
+    )}
+    </>
   );
 };
 

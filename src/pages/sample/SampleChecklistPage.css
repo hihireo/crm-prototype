@@ -67,6 +67,42 @@
   gap: 10px;
 }
 
+.scl-client-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.scl-client-name-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* 체인(연결) 아이콘 버튼 */
+.scl-client-link-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: #bbb;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+.scl-client-link-btn:hover {
+  background: #e8e8e8;
+  color: #555;
+}
+.scl-client-link-btn:active {
+  background: #ddd;
+}
+
 .scl-avatar {
   width: 36px;
   height: 36px;
@@ -334,6 +370,64 @@
   font-weight: 600;
 }
 
+/* 금액 직접입력 + 퀵버튼 */
+.scl-amount-quick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+}
+
+.scl-amount-quick-input-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.scl-amount-quick-input {
+  width: 120px;
+  text-align: right;
+}
+
+.scl-amount-quick-unit {
+  font-size: 13px;
+  font-weight: 600;
+  color: #888;
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+}
+
+.scl-amount-quick-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.scl-amount-quick-btn {
+  padding: 6px 11px;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 16px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: all 0.13s;
+  white-space: nowrap;
+}
+.scl-amount-quick-btn:hover {
+  border-color: #bbb;
+  color: #333;
+}
+.scl-amount-quick-btn.on {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+  font-weight: 600;
+}
+
 /* Input */
 .scl-input {
   padding: 12px 14px;
@@ -583,6 +677,174 @@
   font-size: 15px;
   font-weight: 700;
 }
+.scl-sum-line-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.scl-sum-line-label em {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 400;
+  color: #bbb;
+  letter-spacing: -0.01em;
+}
+
+/* 자산 블록 (시가 + 담보 대출 + 순자산) */
+.scl-asset-block {
+  border: 1px solid #ebebeb;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+.scl-asset-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 15px;
+  background: #fafafa;
+}
+.scl-asset-block-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+.scl-asset-block-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+}
+.scl-asset-value-input {
+  width: 120px;
+  padding: 9px 12px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  background: #fff;
+}
+.scl-asset-value-unit {
+  font-size: 13px;
+  font-weight: 600;
+  color: #888;
+  letter-spacing: -0.01em;
+}
+.scl-asset-collateral {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 15px 12px;
+  border-top: 1px solid #f0f0f0;
+}
+.scl-asset-collateral-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.scl-asset-collateral-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #555;
+  letter-spacing: -0.01em;
+}
+.scl-asset-collateral-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.scl-asset-collateral .scl-debt-grid-wrap {
+  margin: 0;
+}
+.scl-asset-collateral .scl-debt-grid.detail {
+  min-width: 1080px;
+}
+.scl-collateral-equity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 15px;
+  background: #fafafa;
+  border-top: 1px solid #f0f0f0;
+  font-size: 12px;
+  color: #999;
+  letter-spacing: -0.01em;
+}
+.scl-collateral-equity strong {
+  font-size: 14px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+.scl-collateral-equity strong.neg {
+  color: #dc2626;
+}
+
+.scl-asset-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  font-size: 13px;
+  color: #888;
+  letter-spacing: -0.01em;
+}
+.scl-asset-summary strong {
+  font-size: 16px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+.scl-linked-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+}
+.scl-linked-line-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.scl-linked-line-label span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  letter-spacing: -0.01em;
+}
+.scl-linked-line-label em {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 400;
+  color: #aaa;
+  letter-spacing: -0.01em;
+}
+.scl-linked-line-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.scl-linked-line-right strong {
+  font-size: 15px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.02em;
+}
 
 /* Debt input panel (간편/상세 통합) */
 .scl-debt-panel {
@@ -600,22 +862,11 @@
   background: #fafafa;
   border-bottom: 1px solid #f0f0f0;
 }
-.scl-debt-panel-title-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
 .scl-debt-panel-title {
   font-size: 14px;
   font-weight: 700;
   color: #111;
   letter-spacing: -0.02em;
-}
-.scl-debt-panel-hint {
-  font-size: 12px;
-  color: #999;
-  letter-spacing: -0.01em;
 }
 .scl-debt-panel-body {
   padding: 16px;
@@ -712,9 +963,30 @@
 
 .scl-debt-grid {
   width: 100%;
-  min-width: 1320px;
+  min-width: 1400px;
   border-collapse: collapse;
   table-layout: fixed;
+}
+
+/* 간편 모드는 컬럼이 5개뿐이라 가로 스크롤 없이 들어간다 */
+.scl-debt-grid.simple {
+  min-width: 0;
+}
+.scl-debt-grid.simple .col-type {
+  width: 18%;
+}
+.scl-debt-grid.simple .col-secured {
+  width: 16%;
+  min-width: 96px;
+}
+.scl-debt-grid.simple .col-lender {
+  width: 30%;
+}
+.scl-debt-grid.simple .col-overdue {
+  width: 14%;
+}
+.scl-debt-grid.simple .col-num {
+  width: 22%;
 }
 .scl-debt-grid thead th {
   padding: 10px 8px;
@@ -726,6 +998,55 @@
   background: #fafafa;
   border-bottom: 1px solid #eee;
   white-space: nowrap;
+}
+
+/* 헤더 내 힌트 뱃지 */
+.scl-th-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #bbb;
+  background: #efefef;
+  border-radius: 4px;
+  padding: 1px 4px;
+  letter-spacing: 0;
+  vertical-align: middle;
+  cursor: default;
+  position: relative;
+}
+.scl-th-hint[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #222;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.5;
+  white-space: normal;
+  width: 220px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  z-index: 100;
+  pointer-events: none;
+  letter-spacing: -0.01em;
+}
+.scl-th-hint[data-tooltip]:hover::before {
+  content: "";
+  position: absolute;
+  top: calc(100% + 1px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-bottom-color: #222;
+  z-index: 100;
+  pointer-events: none;
 }
 .scl-debt-grid tbody td,
 .scl-debt-grid tfoot td {
@@ -749,7 +1070,33 @@
   width: 7%;
 }
 .scl-debt-grid .col-secured {
-  width: 7%;
+  width: 9%;
+  min-width: 88px;
+}
+
+/* 자산 단계에서 입력된 담보 채무 — 목록 맨 위 + 행/담보칸 색으로만 구분 */
+.scl-debt-grid tbody tr.scl-debt-row-linked {
+  background: #f4f5f7;
+}
+.scl-debt-grid tbody tr.scl-debt-row-linked td:first-child {
+  box-shadow: inset 3px 0 0 #111;
+}
+.scl-debt-grid tbody tr.scl-debt-row-linked td.col-secured {
+  background: #eceef2;
+}
+.scl-debt-grid tbody tr.scl-debt-row-linked .scl-grid-input:hover {
+  background: #fff;
+}
+.scl-grid-collateral-locked {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #111;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 .scl-debt-grid .col-lender {
   width: 8%;
@@ -942,11 +1289,13 @@
   background: #fafafa;
   border: 1px solid #f0f0f0;
   overflow: hidden;
+  margin-top: 8px;
 }
 .scl-income-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   padding: 12px 16px;
   font-size: 13px;
   color: #666;
@@ -955,6 +1304,41 @@
 }
 .scl-income-row:last-child {
   border-bottom: none;
+}
+.scl-income-row-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.scl-income-row-label em {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 400;
+  color: #aaa;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+.scl-income-row-extra {
+  align-items: center;
+}
+.scl-income-extra {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.scl-income-extra-input {
+  width: 96px;
+  padding: 8px 10px;
+  text-align: right;
+  font-size: 13px;
+}
+.scl-income-extra-unit {
+  font-size: 13px;
+  font-weight: 500;
+  color: #888;
+  letter-spacing: -0.01em;
 }
 .scl-income-row.total {
   background: #fff;

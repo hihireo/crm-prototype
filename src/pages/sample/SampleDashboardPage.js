@@ -2,64 +2,16 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./SampleDashboardPage.css";
 import "./SampleChecklistPage.css";
-
-const Chips = ({ options, value, onChange, multi = false }) => (
-  <div className="scl-chips">
-    {options.map((opt) => {
-      const v = typeof opt === "string" ? opt : opt.value;
-      const label = typeof opt === "string" ? opt : opt.label;
-      const selected = multi ? (value || []).includes(v) : value === v;
-      return (
-        <button
-          key={v}
-          type="button"
-          className={`scl-chip ${selected ? "on" : ""}`}
-          onClick={() => {
-            if (multi) {
-              const next = selected
-                ? (value || []).filter((x) => x !== v)
-                : [...(value || []), v];
-              onChange(next);
-            } else {
-              onChange(v);
-            }
-          }}
-        >
-          {label}
-        </button>
-      );
-    })}
-  </div>
-);
-
-const Field = ({ label, hint, children }) => (
-  <div className="scl-field">
-    <label className="scl-label">
-      {label}
-      {hint && <span className="scl-hint">{hint}</span>}
-    </label>
-    {children}
-  </div>
-);
-
-let debtEditIdSeq = 100;
-const nextEditDebtId = () => {
-  debtEditIdSeq += 1;
-  return `edit-d${debtEditIdSeq}`;
-};
-
-const emptyEditDebt = () => ({
-  id: nextEditDebtId(),
-  debtType: "은행대출",
-  secured: false,
-  lender: "",
-  loanDate: "",
-  maturityDate: "",
-  principal: "",
-  rate: "",
-  repayMethod: "원리금균등",
-  overduePeriod: "0",
-});
+import DebtGrid, { DebtModeToggle, DebtTotals } from "./DebtGrid";
+import {
+  buildDebtSummaryFromRows,
+  emptyDebt,
+  ensureRows,
+  overduePeriodLabel,
+  parseOverdueMonths,
+  sortDebtsForDisplay,
+  summaryItemsToRows,
+} from "./debtModel";
 
 const CLIENT = {
   name: "김민수",
@@ -80,86 +32,6 @@ const CLIENT = {
     { label: "캐피탈", amount: 5000, totalRepay: 6553, pct: 16 },
     { label: "사채", amount: 3000, totalRepay: 3807, pct: 10 },
   ],
-};
-
-const DEBT_TYPE_OPTIONS = [
-  "은행대출",
-  "카드론",
-  "캐피탈",
-  "저축은행",
-  "사채",
-  "개인차용",
-];
-const REPAY_METHOD_OPTIONS = ["원리금균등", "원금균등", "만기일시"];
-
-/** 간편 모드 연체기간 (OverduePeriod) */
-const OverduePeriod = {
-  None: "none",
-  Under3Months: "under_3_months",
-  From3To6Months: "3_to_6_months",
-  From6To12Months: "6_to_12_months",
-  Over1Year: "over_1_year",
-};
-
-const OVERDUE_PERIOD_OPTIONS = [
-  { value: OverduePeriod.None, label: "없음" },
-  { value: OverduePeriod.Under3Months, label: "3개월 미만" },
-  { value: OverduePeriod.From3To6Months, label: "3~6개월" },
-  { value: OverduePeriod.From6To12Months, label: "6~12개월" },
-  { value: OverduePeriod.Over1Year, label: "1년 이상" },
-];
-
-const OVERDUE_PERIOD_TO_MONTHS = {
-  [OverduePeriod.None]: 0,
-  [OverduePeriod.Under3Months]: 2,
-  [OverduePeriod.From3To6Months]: 4,
-  [OverduePeriod.From6To12Months]: 8,
-  [OverduePeriod.Over1Year]: 12,
-};
-
-const isOverduePeriodEnum = (value) =>
-  OVERDUE_PERIOD_OPTIONS.some((o) => o.value === value);
-
-const monthsToOverduePeriod = (months) => {
-  const n = Number(months) || 0;
-  if (n <= 0) return OverduePeriod.None;
-  if (n < 3) return OverduePeriod.Under3Months;
-  if (n < 6) return OverduePeriod.From3To6Months;
-  if (n < 12) return OverduePeriod.From6To12Months;
-  return OverduePeriod.Over1Year;
-};
-
-const normalizeSimpleOverdue = (value) => {
-  if (isOverduePeriodEnum(value)) return value;
-  if (value === "없음") return OverduePeriod.None;
-  if (value === "3개월 미만") return OverduePeriod.Under3Months;
-  if (value === "3~6개월") return OverduePeriod.From3To6Months;
-  if (value === "6~12개월") return OverduePeriod.From6To12Months;
-  if (value === "1년 이상") return OverduePeriod.Over1Year;
-  return monthsToOverduePeriod(
-    parseInt(String(value ?? "").replace(/[^\d]/g, ""), 10) || 0,
-  );
-};
-
-const overduePeriodLabel = (value) => {
-  const opt = OVERDUE_PERIOD_OPTIONS.find((o) => o.value === value);
-  return opt?.label ?? null;
-};
-
-const parseOverdueMonths = (value) => {
-  if (value == null || value === "" || value === "없음") return 0;
-  if (isOverduePeriodEnum(value)) return OVERDUE_PERIOD_TO_MONTHS[value] ?? 0;
-  const n = parseInt(String(value).replace(/[^\d]/g, ""), 10);
-  return Number.isNaN(n) ? 0 : n;
-};
-
-const getMaxOverdueMonths = (items) => {
-  let max = 0;
-  (items || []).forEach((i) => {
-    const n = parseOverdueMonths(i.overduePeriod);
-    if (n > max) max = n;
-  });
-  return String(max);
 };
 
 const DEFAULT_DEBT_ITEMS = [
@@ -213,204 +85,6 @@ const DEFAULT_DEBT_ITEMS = [
   },
 ];
 
-const monthsBetween = (startStr, endStr) => {
-  if (!startStr || !endStr) return null;
-  const start = new Date(startStr);
-  const end = new Date(endStr);
-  if (
-    Number.isNaN(start.getTime()) ||
-    Number.isNaN(end.getTime()) ||
-    end <= start
-  )
-    return null;
-  const months =
-    (end.getFullYear() - start.getFullYear()) * 12 +
-    (end.getMonth() - start.getMonth());
-  return Math.max(1, months);
-};
-
-const calcRepayment = (principalWon, annualRatePct, n, method) => {
-  const P = Number(principalWon);
-  const rate = Number(annualRatePct);
-  if (!P || P <= 0 || !n || n < 1 || Number.isNaN(rate) || rate < 0)
-    return null;
-  const r = rate / 12 / 100;
-  const mode = method || "원리금균등";
-  if (mode === "만기일시") {
-    const monthlyInterest = P * r;
-    const totalInterest = monthlyInterest * n;
-    return {
-      months: n,
-      monthly: Math.round(monthlyInterest),
-      totalRepay: Math.round(P + totalInterest),
-      totalInterest: Math.round(totalInterest),
-    };
-  }
-  if (mode === "원금균등") {
-    const principalPart = P / n;
-    let totalInterest = 0;
-    for (let k = 0; k < n; k++) totalInterest += (P - principalPart * k) * r;
-    const totalRepay = P + totalInterest;
-    return {
-      months: n,
-      monthly: Math.round(totalRepay / n),
-      totalRepay: Math.round(totalRepay),
-      totalInterest: Math.round(totalInterest),
-    };
-  }
-  let monthly;
-  if (r === 0) monthly = P / n;
-  else {
-    const pow = Math.pow(1 + r, n);
-    monthly = (P * r * pow) / (pow - 1);
-  }
-  const totalRepay = monthly * n;
-  return {
-    months: n,
-    monthly: Math.round(monthly),
-    totalRepay: Math.round(totalRepay),
-    totalInterest: Math.round(totalRepay - P),
-  };
-};
-
-const wonToMan = (won) => Math.round((Number(won) || 0) / 10000);
-const formatWon = (n) => `${Math.round(Number(n) || 0).toLocaleString()}원`;
-const formatComma = (value) => {
-  const digits = String(value ?? "").replace(/[^\d]/g, "");
-  if (!digits) return "";
-  return Number(digits).toLocaleString("ko-KR");
-};
-const parseComma = (value) => String(value ?? "").replace(/[^\d]/g, "");
-
-const calcDebtItem = (debt) => {
-  const n = monthsBetween(debt.loanDate, debt.maturityDate);
-  if (n == null) return null;
-  return calcRepayment(
-    debt.principal,
-    debt.rate,
-    n,
-    debt.repayMethod || "원리금균등",
-  );
-};
-
-const buildDebtSummaryFromDetailRows = (rows) => {
-  const items = rows.map((row, idx) => {
-    const principalWon = parseInt(row.principalWon ?? row.principal) || 0;
-    const n = monthsBetween(row.loanDate, row.maturityDate);
-    const calc = n
-      ? calcRepayment(principalWon, row.rate, n, row.repayMethod)
-      : null;
-    const amount = wonToMan(principalWon);
-    return {
-      id: row.id || `d${idx}`,
-      label: row.lender
-        ? `${row.lender}${row.debtType ? ` (${row.debtType})` : ""}`
-        : row.debtType || "미입력",
-      debtType: row.debtType || "",
-      secured: !!row.secured,
-      lender: row.lender || "",
-      amount,
-      principalWon,
-      totalRepay: calc ? wonToMan(calc.totalRepay) : amount,
-      totalInterest: calc ? wonToMan(calc.totalInterest) : 0,
-      monthly: calc ? wonToMan(calc.monthly) : null,
-      months: calc?.months ?? null,
-      rate: row.rate,
-      repayMethod: row.repayMethod || "원리금균등",
-      overduePeriod: String(parseOverdueMonths(row.overduePeriod)),
-      loanDate: row.loanDate || "",
-      maturityDate: row.maturityDate || "",
-    };
-  });
-  const totalDebt = items.reduce((s, i) => s + (i.amount || 0), 0);
-  const securedDebt = items
-    .filter((i) => i.secured)
-    .reduce((s, i) => s + (i.amount || 0), 0);
-  const unsecuredDebt = items
-    .filter((i) => !i.secured)
-    .reduce((s, i) => s + (i.amount || 0), 0);
-  const totalDebtWithInterest = items.reduce(
-    (s, i) => s + (i.totalRepay || i.amount || 0),
-    0,
-  );
-  const overduePeriod = getMaxOverdueMonths(items);
-  return {
-    mode: "detail",
-    totalDebt,
-    securedDebt,
-    unsecuredDebt,
-    totalDebtWithInterest,
-    totalInterest: totalDebtWithInterest - totalDebt,
-    overduePeriod,
-    maxOverdue: overduePeriod,
-    items,
-  };
-};
-
-const buildDebtSummaryFromSimpleDraft = (draft) => {
-  const rows = [];
-  if (draft.debtTypes.includes("은행대출")) {
-    rows.push({
-      id: "s-bank",
-      debtType: "은행대출",
-      amount: draft.bankLoan,
-    });
-  }
-  if (draft.debtTypes.includes("카드론")) {
-    rows.push({
-      id: "s-card",
-      debtType: "카드론",
-      amount: draft.creditCardDebt,
-    });
-  }
-  if (
-    draft.debtTypes.includes("캐피탈") ||
-    draft.debtTypes.includes("저축은행")
-  ) {
-    rows.push({
-      id: "s-capital",
-      debtType: draft.debtTypes.includes("캐피탈") ? "캐피탈" : "저축은행",
-      amount: draft.capitalLoan,
-    });
-  }
-  if (
-    draft.debtTypes.includes("사채") ||
-    draft.debtTypes.includes("개인차용")
-  ) {
-    rows.push({
-      id: "s-private",
-      debtType: draft.debtTypes.includes("사채") ? "사채" : "개인차용",
-      amount: draft.privateLoan,
-    });
-  }
-  return buildDebtSummaryFromSimpleRows(rows, draft.overduePeriod);
-};
-
-const buildDebtSummaryFromSimpleRows = (
-  rows,
-  overduePeriod = OverduePeriod.None,
-) => {
-  const items = rows
-    .map((row, idx) => ({
-      id: row.id || `s${idx}`,
-      label: row.debtType || "기타",
-      debtType: row.debtType || "",
-      amount: parseInt(row.amount) || 0,
-    }))
-    .filter((i) => i.amount > 0);
-  const totalDebt = items.reduce((s, i) => s + i.amount, 0);
-  const overdue = normalizeSimpleOverdue(overduePeriod);
-  return {
-    mode: "simple",
-    totalDebt,
-    totalDebtWithInterest: totalDebt,
-    totalInterest: 0,
-    overduePeriod: overdue,
-    maxOverdue: overdue,
-    items,
-  };
-};
-
 const aggregateByDebtType = (items) => {
   const map = {};
   (items || []).forEach((i) => {
@@ -429,132 +103,13 @@ const aggregateByDebtType = (items) => {
   }));
 };
 
-const amountByDebtType = (items) => {
-  const amounts = {
-    bankLoan: "0",
-    creditCardDebt: "0",
-    capitalLoan: "0",
-    privateLoan: "0",
-  };
-  const types = [];
-  (items || []).forEach((i) => {
-    const type = i.debtType || i.label || "";
-    const amt = String(i.amount || 0);
-    if (type === "은행대출" || type.includes("은행 대출")) {
-      if (!types.includes("은행대출")) types.push("은행대출");
-      amounts.bankLoan = String(
-        (parseInt(amounts.bankLoan) || 0) + (parseInt(amt) || 0),
-      );
-    } else if (type === "카드론" || type.includes("카드")) {
-      if (!types.includes("카드론")) types.push("카드론");
-      amounts.creditCardDebt = String(
-        (parseInt(amounts.creditCardDebt) || 0) + (parseInt(amt) || 0),
-      );
-    } else if (
-      type === "캐피탈" ||
-      type === "저축은행" ||
-      type.includes("캐피탈")
-    ) {
-      const key = type === "저축은행" ? "저축은행" : "캐피탈";
-      if (!types.includes(key)) types.push(key);
-      amounts.capitalLoan = String(
-        (parseInt(amounts.capitalLoan) || 0) + (parseInt(amt) || 0),
-      );
-    } else if (
-      type === "사채" ||
-      type === "개인차용" ||
-      type.includes("사채")
-    ) {
-      const key = type === "개인차용" ? "개인차용" : "사채";
-      if (!types.includes(key)) types.push(key);
-      amounts.privateLoan = String(
-        (parseInt(amounts.privateLoan) || 0) + (parseInt(amt) || 0),
-      );
-    }
-  });
-  return {
-    debtTypes: types.length ? types : ["은행대출", "카드론", "캐피탈"],
-    ...amounts,
-  };
-};
+/** 요약 → 편집용 draft (간편/상세가 같은 행 배열을 쓰므로 모드만 따라간다) */
+const summaryToDebtDraft = (summary) => ({
+  debtInputMode: summary?.mode === "simple" ? "simple" : "detail",
+  debts: summaryItemsToRows(summary?.items),
+});
 
-const itemsToDetailDebts = (items) => {
-  if (!items?.length) return [emptyEditDebt()];
-  return items.map((item, idx) => {
-    const principalWon =
-      item.principalWon ??
-      (item.amount != null ? Math.round(Number(item.amount) * 10000) : 0);
-    return {
-      id: item.id || `edit-${idx}`,
-      debtType: item.debtType || "은행대출",
-      secured: !!item.secured,
-      lender: item.lender || "",
-      loanDate: item.loanDate || "",
-      maturityDate: item.maturityDate || "",
-      principal: String(principalWon || ""),
-      rate: item.rate ?? "",
-      repayMethod: item.repayMethod || "원리금균등",
-      overduePeriod: String(parseOverdueMonths(item.overduePeriod)),
-    };
-  });
-};
-
-const simpleDraftToDetailDebts = (draft) => {
-  const rows = [];
-  const push = (debtType, manAmount) => {
-    const amt = parseInt(manAmount) || 0;
-    if (amt <= 0) return;
-    rows.push({
-      ...emptyEditDebt(),
-      debtType,
-      principal: String(amt * 10000),
-      overduePeriod: String(parseOverdueMonths(draft.overduePeriod)),
-    });
-  };
-  if (draft.debtTypes.includes("은행대출")) push("은행대출", draft.bankLoan);
-  if (draft.debtTypes.includes("카드론")) push("카드론", draft.creditCardDebt);
-  if (
-    draft.debtTypes.includes("캐피탈") ||
-    draft.debtTypes.includes("저축은행")
-  ) {
-    push(
-      draft.debtTypes.includes("캐피탈") ? "캐피탈" : "저축은행",
-      draft.capitalLoan,
-    );
-  }
-  if (
-    draft.debtTypes.includes("사채") ||
-    draft.debtTypes.includes("개인차용")
-  ) {
-    push(
-      draft.debtTypes.includes("사채") ? "사채" : "개인차용",
-      draft.privateLoan,
-    );
-  }
-  return rows.length ? rows : [emptyEditDebt()];
-};
-
-const summaryToDebtDraft = (summary) => {
-  const mode = summary?.mode || "detail";
-  const items = summary?.items || [];
-  const simplePart = amountByDebtType(items);
-  const overdue =
-    mode === "simple"
-      ? normalizeSimpleOverdue(summary?.overduePeriod)
-      : monthsToOverduePeriod(
-          parseOverdueMonths(
-            summary?.overduePeriod ?? getMaxOverdueMonths(items),
-          ),
-        );
-  return {
-    debtInputMode: mode,
-    ...simplePart,
-    overduePeriod: overdue,
-    debts: itemsToDetailDebts(items),
-  };
-};
-
-const DEFAULT_DEBT_SUMMARY = buildDebtSummaryFromDetailRows(
+const DEFAULT_DEBT_SUMMARY = buildDebtSummaryFromRows(
   DEFAULT_DEBT_ITEMS.map((d) => ({
     ...d,
     principal: String(d.principalWon),
@@ -729,6 +284,74 @@ const TRANSMISSION_TYPE_LABEL = {
   reject: "반려",
   payment: "결제",
   refund: "환불",
+};
+
+/* AnalysisStatus ─────────────────────────────────────────────── */
+
+const AnalysisStatus = {
+  Consulting: "consulting", // 상담중
+  Reviewing: "reviewing", // 검토중
+  Rejected: "rejected", // 반려됨
+  ContractPending: "contract_pending", // 계약대기중
+  InProgress: "in_progress", // 절차진행중
+  Suspended: "suspended", // 중단됨
+};
+
+/** 메인 플로우 (선형) */
+const ANALYSIS_STATUS_FLOW = [
+  { value: AnalysisStatus.Consulting, label: "상담중", desc: "초기 상담 단계" },
+  {
+    value: AnalysisStatus.Reviewing,
+    label: "검토중",
+    desc: "분석 결과 검토 중",
+  },
+  {
+    value: AnalysisStatus.ContractPending,
+    label: "계약대기중",
+    desc: "결제·계약 진행 대기",
+  },
+  {
+    value: AnalysisStatus.InProgress,
+    label: "절차진행중",
+    desc: "채무조정 절차 진행 중",
+  },
+];
+
+/** 분기 종단 상태 */
+const ANALYSIS_STATUS_TERMINAL = {
+  [AnalysisStatus.Rejected]: { label: "반려됨", colorVar: "rejected" },
+  [AnalysisStatus.Suspended]: { label: "중단됨", colorVar: "suspended" },
+};
+
+/** 상태별 다음 액션 정의 */
+const ANALYSIS_STATUS_ACTIONS = {
+  [AnalysisStatus.Consulting]: [
+    { key: "advance", label: "진행하기", primary: true },
+  ],
+  [AnalysisStatus.Reviewing]: [
+    { key: "reject", label: "거절", primary: false },
+    { key: "accept", label: "수락", primary: true },
+  ],
+  [AnalysisStatus.ContractPending]: [
+    { key: "payment", label: "진행하기", primary: true },
+  ],
+  [AnalysisStatus.InProgress]: [
+    { key: "suspend", label: "진행하기", primary: true },
+  ],
+  [AnalysisStatus.Rejected]: [],
+  [AnalysisStatus.Suspended]: [],
+};
+
+/** 상태별 안내 문구 */
+const ANALYSIS_STATUS_HINT = {
+  [AnalysisStatus.Consulting]: "분석 완료 후 검토를 요청하세요.",
+  [AnalysisStatus.Reviewing]:
+    "분석 내용을 확인하고 수락 또는 거절을 선택해 주세요.",
+  [AnalysisStatus.ContractPending]:
+    "결제 정보를 등록하면 절차 진행 단계로 이동합니다.",
+  [AnalysisStatus.InProgress]: "채무조정 절차가 진행 중입니다.",
+  [AnalysisStatus.Rejected]: "분석 건이 반려 처리되었습니다.",
+  [AnalysisStatus.Suspended]: "절차가 중단되었습니다.",
 };
 
 /* 수임료 결제 정보 (분할 납부) — 기본값 */
@@ -2029,12 +1652,6 @@ const SampleDashboardPage = () => {
   const [isAiTyping, setIsAiTyping] = useState(false);
   const chatEndRef = useRef(null);
 
-  /* 변호사 분석 데이터 검토 상태 (외부 뷰) */
-  const [reviewStatus, setReviewStatus] = useState("pending"); // pending | accepted | rejected
-  const [rejectModalOpen, setRejectModalOpen] = useState(false);
-  const [rejectReason, setRejectReason] = useState("");
-  const [acceptModalOpen, setAcceptModalOpen] = useState(false);
-  const [acceptMessage, setAcceptMessage] = useState("");
   const [transmissionNotes, setTransmissionNotes] = useState(() =>
     loadTransmissionNotes(isExternal),
   );
@@ -2077,6 +1694,12 @@ const SampleDashboardPage = () => {
   const [draftSelectedProc, setDraftSelectedProc] = useState("rehabilitation");
   const pendingPaymentApplyRef = useRef(null);
 
+  /* AnalysisStatus 단계 상태 */
+  const [analysisStatus, setAnalysisStatus] = useState(
+    AnalysisStatus.Reviewing,
+  );
+  const [suspendConfirmOpen, setSuspendConfirmOpen] = useState(false);
+
   /* 채무 구성 자세히보기 / 수정 */
   const [debtSummary, setDebtSummary] = useState(
     () => location.state?.debtSummary || DEFAULT_DEBT_SUMMARY,
@@ -2098,146 +1721,26 @@ const SampleDashboardPage = () => {
     setDebtConfirmOpen(false);
   };
 
-  const setDebtDraftField = (field) => (value) => {
-    setDebtDraft((p) => ({ ...p, [field]: value }));
-  };
+  const switchDebtDraftMode = (nextMode) =>
+    setDebtDraft((p) => ({ ...p, debtInputMode: nextMode }));
 
-  const setDebtDraftInput = (field) => (e) => {
-    setDebtDraft((p) => ({ ...p, [field]: e.target.value }));
-  };
+  const updateDraftDebt = (id, patch) =>
+    setDebtDraft((p) => ({
+      ...p,
+      debts: p.debts.map((d) => (d.id === id ? { ...d, ...patch } : d)),
+    }));
 
-  const switchDebtDraftMode = (nextMode) => {
-    setDebtDraft((p) => {
-      if (p.debtInputMode === nextMode) return p;
-      if (nextMode === "detail") {
-        const hasDetail =
-          p.debts?.some((d) => (parseInt(d.principal) || 0) > 0) ?? false;
-        return {
-          ...p,
-          debtInputMode: "detail",
-          debts: hasDetail ? p.debts : simpleDraftToDetailDebts(p),
-          overduePeriod: hasDetail
-            ? getMaxOverdueMonths(p.debts)
-            : String(parseOverdueMonths(p.overduePeriod)),
-        };
-      }
-      const simplePart = amountByDebtType(
-        (p.debts || []).map((d) => ({
-          debtType: d.debtType,
-          amount: wonToMan(d.principal),
-          overduePeriod: d.overduePeriod,
-        })),
-      );
-      return {
-        ...p,
-        debtInputMode: "simple",
-        ...simplePart,
-        overduePeriod: monthsToOverduePeriod(
-          getMaxOverdueMonths(p.debts) || parseOverdueMonths(p.overduePeriod),
-        ),
-      };
-    });
-  };
+  const addDraftDebt = () =>
+    setDebtDraft((p) => ({ ...p, debts: [...p.debts, emptyDebt()] }));
 
-  const updateDraftDebt = (id, field, value) => {
-    setDebtDraft((p) => {
-      const debts = p.debts.map((d) =>
-        d.id === id ? { ...d, [field]: value } : d,
-      );
-      return {
-        ...p,
-        debts,
-        overduePeriod: getMaxOverdueMonths(debts),
-      };
-    });
-  };
+  const removeDraftDebt = (id) =>
+    setDebtDraft((p) => ({
+      ...p,
+      debts: ensureRows(p.debts.filter((d) => d.id !== id)),
+    }));
 
-  const addDraftDebt = () => {
-    setDebtDraft((p) => {
-      const debts = [...p.debts, emptyEditDebt()];
-      return {
-        ...p,
-        debts,
-        overduePeriod: getMaxOverdueMonths(debts),
-      };
-    });
-  };
-
-  const removeDraftDebt = (id) => {
-    setDebtDraft((p) => {
-      if (p.debts.length <= 1) return p;
-      const debts = p.debts.filter((d) => d.id !== id);
-      return {
-        ...p,
-        debts,
-        overduePeriod: getMaxOverdueMonths(debts),
-      };
-    });
-  };
-
-  const draftSimpleTotal =
-    (debtDraft.debtTypes.includes("은행대출")
-      ? parseInt(debtDraft.bankLoan) || 0
-      : 0) +
-    (debtDraft.debtTypes.includes("카드론")
-      ? parseInt(debtDraft.creditCardDebt) || 0
-      : 0) +
-    (debtDraft.debtTypes.includes("캐피탈") ||
-    debtDraft.debtTypes.includes("저축은행")
-      ? parseInt(debtDraft.capitalLoan) || 0
-      : 0) +
-    (debtDraft.debtTypes.includes("사채") ||
-    debtDraft.debtTypes.includes("개인차용")
-      ? parseInt(debtDraft.privateLoan) || 0
-      : 0);
-
-  const draftDetailCalcs = (debtDraft.debts || []).map((debt) => ({
-    debt,
-    calc: calcDebtItem(debt),
-  }));
-  const draftDetailPrincipalWon = draftDetailCalcs.reduce(
-    (s, { debt }) => s + (parseInt(debt.principal) || 0),
-    0,
-  );
-  const draftDetailSecuredWon = draftDetailCalcs.reduce(
-    (s, { debt }) => s + (debt.secured ? parseInt(debt.principal) || 0 : 0),
-    0,
-  );
-  const draftDetailUnsecuredWon =
-    draftDetailPrincipalWon - draftDetailSecuredWon;
-  const draftDetailSecuredMonthlyWon = draftDetailCalcs.reduce(
-    (s, { debt, calc }) => s + (debt.secured && calc ? calc.monthly : 0),
-    0,
-  );
-  const draftDetailUnsecuredMonthlyWon = draftDetailCalcs.reduce(
-    (s, { debt, calc }) => s + (!debt.secured && calc ? calc.monthly : 0),
-    0,
-  );
-  const draftDetailSecuredInterestWon = draftDetailCalcs.reduce(
-    (s, { debt, calc }) =>
-      s + (debt.secured && calc ? calc.totalInterest : 0),
-    0,
-  );
-  const draftDetailUnsecuredInterestWon = draftDetailCalcs.reduce(
-    (s, { debt, calc }) =>
-      s + (!debt.secured && calc ? calc.totalInterest : 0),
-    0,
-  );
-  const draftDetailTotalInterestWon = draftDetailCalcs.reduce(
-    (s, { calc }) => s + (calc ? calc.totalInterest : 0),
-    0,
-  );
-  const draftDetailMonthlySumWon = draftDetailCalcs.reduce(
-    (s, { calc }) => s + (calc ? calc.monthly : 0),
-    0,
-  );
-
-  const buildEditedDebtSummary = () => {
-    if (debtDraft.debtInputMode === "simple") {
-      return buildDebtSummaryFromSimpleDraft(debtDraft);
-    }
-    return buildDebtSummaryFromDetailRows(debtDraft.debts);
-  };
+  const buildEditedDebtSummary = () =>
+    buildDebtSummaryFromRows(debtDraft.debts);
 
   const handleDebtApply = () => {
     setDebtConfirmOpen(true);
@@ -2480,6 +1983,28 @@ const SampleDashboardPage = () => {
     }
   }, [chatMessages, isAiTyping]);
 
+  /* paymentConfigured / stopType 변화 시 analysisStatus 자동 동기화 */
+  useEffect(() => {
+    if (stopType) {
+      setAnalysisStatus(AnalysisStatus.Suspended);
+    } else if (paymentConfigured) {
+      setAnalysisStatus(AnalysisStatus.InProgress);
+    }
+  }, [paymentConfigured, stopType]);
+
+  const handleAdvanceAnalysisStatus = () => {
+    const currentIdx = ANALYSIS_STATUS_FLOW.findIndex(
+      (s) => s.value === analysisStatus,
+    );
+    if (currentIdx < 0 || currentIdx >= ANALYSIS_STATUS_FLOW.length - 1) return;
+    const next = ANALYSIS_STATUS_FLOW[currentIdx + 1];
+    if (next.value === AnalysisStatus.InProgress) {
+      openPaymentModal();
+    } else {
+      setAnalysisStatus(next.value);
+    }
+  };
+
   useEffect(() => {
     const saved = localStorage.getItem(procStorageKey(1, selectedOption));
     setProcCurrentStep(saved ? parseInt(saved) : null);
@@ -2499,38 +2024,6 @@ const SampleDashboardPage = () => {
       setChatMessages((prev) => [...prev, { role: "ai", text: answer }]);
       setIsAiTyping(false);
     }, 1000);
-  };
-
-  const openAcceptModal = () => {
-    setAcceptMessage("");
-    setAcceptModalOpen(true);
-  };
-
-  const handleConfirmAccept = () => {
-    if (!acceptMessage.trim()) {
-      alert("수락 메시지를 입력해 주세요.");
-      return;
-    }
-    saveTransmissionNote("accept", acceptMessage.trim());
-    setReviewStatus("accepted");
-    setAcceptModalOpen(false);
-    setTransmissionNotes(loadTransmissionNotes(isExternal));
-  };
-
-  const openRejectModal = () => {
-    setRejectReason("");
-    setRejectModalOpen(true);
-  };
-
-  const handleConfirmReject = () => {
-    if (!rejectReason.trim()) {
-      alert("거절 사유를 입력해 주세요.");
-      return;
-    }
-    setReviewStatus("rejected");
-    setRejectModalOpen(false);
-    saveTransmissionNote("reject", rejectReason.trim());
-    navigate("/checklist");
   };
 
   const totalDebtPrincipal = debtSummary?.totalDebt ?? CLIENT.totalDebt;
@@ -2785,45 +2278,186 @@ const SampleDashboardPage = () => {
           </div>
         </div>
 
-        {/* 변호사 분석 데이터 검토 (외부 뷰) */}
-        {isExternal && (
-          <>
-            {reviewStatus === "pending" && (
-              <div className="sdp-review-strip sdp-review-strip--pending">
-                <div className="sdp-review-strip-main">
-                  <span className="sdp-review-strip-label">검토 대기</span>
-                  <span className="sdp-review-strip-desc">
-                    AI 분석 결과를 검토하고 수락 또는 거절해 주세요
+        {/* AnalysisStatus 단계 통합 바 */}
+        {(() => {
+          const isTerminal =
+            analysisStatus === AnalysisStatus.Rejected ||
+            analysisStatus === AnalysisStatus.Suspended;
+          const currentFlowIdx = ANALYSIS_STATUS_FLOW.findIndex(
+            (s) => s.value === analysisStatus,
+          );
+          const terminalMeta = ANALYSIS_STATUS_TERMINAL[analysisStatus];
+          const actions = ANALYSIS_STATUS_ACTIONS[analysisStatus] || [];
+          const proc = PROCEDURES[selectedOption];
+          const currentProcStep = proc?.steps?.find(
+            (s) => s.id === procCurrentStep,
+          );
+
+          return (
+            <div className="sdp-ast">
+              {/* 스텝 플로우 */}
+              <div className="sdp-ast-flow">
+                {ANALYSIS_STATUS_FLOW.map((step, idx) => {
+                  const isDone = !isTerminal && idx < currentFlowIdx;
+                  const isCurrent =
+                    !isTerminal && step.value === analysisStatus;
+                  return (
+                    <React.Fragment key={step.value}>
+                      <div
+                        className={`sdp-ast-step ${isCurrent ? "current" : isDone ? "done" : "pending"}`}
+                      >
+                        <div className="sdp-ast-dot">
+                          {isDone ? (
+                            <svg
+                              width="10"
+                              height="10"
+                              viewBox="0 0 12 12"
+                              fill="none"
+                            >
+                              <path
+                                d="M2 6l3 3 5-5"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          ) : (
+                            <span>{idx + 1}</span>
+                          )}
+                        </div>
+                        <span className="sdp-ast-label">{step.label}</span>
+                      </div>
+                      {idx < ANALYSIS_STATUS_FLOW.length - 1 && (
+                        <div
+                          className={`sdp-ast-connector ${isDone ? "done" : ""}`}
+                        />
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+
+                {/* 종단 상태 배지 */}
+                {isTerminal && terminalMeta && (
+                  <div
+                    className={`sdp-ast-terminal sdp-ast-terminal--${terminalMeta.colorVar}`}
+                  >
+                    <span>{terminalMeta.label}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* 우측: 안내 문구 + 서브 정보 + 액션 버튼 */}
+              <div className="sdp-ast-right">
+                <div className="sdp-ast-hint-wrap">
+                  {/* 절차진행중 서브스텝 */}
+                  {analysisStatus === AnalysisStatus.InProgress &&
+                    currentProcStep && (
+                      <span className="sdp-ast-substep">
+                        <span className="sdp-ast-substep-num">
+                          {procCurrentStep}
+                        </span>
+                        {currentProcStep.title}
+                      </span>
+                    )}
+                  {/* 안내 문구 */}
+                  <span className="sdp-ast-hint">
+                    {ANALYSIS_STATUS_HINT[analysisStatus]}
                   </span>
                 </div>
-                <div className="sdp-review-strip-actions">
+                {/* 액션 버튼 */}
+                {actions.length > 0 && (
+                  <div className="sdp-ast-btns">
+                    {actions.map((action) => (
+                      <button
+                        key={action.key}
+                        type="button"
+                        className={`sdp-ast-btn ${action.primary ? "primary" : "ghost"}`}
+                        onClick={() => {
+                          if (action.key === "advance")
+                            handleAdvanceAnalysisStatus();
+                          else if (action.key === "accept")
+                            setAnalysisStatus(AnalysisStatus.ContractPending);
+                          else if (action.key === "reject")
+                            setAnalysisStatus(AnalysisStatus.Rejected);
+                          else if (action.key === "payment") openPaymentModal();
+                          else if (action.key === "suspend")
+                            setSuspendConfirmOpen(true);
+                        }}
+                      >
+                        {action.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* 절차진행중 → 진행하기 안내 모달 */}
+        {suspendConfirmOpen && (
+          <div
+            className="sdp-review-modal-overlay"
+            onClick={() => setSuspendConfirmOpen(false)}
+          >
+            <div
+              className="sdp-review-modal sdp-ast-guide-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="sdp-review-modal-head">
+                <h2 className="sdp-review-modal-title">절차 진행 상태</h2>
+                <button
+                  type="button"
+                  className="sdp-review-modal-close"
+                  onClick={() => setSuspendConfirmOpen(false)}
+                  aria-label="닫기"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M3 3l10 10M13 3L3 13"
+                      stroke="#666"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div className="sdp-review-modal-body">
+                <p className="sdp-review-modal-desc">
+                  현재 채무조정 절차가 진행 중입니다.
+                  <br />
+                  절차를 <strong>중단</strong>하려면 아래 버튼을 선택하세요.
+                </p>
+                <div className="sdp-ast-guide-options">
                   <button
                     type="button"
-                    className="sdp-review-strip-btn sdp-review-strip-btn--ghost"
-                    onClick={openRejectModal}
+                    className="sdp-ast-guide-opt sdp-ast-guide-opt--reject"
+                    onClick={() => {
+                      setAnalysisStatus(AnalysisStatus.Suspended);
+                      setStopType("suspended");
+                      setSuspendConfirmOpen(false);
+                    }}
                   >
-                    거절
-                  </button>
-                  <button
-                    type="button"
-                    className="sdp-review-strip-btn sdp-review-strip-btn--primary"
-                    onClick={openAcceptModal}
-                  >
-                    수락
+                    <span className="sdp-ast-guide-opt-icon">■</span>
+                    <span className="sdp-ast-guide-opt-label">중단 처리</span>
+                    <span className="sdp-ast-guide-opt-desc">
+                      절차를 중단하고 중단됨으로 표시
+                    </span>
                   </button>
                 </div>
               </div>
-            )}
-            {reviewStatus === "accepted" && (
-              <div className="sdp-review-strip sdp-review-strip--done">
-                <span className="sdp-review-done-dot" aria-hidden="true" />
-                <p className="sdp-review-done-text">
-                  <strong>수락 완료</strong>
-                  계약 진행 후 결제 정보 입력 시 절차 단계로 이동합니다
-                </p>
+              <div className="sdp-review-modal-footer">
+                <button
+                  type="button"
+                  className="sdp-review-cancel-btn"
+                  onClick={() => setSuspendConfirmOpen(false)}
+                >
+                  닫기
+                </button>
               </div>
-            )}
-          </>
+            </div>
+          </div>
         )}
 
         {/* 전달 사항 */}
@@ -3056,21 +2690,27 @@ const SampleDashboardPage = () => {
                       className="sdp-ref-link-btn"
                       onClick={openRefModal}
                     >
-                      제도 안내
                       <svg
-                        width="12"
-                        height="12"
-                        viewBox="0 0 12 12"
+                        width="13"
+                        height="13"
+                        viewBox="0 0 16 16"
                         fill="none"
+                        aria-hidden="true"
                       >
                         <path
-                          d="M4.5 2.5h5v5M9.5 2.5L2.5 9.5"
+                          d="M3.5 2.5h7.2A1.3 1.3 0 0 1 12 3.8v9.4a.9.9 0 0 1-1.4.75L8 12.6l-2.6 1.35A.9.9 0 0 1 4 13.2V3.8A1.3 1.3 0 0 1 5.3 2.5H3.5Z"
+                          stroke="currentColor"
+                          strokeWidth="1.4"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M6.2 6h3.6M6.2 8.5h3.6"
                           stroke="currentColor"
                           strokeWidth="1.4"
                           strokeLinecap="round"
-                          strokeLinejoin="round"
                         />
                       </svg>
+                      제도 안내
                     </button>
                   </div>
                   <div className="sdp-condition-legend">
@@ -3192,7 +2832,7 @@ const SampleDashboardPage = () => {
                 </span>
               </div>
               <div className="sdp-stat">
-                <span className="sdp-stat-label">월 가용 소득</span>
+                <span className="sdp-stat-label">추정 상환여력</span>
                 <span className="sdp-stat-val">
                   +{CLIENT.disposableIncome}
                   <em>만원</em>
@@ -3257,22 +2897,30 @@ const SampleDashboardPage = () => {
             <p className="sdp-section-label">{planProfile.title}</p>
 
             {planProfile.kind === "repayment" && (
-              <div className="sdp-plan-kv">
-                <div className="sdp-kv">
-                  <span>월 변제액</span>
-                  <strong>{planProfile.amount}만원</strong>
+              <>
+                <div className="sdp-plan-kv">
+                  <div className="sdp-kv">
+                    <span>월 변제액</span>
+                    <strong>{planProfile.amount}만원</strong>
+                  </div>
+                  <div className="sdp-kv">
+                    <span>변제 기간</span>
+                    <strong>
+                      {planProfile.months}개월 ({planProfile.periodNote})
+                    </strong>
+                  </div>
+                  <div className="sdp-kv">
+                    <span>총 변제액</span>
+                    <strong>{totalRepayment.toLocaleString()}만원</strong>
+                  </div>
                 </div>
-                <div className="sdp-kv">
-                  <span>변제 기간</span>
-                  <strong>
-                    {planProfile.months}개월 ({planProfile.periodNote})
-                  </strong>
-                </div>
-                <div className="sdp-kv">
-                  <span>총 변제액</span>
-                  <strong>{totalRepayment.toLocaleString()}만원</strong>
-                </div>
-              </div>
+                {selectedOption === "rehabilitation" && (
+                  <p className="sdp-plan-note">
+                    개인회생은 법정 생계비(가구원 기준)를 반영한 가용소득으로 월
+                    변제액을 산정합니다. 위 추정 상환여력과 다를 수 있습니다.
+                  </p>
+                )}
+              </>
             )}
 
             {planProfile.kind === "adjustment" && (
@@ -4029,386 +3677,25 @@ const SampleDashboardPage = () => {
             <div className="sdp-debt-modal-body">
               <div className="scl-debt-panel">
                 <div className="scl-debt-panel-head">
-                  <div className="scl-debt-panel-title-wrap">
-                    <span className="scl-debt-panel-title">채무 내역</span>
-                    <span className="scl-debt-panel-hint">
-                      {debtDraft.debtInputMode === "simple"
-                        ? "종류별 잔액만 빠르게 입력"
-                        : "채권처·상환방식·금리까지 상세 입력 (원 단위)"}
-                    </span>
-                  </div>
-                  <div className="scl-mode-toggle" role="tablist">
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={debtDraft.debtInputMode === "simple"}
-                      className={`scl-mode-btn ${debtDraft.debtInputMode === "simple" ? "on" : ""}`}
-                      onClick={() => switchDebtDraftMode("simple")}
-                    >
-                      간편
-                    </button>
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={debtDraft.debtInputMode === "detail"}
-                      className={`scl-mode-btn ${debtDraft.debtInputMode === "detail" ? "on" : ""}`}
-                      onClick={() => switchDebtDraftMode("detail")}
-                    >
-                      상세
-                    </button>
-                  </div>
+                  <span className="scl-debt-panel-title">채무 내역</span>
+                  <DebtModeToggle
+                    mode={debtDraft.debtInputMode}
+                    onChange={switchDebtDraftMode}
+                  />
                 </div>
 
                 <div className="scl-debt-panel-body">
-                  {debtDraft.debtInputMode === "simple" ? (
-                    <>
-                      <Field label="채무 종류 (중복 선택 가능)">
-                        <Chips
-                          options={DEBT_TYPE_OPTIONS}
-                          value={debtDraft.debtTypes}
-                          onChange={setDebtDraftField("debtTypes")}
-                          multi
-                        />
-                      </Field>
-                      <p className="scl-note">
-                        ※ 해당 채무의 현재 잔액을 만원 단위로 입력하세요
-                      </p>
-                      <div className="scl-row-2">
-                        {debtDraft.debtTypes.includes("은행대출") && (
-                          <Field label="은행 대출">
-                            <input
-                              className="scl-input"
-                              type="number"
-                              value={debtDraft.bankLoan}
-                              onChange={setDebtDraftInput("bankLoan")}
-                            />
-                          </Field>
-                        )}
-                        {debtDraft.debtTypes.includes("카드론") && (
-                          <Field label="카드론">
-                            <input
-                              className="scl-input"
-                              type="number"
-                              value={debtDraft.creditCardDebt}
-                              onChange={setDebtDraftInput("creditCardDebt")}
-                            />
-                          </Field>
-                        )}
-                        {(debtDraft.debtTypes.includes("캐피탈") ||
-                          debtDraft.debtTypes.includes("저축은행")) && (
-                          <Field label="캐피탈 / 저축은행">
-                            <input
-                              className="scl-input"
-                              type="number"
-                              value={debtDraft.capitalLoan}
-                              onChange={setDebtDraftInput("capitalLoan")}
-                            />
-                          </Field>
-                        )}
-                        {(debtDraft.debtTypes.includes("사채") ||
-                          debtDraft.debtTypes.includes("개인차용")) && (
-                          <Field label="사채 / 개인차용">
-                            <input
-                              className="scl-input"
-                              type="number"
-                              value={debtDraft.privateLoan}
-                              onChange={setDebtDraftInput("privateLoan")}
-                            />
-                          </Field>
-                        )}
-                      </div>
-                      <div className="scl-sum-line">
-                        <span>총 채무 합계</span>
-                        <strong>{draftSimpleTotal.toLocaleString()}만원</strong>
-                      </div>
-                      <Field
-                        label="연체 기간"
-                        hint="여러 채무가 있으면 가장 긴 연체 기준으로"
-                      >
-                        <select
-                          className="scl-input"
-                          value={normalizeSimpleOverdue(
-                            debtDraft.overduePeriod,
-                          )}
-                          onChange={(e) =>
-                            setDebtDraftField("overduePeriod")(e.target.value)
-                          }
-                        >
-                          {OVERDUE_PERIOD_OPTIONS.map((o) => (
-                            <option key={o.value} value={o.value}>
-                              {o.label}
-                            </option>
-                          ))}
-                        </select>
-                      </Field>
-                    </>
-                  ) : (
-                    <>
-                      <div className="scl-debt-grid-wrap">
-                        <table className="scl-debt-grid">
-                          <thead>
-                            <tr>
-                              <th className="col-type">채무종류</th>
-                              <th className="col-secured">담보</th>
-                              <th className="col-lender">채권처</th>
-                              <th className="col-method">상환방식</th>
-                              <th className="col-overdue">연체(개월)</th>
-                              <th className="col-date">대출일</th>
-                              <th className="col-date">만기일</th>
-                              <th className="col-num">금액(원)</th>
-                              <th className="col-rate">금리(%)</th>
-                              <th className="col-calc">기간</th>
-                              <th className="col-calc">월불입</th>
-                              <th className="col-calc">총이자</th>
-                              <th className="col-calc">총상환</th>
-                              <th className="col-act" />
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {debtDraft.debts.map((debt) => {
-                              const calc = calcDebtItem(debt);
-                              return (
-                                <tr key={debt.id}>
-                                  <td>
-                                    <select
-                                      className="scl-grid-input scl-grid-select"
-                                      value={debt.debtType || "은행대출"}
-                                      onChange={(e) =>
-                                        updateDraftDebt(
-                                          debt.id,
-                                          "debtType",
-                                          e.target.value,
-                                        )
-                                      }
-                                    >
-                                      {DEBT_TYPE_OPTIONS.map((t) => (
-                                        <option key={t} value={t}>
-                                          {t}
-                                        </option>
-                                      ))}
-                                    </select>
-                                  </td>
-                                  <td>
-                                    <select
-                                      className="scl-grid-input scl-grid-select"
-                                      value={debt.secured ? "담보" : "무담보"}
-                                      onChange={(e) =>
-                                        updateDraftDebt(
-                                          debt.id,
-                                          "secured",
-                                          e.target.value === "담보",
-                                        )
-                                      }
-                                    >
-                                      <option value="무담보">무담보</option>
-                                      <option value="담보">담보</option>
-                                    </select>
-                                  </td>
-                                  <td>
-                                    <input
-                                      className="scl-grid-input"
-                                      value={debt.lender}
-                                      onChange={(e) =>
-                                        updateDraftDebt(
-                                          debt.id,
-                                          "lender",
-                                          e.target.value,
-                                        )
-                                      }
-                                      placeholder="예: 국민은행"
-                                    />
-                                  </td>
-                                <td>
-                                  <select
-                                    className="scl-grid-input scl-grid-select"
-                                    value={debt.repayMethod || "원리금균등"}
-                                    onChange={(e) =>
-                                      updateDraftDebt(
-                                        debt.id,
-                                        "repayMethod",
-                                        e.target.value,
-                                      )
-                                    }
-                                  >
-                                    {REPAY_METHOD_OPTIONS.map((m) => (
-                                      <option key={m} value={m}>
-                                        {m}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </td>
-                                <td>
-                                  <input
-                                    className="scl-grid-input scl-grid-num"
-                                    type="number"
-                                    min="0"
-                                    inputMode="numeric"
-                                    value={debt.overduePeriod ?? "0"}
-                                    onChange={(e) =>
-                                      updateDraftDebt(
-                                        debt.id,
-                                        "overduePeriod",
-                                        e.target.value.replace(/[^\d]/g, ""),
-                                      )
-                                    }
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="scl-grid-input"
-                                    type="date"
-                                    value={debt.loanDate}
-                                    onChange={(e) =>
-                                      updateDraftDebt(
-                                        debt.id,
-                                        "loanDate",
-                                        e.target.value,
-                                      )
-                                    }
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="scl-grid-input"
-                                    type="date"
-                                    value={debt.maturityDate}
-                                    onChange={(e) =>
-                                      updateDraftDebt(
-                                        debt.id,
-                                        "maturityDate",
-                                        e.target.value,
-                                      )
-                                    }
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="scl-grid-input scl-grid-num"
-                                    type="text"
-                                    inputMode="numeric"
-                                    value={formatComma(debt.principal)}
-                                    onChange={(e) =>
-                                      updateDraftDebt(
-                                        debt.id,
-                                        "principal",
-                                        parseComma(e.target.value),
-                                      )
-                                    }
-                                    placeholder="예: 50,000,000"
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="scl-grid-input scl-grid-num"
-                                    type="number"
-                                    step="0.1"
-                                    value={debt.rate}
-                                    onChange={(e) =>
-                                      updateDraftDebt(
-                                        debt.id,
-                                        "rate",
-                                        e.target.value,
-                                      )
-                                    }
-                                    placeholder="예: 15"
-                                  />
-                                </td>
-                                <td className="scl-grid-calc">
-                                  {calc ? `${calc.months}개월` : "—"}
-                                </td>
-                                <td className="scl-grid-calc">
-                                  {calc ? formatWon(calc.monthly) : "—"}
-                                </td>
-                                <td className="scl-grid-calc">
-                                  {calc ? formatWon(calc.totalInterest) : "—"}
-                                </td>
-                                <td className="scl-grid-calc">
-                                  {calc ? formatWon(calc.totalRepay) : "—"}
-                                </td>
-                                <td className="col-act">
-                                  {debtDraft.debts.length > 1 && (
-                                    <button
-                                      type="button"
-                                      className="scl-debt-remove"
-                                      onClick={() => removeDraftDebt(debt.id)}
-                                      title="삭제"
-                                    >
-                                      ×
-                                    </button>
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                          <tr className="scl-debt-add-row">
-                            <td colSpan={14}>
-                              <button
-                                type="button"
-                                className="scl-debt-add-btn"
-                                onClick={addDraftDebt}
-                              >
-                                + 행 추가
-                              </button>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                    {draftDetailPrincipalWon > 0 && (
-                      <div className="scl-debt-summary">
-                        <div className="scl-debt-summary-item">
-                          <span className="scl-debt-summary-label">
-                            담보대출 합산
-                          </span>
-                          <strong className="scl-debt-summary-val">
-                            {formatWon(draftDetailSecuredWon)}
-                          </strong>
-                          <div className="scl-debt-summary-meta">
-                            <span>
-                              월불입 {formatWon(draftDetailSecuredMonthlyWon)}
-                            </span>
-                            <span>
-                              총이자 {formatWon(draftDetailSecuredInterestWon)}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="scl-debt-summary-item">
-                          <span className="scl-debt-summary-label">
-                            무담보대출 합산
-                          </span>
-                          <strong className="scl-debt-summary-val">
-                            {formatWon(draftDetailUnsecuredWon)}
-                          </strong>
-                          <div className="scl-debt-summary-meta">
-                            <span>
-                              월불입 {formatWon(draftDetailUnsecuredMonthlyWon)}
-                            </span>
-                            <span>
-                              총이자{" "}
-                              {formatWon(draftDetailUnsecuredInterestWon)}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="scl-debt-summary-item total">
-                          <span className="scl-debt-summary-label">
-                            총 합산
-                          </span>
-                          <strong className="scl-debt-summary-val">
-                            {formatWon(draftDetailPrincipalWon)}
-                          </strong>
-                          <div className="scl-debt-summary-meta">
-                            <span>
-                              월불입 {formatWon(draftDetailMonthlySumWon)}
-                            </span>
-                            <span>
-                              총이자 {formatWon(draftDetailTotalInterestWon)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    </>
-                  )}
+                  <DebtGrid
+                    rows={sortDebtsForDisplay(debtDraft.debts)}
+                    mode={debtDraft.debtInputMode}
+                    onUpdate={updateDraftDebt}
+                    onAdd={addDraftDebt}
+                    onRemove={removeDraftDebt}
+                  />
+                  <DebtTotals
+                    rows={debtDraft.debts}
+                    mode={debtDraft.debtInputMode}
+                  />
                 </div>
               </div>
             </div>
@@ -5201,142 +4488,6 @@ const SampleDashboardPage = () => {
                 onClick={handleConfirmRefund}
               >
                 환불 확정
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 분석 데이터 수락 모달 */}
-      {acceptModalOpen && (
-        <div
-          className="sdp-review-modal-overlay"
-          onClick={() => setAcceptModalOpen(false)}
-        >
-          <div
-            className="sdp-review-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="sdp-review-modal-head">
-              <h2 className="sdp-review-modal-title">분석 데이터 수락</h2>
-              <button
-                type="button"
-                className="sdp-review-modal-close"
-                onClick={() => setAcceptModalOpen(false)}
-                aria-label="닫기"
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path
-                    d="M3 3l10 10M13 3L3 13"
-                    stroke="#666"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
-            </div>
-            <div className="sdp-review-modal-body">
-              <p className="sdp-review-modal-desc">
-                수락 메시지를 입력해 주세요. 영업담당자에게 전달됩니다.
-                <br />
-                계약 진행 후 결제 정보를 입력하면 절차 진행 단계로 넘어갑니다.
-              </p>
-              <label className="sdp-review-field">
-                <span className="sdp-review-field-label">수락 메시지</span>
-                <input
-                  type="text"
-                  className="sdp-review-input"
-                  placeholder="예: 분석 내용 확인했습니다. 계약 진행 부탁드립니다."
-                  value={acceptMessage}
-                  onChange={(e) => setAcceptMessage(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleConfirmAccept();
-                  }}
-                  autoFocus
-                />
-              </label>
-            </div>
-            <div className="sdp-review-modal-footer">
-              <button
-                type="button"
-                className="sdp-review-cancel-btn"
-                onClick={() => setAcceptModalOpen(false)}
-              >
-                취소
-              </button>
-              <button
-                type="button"
-                className="sdp-review-confirm-accept-btn"
-                onClick={handleConfirmAccept}
-              >
-                수락 확정
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 분석 데이터 거절 모달 */}
-      {rejectModalOpen && (
-        <div
-          className="sdp-review-modal-overlay"
-          onClick={() => setRejectModalOpen(false)}
-        >
-          <div
-            className="sdp-review-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="sdp-review-modal-head">
-              <h2 className="sdp-review-modal-title">분석 데이터 거절</h2>
-              <button
-                type="button"
-                className="sdp-review-modal-close"
-                onClick={() => setRejectModalOpen(false)}
-                aria-label="닫기"
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path
-                    d="M3 3l10 10M13 3L3 13"
-                    stroke="#666"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
-            </div>
-            <div className="sdp-review-modal-body">
-              <p className="sdp-review-modal-desc">
-                거절 사유를 입력해 주세요. 영업담당자에게 전달됩니다.
-              </p>
-              <label className="sdp-review-field">
-                <span className="sdp-review-field-label">거절 사유</span>
-                <input
-                  type="text"
-                  className="sdp-review-input"
-                  placeholder=""
-                  value={rejectReason}
-                  onChange={(e) => setRejectReason(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleConfirmReject();
-                  }}
-                  autoFocus
-                />
-              </label>
-            </div>
-            <div className="sdp-review-modal-footer">
-              <button
-                type="button"
-                className="sdp-review-cancel-btn"
-                onClick={() => setRejectModalOpen(false)}
-              >
-                취소
-              </button>
-              <button
-                type="button"
-                className="sdp-review-confirm-reject-btn"
-                onClick={handleConfirmReject}
-              >
-                거절 확정
               </button>
             </div>
           </div>

@@ -678,12 +678,14 @@ const ChecklistListPage = () => {
             </p>
           </div>
           <div className="cll-header-actions">
-            {/* <button
-              className="cll-btn-secondary"
+            <button
+              type="button"
+              className="cll-guide-btn"
               onClick={() => navigate("/checklist/procedure")}
+              aria-label="채무조정 제도 안내"
             >
-              절차 안내
-            </button> */}
+              <span className="cll-guide-btn__text">제도 안내</span>
+            </button>
             <button
               type="button"
               className="cll-news-ticker"
@@ -1008,6 +1010,7 @@ const ChecklistListPage = () => {
 
         <div className="cll-news-drawer-foot"></div>
       </aside>
+
     </div>
   );
 };

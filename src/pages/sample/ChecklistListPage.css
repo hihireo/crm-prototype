@@ -1236,3 +1236,32 @@
     display: none;
   }
 }
+
+/* ── 제도 안내 버튼 ─────────────────────────────────────── */
+.cll-guide-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px 0 10px;
+  background: #fff;
+  color: #333;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.12s, background 0.12s;
+  white-space: nowrap;
+}
+
+.cll-guide-btn:hover {
+  border-color: #aaa;
+  background: #f8f8f8;
+}
+
+.cll-guide-btn__text {
+  font-size: 13px;
+  font-weight: 700;
+  color: #333;
+  letter-spacing: -0.02em;
+}
