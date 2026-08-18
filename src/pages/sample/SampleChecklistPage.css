@@ -1739,3 +1739,243 @@
       border-box;
   box-shadow: 0 3px 14px rgba(139, 92, 246, 0.14);
 }
+
+/* ── 분석 제외 채무 모달 ── */
+.scl-exclude-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.scl-exclude-modal {
+  background: #fff;
+  width: 100%;
+  max-width: 560px;
+  max-height: 88vh;
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+
+@media (min-width: 720px) {
+  .scl-exclude-overlay {
+    align-items: center;
+  }
+  .scl-exclude-modal {
+    border-radius: 16px;
+    margin: 16px;
+  }
+}
+
+.scl-exclude-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 20px 14px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.scl-exclude-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #111;
+}
+
+.scl-exclude-sub {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #777;
+}
+
+.scl-exclude-close {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.scl-exclude-close:hover {
+  background: #f5f5f5;
+}
+
+.scl-exclude-body {
+  padding: 10px 12px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.scl-exclude-empty {
+  margin: 24px 8px;
+  text-align: center;
+  font-size: 13px;
+  color: #999;
+}
+
+.scl-exclude-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.scl-exclude-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1.5px solid #eee;
+  border-radius: 12px;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.12s,
+    background 0.12s;
+}
+
+.scl-exclude-row:hover {
+  border-color: #ccc;
+}
+
+.scl-exclude-row.is-excluded {
+  background: #f7f7f7;
+  border-color: #111;
+}
+
+.scl-exclude-check {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid #d0d0d0;
+  border-radius: 6px;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scl-exclude-check.on {
+  background: #111;
+  border-color: #111;
+}
+
+.scl-exclude-row-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.scl-exclude-row-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+
+.scl-exclude-row.is-excluded .scl-exclude-row-name {
+  text-decoration: line-through;
+  color: #888;
+}
+
+.scl-exclude-row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+  color: #888;
+}
+
+.scl-exclude-row-amt {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+
+.scl-exclude-row.is-excluded .scl-exclude-row-amt {
+  color: #999;
+  text-decoration: line-through;
+}
+
+.scl-exclude-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 20px 18px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.scl-exclude-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+}
+
+.scl-exclude-summary-off {
+  color: #999;
+  font-weight: 500;
+}
+
+.scl-exclude-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.scl-exclude-btn-ghost,
+.scl-exclude-btn-primary {
+  padding: 9px 14px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: -0.02em;
+}
+
+.scl-exclude-btn-ghost {
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  color: #555;
+}
+
+.scl-exclude-btn-primary {
+  border: none;
+  background: #111;
+  color: #fff;
+}
+
+.scl-exclude-btn-primary:hover:not(:disabled) {
+  background: #333;
+}
+
+.scl-exclude-btn-primary:disabled {
+  background: #ddd;
+  color: #fff;
+  cursor: not-allowed;
+}
