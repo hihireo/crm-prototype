@@ -7,6 +7,7 @@ import BulkImportHistoryPage from "./settings/BulkImportHistoryPage";
 import CustomerApiPage from "./settings/CustomerApiPage";
 import SenderNumbersPage from "./settings/SenderNumbersPage";
 import SmsHistoryPage from "./settings/SmsHistoryPage";
+import SecuritySettingsPage from "./settings/SecuritySettingsPage";
 import "./SettingsPage.css";
 
 const SettingsPage = ({ service, user }) => {
@@ -14,6 +15,7 @@ const SettingsPage = ({ service, user }) => {
 
   const serviceMenus = [
     { id: "general", name: "일반", path: "/settings/general", icon: "⚙️" },
+    { id: "security", name: "보안", path: "/settings/security", icon: "🔒" },
     { id: "profile", name: "프로필", path: "/settings/profile", icon: "👤" },
     {
       id: "channels",
@@ -82,6 +84,7 @@ const SettingsPage = ({ service, user }) => {
                 path="/general"
                 element={<GeneralSettings service={service} user={user} />}
               />
+              <Route path="/security" element={<SecuritySettingsPage />} />
               <Route
                 path="/profile"
                 element={
@@ -160,6 +163,17 @@ const GeneralSettings = ({ service, user }) => {
   const [newStatus, setNewStatus] = useState("");
   const [editingIndex, setEditingIndex] = useState(-1);
   const [editingValue, setEditingValue] = useState("");
+
+  const FIELD_TYPE_LABELS = {
+    text: "텍스트",
+    number: "숫자",
+    select: "선택",
+  };
+  const emptySalesFieldForm = { name: "", type: "text", options: "" };
+  const [salesFields, setSalesFields] = useState([]);
+  const [newSalesField, setNewSalesField] = useState(emptySalesFieldForm);
+  const [editingFieldIndex, setEditingFieldIndex] = useState(-1);
+  const [editingField, setEditingField] = useState(emptySalesFieldForm);
 
   const handleServiceNameSave = () => {
     setIsEditingServiceName(false);
@@ -368,6 +382,71 @@ const GeneralSettings = ({ service, user }) => {
   const handleEditCancel = () => {
     setEditingIndex(-1);
     setEditingValue("");
+  };
+
+  const parseFieldOptions = (type, optionsText) => {
+    if (type !== "select") return [];
+    return optionsText
+      .split(",")
+      .map((option) => option.trim())
+      .filter(Boolean);
+  };
+
+  const handleAddSalesField = () => {
+    const name = newSalesField.name.trim();
+    if (!name || salesFields.some((field) => field.name === name)) return;
+    setSalesFields([
+      ...salesFields,
+      {
+        name,
+        type: newSalesField.type,
+        options: parseFieldOptions(newSalesField.type, newSalesField.options),
+      },
+    ]);
+    setNewSalesField(emptySalesFieldForm);
+  };
+
+  const handleDeleteSalesField = (index) => {
+    if (window.confirm(`"${salesFields[index].name}" 필드를 삭제하시겠습니까?`)) {
+      setSalesFields(salesFields.filter((_, i) => i !== index));
+      if (editingFieldIndex === index) {
+        setEditingFieldIndex(-1);
+        setEditingField(emptySalesFieldForm);
+      }
+    }
+  };
+
+  const handleEditSalesFieldStart = (index) => {
+    const field = salesFields[index];
+    setEditingFieldIndex(index);
+    setEditingField({
+      name: field.name,
+      type: field.type,
+      options: field.options.join(", "),
+    });
+  };
+
+  const handleEditSalesFieldSave = () => {
+    const name = editingField.name.trim();
+    const isDuplicate = salesFields.some(
+      (field, i) => i !== editingFieldIndex && field.name === name
+    );
+    if (name && !isDuplicate) {
+      const next = [...salesFields];
+      next[editingFieldIndex] = {
+        name,
+        type: editingField.type,
+        options: parseFieldOptions(editingField.type, editingField.options),
+      };
+      setSalesFields(next);
+    }
+    setEditingFieldIndex(-1);
+    setEditingField(emptySalesFieldForm);
+  };
+
+  const handleEditSalesFieldCancel = () => {
+    setEditingFieldIndex(-1);
+    setEditingField(emptySalesFieldForm);
   };
 
   return (
@@ -643,6 +722,178 @@ const GeneralSettings = ({ service, user }) => {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* 영업 정보 필드 커스터마이징 */}
+      <div className="stgs-status-section">
+        <h4>영업 정보 필드</h4>
+        <p className="stgs-section-description">
+          고객 모달의 영업 정보에 표시할 필드를 프로젝트별로 설정합니다.
+        </p>
+
+        <div className="stgs-field-add">
+          <input
+            type="text"
+            value={newSalesField.name}
+            onChange={(e) =>
+              setNewSalesField((prev) => ({ ...prev, name: e.target.value }))
+            }
+            placeholder="필드 이름"
+            className="stgs-status-input"
+            onKeyPress={(e) => e.key === "Enter" && handleAddSalesField()}
+          />
+          <select
+            value={newSalesField.type}
+            onChange={(e) =>
+              setNewSalesField((prev) => ({
+                ...prev,
+                type: e.target.value,
+                options: e.target.value === "select" ? prev.options : "",
+              }))
+            }
+            className="stgs-field-type"
+          >
+            {Object.entries(FIELD_TYPE_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <button
+            className="stgs-add-btn"
+            onClick={handleAddSalesField}
+            disabled={!newSalesField.name.trim()}
+          >
+            추가
+          </button>
+          {newSalesField.type === "select" && (
+            <input
+              type="text"
+              value={newSalesField.options}
+              onChange={(e) =>
+                setNewSalesField((prev) => ({
+                  ...prev,
+                  options: e.target.value,
+                }))
+              }
+              placeholder="선택 옵션 (쉼표로 구분)"
+              className="stgs-status-input stgs-field-options"
+              onKeyPress={(e) => e.key === "Enter" && handleAddSalesField()}
+            />
+          )}
+        </div>
+
+        {salesFields.length === 0 ? (
+          <div className="stgs-field-empty">
+            아직 추가된 필드가 없습니다. 고객 모달의 영업 정보에 표시할 필드를
+            추가하세요.
+          </div>
+        ) : (
+          <div className="stgs-status-list">
+            {salesFields.map((field, index) => (
+              <div key={`${field.name}-${index}`} className="stgs-status-item">
+                {editingFieldIndex === index ? (
+                  <div className="stgs-field-edit">
+                    <input
+                      type="text"
+                      value={editingField.name}
+                      onChange={(e) =>
+                        setEditingField((prev) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }))
+                      }
+                      className="stgs-status-input"
+                      onKeyPress={(e) =>
+                        e.key === "Enter" && handleEditSalesFieldSave()
+                      }
+                      autoFocus
+                    />
+                    <select
+                      value={editingField.type}
+                      onChange={(e) =>
+                        setEditingField((prev) => ({
+                          ...prev,
+                          type: e.target.value,
+                          options:
+                            e.target.value === "select" ? prev.options : "",
+                        }))
+                      }
+                      className="stgs-field-type"
+                    >
+                      {Object.entries(FIELD_TYPE_LABELS).map(
+                        ([value, label]) => (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        )
+                      )}
+                    </select>
+                    {editingField.type === "select" && (
+                      <input
+                        type="text"
+                        value={editingField.options}
+                        onChange={(e) =>
+                          setEditingField((prev) => ({
+                            ...prev,
+                            options: e.target.value,
+                          }))
+                        }
+                        placeholder="선택 옵션 (쉼표로 구분)"
+                        className="stgs-status-input stgs-field-options"
+                        onKeyPress={(e) =>
+                          e.key === "Enter" && handleEditSalesFieldSave()
+                        }
+                      />
+                    )}
+                    <div className="stgs-status-actions">
+                      <button
+                        className="stgs-save-btn"
+                        onClick={handleEditSalesFieldSave}
+                      >
+                        저장
+                      </button>
+                      <button
+                        className="stgs-cancel-btn"
+                        onClick={handleEditSalesFieldCancel}
+                      >
+                        취소
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="stgs-status-display">
+                    <div className="stgs-field-info">
+                      <span className="stgs-status-name">{field.name}</span>
+                      <span className="stgs-field-type-badge">
+                        {FIELD_TYPE_LABELS[field.type]}
+                      </span>
+                      {field.type === "select" && field.options.length > 0 && (
+                        <span className="stgs-field-options-text">
+                          {field.options.join(", ")}
+                        </span>
+                      )}
+                    </div>
+                    <div className="stgs-status-actions">
+                      <button
+                        className="stgs-edit-btn"
+                        onClick={() => handleEditSalesFieldStart(index)}
+                      >
+                        수정
+                      </button>
+                      <button
+                        className="stgs-delete-btn"
+                        onClick={() => handleDeleteSalesField(index)}
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 프로젝트 기능 설정 섹션 */}

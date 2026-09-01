@@ -12,6 +12,8 @@ import SampleDashboardPage from "./pages/sample/SampleDashboardPage";
 import ChecklistListPage from "./pages/sample/ChecklistListPage";
 import ProcedureGuidePage from "./pages/sample/ProcedureGuidePage";
 import PaymentStatsPage from "./pages/sample/PaymentStatsPage";
+import ApplicationsPage from "./pages/ApplicationsPage";
+import SettingsPage from "./pages/SettingsPage";
 
 const DEMO_USER    = { name: "데모 상담사", email: "demo@talkgate.kr" };
 const DEMO_SERVICE = "TalkGate Demo";
@@ -20,7 +22,13 @@ function AppContent() {
   const location = useLocation();
   const isChecklistRoute = location.pathname.startsWith("/checklist");
   const isStatisticsRoute = location.pathname.startsWith("/statistics");
-  const showHeader = isChecklistRoute || isStatisticsRoute;
+  const isApplicationsRoute = location.pathname.startsWith("/applications");
+  const isSettingsRoute = location.pathname.startsWith("/settings");
+  const showHeader =
+    isChecklistRoute ||
+    isStatisticsRoute ||
+    isApplicationsRoute ||
+    isSettingsRoute;
 
   return (
     <div className="App">
@@ -40,6 +48,11 @@ function AppContent() {
           <Route path="/checklist/result-external"  element={<SampleDashboardPage />} />
           <Route path="/checklist/procedure"        element={<ProcedureGuidePage />} />
           <Route path="/statistics"                 element={<PaymentStatsPage />} />
+          <Route path="/applications"               element={<ApplicationsPage />} />
+          <Route
+            path="/settings/*"
+            element={<SettingsPage service={DEMO_SERVICE} user={DEMO_USER} />}
+          />
           {/* 그 외 모든 경로 → 목록으로 */}
           <Route path="*" element={<Navigate to="/checklist" replace />} />
         </Routes>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import {
   DEBT_TYPE_OPTIONS,
   REPAY_METHOD_OPTIONS,
@@ -35,9 +35,30 @@ const DebtGrid = ({
   const detail = mode === "detail";
   const colCount =
     (detail ? 12 : 4) + (showCollateral ? 1 : 0) + (onRemove ? 1 : 0);
+  const wrapRef = useRef(null);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  useLayoutEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return undefined;
+
+    const update = () => {
+      setCanScrollRight(el.scrollWidth - el.scrollLeft - el.clientWidth > 2);
+    };
+
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", update);
+      ro.disconnect();
+    };
+  }, [detail, rows.length]);
 
   return (
-    <div className="scl-debt-grid-wrap">
+    <div className="scl-debt-grid-shell">
+    <div className="scl-debt-grid-wrap" ref={wrapRef}>
       <table className={`scl-debt-grid ${detail ? "detail" : "simple"}`}>
         <thead>
           <tr>
@@ -265,6 +286,29 @@ const DebtGrid = ({
           )}
         </tbody>
       </table>
+    </div>
+    {detail && canScrollRight && (
+      <div className="scl-debt-grid-more">
+        <button
+          type="button"
+          className="scl-debt-grid-more-btn"
+          aria-label="오른쪽으로 더 보기"
+          onClick={() =>
+            wrapRef.current?.scrollBy({ left: 240, behavior: "smooth" })
+          }
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path
+              d="M5 2.5L9.5 7 5 11.5"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
+    )}
     </div>
   );
 };

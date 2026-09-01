@@ -902,6 +902,9 @@
 }
 
 /* Debt detail grid */
+.scl-debt-grid-shell {
+  position: relative;
+}
 .scl-debt-grid-wrap {
   width: 100%;
   overflow-x: auto;
@@ -909,6 +912,50 @@
   border-radius: 10px;
   background: #fff;
   margin: 0 -2px;
+}
+.scl-debt-grid-more {
+  position: absolute;
+  top: 1px;
+  right: -1px;
+  bottom: 1px;
+  width: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  border-radius: 0 10px 10px 0;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0), #fff 58%);
+  pointer-events: none;
+}
+.scl-debt-grid-more-btn {
+  pointer-events: auto;
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e5e5e5;
+  border-radius: 50%;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation: scl-debt-more-nudge 1.8s ease-in-out infinite;
+}
+.scl-debt-grid-more-btn:hover {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+  animation: none;
+}
+@keyframes scl-debt-more-nudge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(3px);
+  }
 }
 .scl-debt-max-overdue {
   display: flex;

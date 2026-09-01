@@ -416,6 +416,85 @@
   border-radius: 2px;
 }
 
+.cim-field-setup {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: -4px 0 4px;
+  padding: 14px 16px;
+  background: #f6f8fb;
+  border: 1px solid #e6ebf2;
+  border-radius: 10px;
+}
+
+.cim-field-setup-copy {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.cim-field-setup-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #3b82f6;
+  background: #fff;
+  border: 1px solid #dbe7f7;
+  border-radius: 7px;
+}
+
+.cim-field-setup-copy strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+  letter-spacing: -0.02em;
+}
+
+.cim-field-setup-copy p {
+  margin: 3px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #6b7280;
+}
+
+.cim-field-setup-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 8px 13px;
+  background: #1f2937;
+  color: #fff;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.cim-field-setup-btn:hover {
+  background: #111827;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(17, 24, 39, 0.18);
+}
+
+.cim-field-setup-btn:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
 /* 필드 그리드 */
 .cim-field-grid {
   display: grid;
@@ -1365,6 +1444,16 @@
 
   .cim-section {
     padding: 12px;
+  }
+
+  .cim-field-setup {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .cim-field-setup-btn {
+    justify-content: center;
   }
 
   .cim-modal-content {

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import "./CustomerInfoModal.css";
 import CustomerAssignmentModal from "./CustomerAssignmentModal";
 
@@ -42,15 +43,6 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
     specialNotes: "",
   });
 
-  // 영업 정보 상태
-  const [businessInfo, setBusinessInfo] = useState({
-    investmentInfo: "",
-    investmentProfitLoss: "",
-    investmentTendency: "안정형",
-    remarks: "",
-  });
-
-  // 결제 내역 상태
   const [paymentHistory, setPaymentHistory] = useState([
     {
       id: 1,
@@ -154,16 +146,6 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
   // 숫자 포맷팅 함수
   const formatNumber = (value) => {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
-
-  // 투자 손익 입력 처리
-  const handleProfitLossChange = (value) => {
-    const numericValue = value.replace(/[^0-9-]/g, "");
-    const formattedValue = formatNumber(numericValue);
-    setBusinessInfo((prev) => ({
-      ...prev,
-      investmentProfitLoss: formattedValue,
-    }));
   };
 
   if (!isOpen || !customerData) return null;
@@ -1108,53 +1090,49 @@ const CustomerInfoModal = ({ isOpen, onClose, customerData }) => {
               {/* 영업 정보 영역 */}
               <div className="cim-section">
                 <h3 className="cim-section-title">영업 정보</h3>
-                <div className="cim-field-grid">
-                  <div className="cim-field">
-                    <label>투자 정보</label>
-                    <input
-                      type="text"
-                      value={businessInfo.investmentInfo}
-                      onChange={(e) =>
-                        setBusinessInfo((prev) => ({
-                          ...prev,
-                          investmentInfo: e.target.value,
-                        }))
-                      }
-                      className="cim-input"
-                      placeholder="투자 정보를 입력하세요"
-                    />
+                <div className="cim-field-setup">
+                  <div className="cim-field-setup-copy">
+                    <span className="cim-field-setup-icon" aria-hidden="true">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        fill="none"
+                      >
+                        <path
+                          d="M2.5 4.5h11M4.5 8h7M6 11.5h4"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </span>
+                    <div>
+                      <strong>맞춤 필드가 아직 없습니다</strong>
+                      <p>
+                        이 프로젝트에 필요한 영업 정보만 골라 여기에 표시할 수
+                        있습니다.
+                      </p>
+                    </div>
                   </div>
-
-                  <div className="cim-field">
-                    <label>투자 손익</label>
-                    <input
-                      type="text"
-                      value={businessInfo.investmentProfitLoss}
-                      onChange={(e) => handleProfitLossChange(e.target.value)}
-                      className="cim-input"
-                      placeholder="0"
-                    />
-                  </div>
-
-                  <div className="cim-field">
-                    <label>투자 성향</label>
-                    <select
-                      value={businessInfo.investmentTendency}
-                      onChange={(e) =>
-                        setBusinessInfo((prev) => ({
-                          ...prev,
-                          investmentTendency: e.target.value,
-                        }))
-                      }
-                      className="cim-select"
+                  <Link to="/settings/general" className="cim-field-setup-btn">
+                    필드 설정하기
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 14 14"
+                      fill="none"
+                      aria-hidden="true"
                     >
-                      <option value="안정형">안정형</option>
-                      <option value="안정추구형">안정추구형</option>
-                      <option value="위험중립형">위험중립형</option>
-                      <option value="적극투자형">적극투자형</option>
-                      <option value="공격투자형">공격투자형</option>
-                    </select>
-                  </div>
+                      <path
+                        d="M3 7h8M7.5 3.5 11 7l-3.5 3.5"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </Link>
                 </div>
 
                 {/* 결제 내역 */}

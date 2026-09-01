@@ -1385,6 +1385,106 @@
   }
 }
 
+/* 영업 정보 필드 커스터마이징 */
+.stgs-field-add,
+.stgs-field-edit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.stgs-field-add {
+  margin-bottom: 20px;
+}
+
+.stgs-field-add .stgs-status-input,
+.stgs-field-edit .stgs-status-input {
+  flex: 1;
+  min-width: 140px;
+  margin: 0;
+}
+
+.stgs-field-type {
+  width: 108px;
+  flex-shrink: 0;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  color: #374151;
+}
+
+.stgs-field-type:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.stgs-field-options {
+  flex: 1 1 100%;
+}
+
+.stgs-field-empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 14px;
+  line-height: 1.5;
+  background: #f8fafc;
+  border: 1px dashed #e2e8f0;
+  border-radius: 6px;
+}
+
+.stgs-field-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.stgs-field-type-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  background: #e2e8f0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.stgs-field-options-text {
+  font-size: 12px;
+  color: #94a3b8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 280px;
+}
+
+.stgs-field-edit .stgs-status-actions {
+  margin-left: auto;
+}
+
+@media (max-width: 768px) {
+  .stgs-field-add,
+  .stgs-field-edit {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .stgs-field-type {
+    width: 100%;
+  }
+
+  .stgs-field-edit .stgs-status-actions {
+    margin-left: 0;
+    justify-content: flex-end;
+  }
+}
+
 /* 서비스 로고 및 도메인 섹션 스타일 */
 .stgs-service-data-section {
   background: white;
