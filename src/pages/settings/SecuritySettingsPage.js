@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "./SecuritySettingsPage.css";
 
 const MAX_ALLOW_IPS = 20;
+const PAGE_SIZE = 5;
 const EMPTY_OCTETS = ["", "", "", ""];
 const IPV4_OCTET = /^(?:0|[1-9]\d{0,2})$/;
 
@@ -226,8 +227,39 @@ const SecuritySettingsPage = () => {
       type: "range",
       memo: "VPN 할당 구간",
     },
+    {
+      id: 4,
+      value: "198.51.100.8",
+      type: "ip",
+      memo: "지사 고정 IP",
+    },
+    {
+      id: 5,
+      value: "198.51.100.0/24",
+      type: "cidr",
+      memo: "지사 사무실 대역",
+    },
+    {
+      id: 6,
+      value: "192.0.2.10",
+      type: "ip",
+      memo: "개발 서버",
+    },
+    {
+      id: 7,
+      value: "192.0.2.1-192.0.2.20",
+      type: "range",
+      memo: "테스트 구간",
+    },
+    {
+      id: 8,
+      value: "203.0.113.80",
+      type: "ip",
+      memo: "콜센터",
+    },
   ]);
   const [restrictionOn, setRestrictionOn] = useState(true);
+  const [page, setPage] = useState(1);
   const [mode, setMode] = useState("ip");
   const [ipOctets, setIpOctets] = useState([...EMPTY_OCTETS]);
   const [endOctets, setEndOctets] = useState([...EMPTY_OCTETS]);
@@ -238,6 +270,12 @@ const SecuritySettingsPage = () => {
   const [myIpStatus, setMyIpStatus] = useState("loading");
 
   const isFull = entries.length >= MAX_ALLOW_IPS;
+  const totalPages = Math.max(1, Math.ceil(entries.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageEntries = entries.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
   const myIpRegistered = Boolean(
     myIp && entries.some((entry) => entry.value === myIp),
   );
@@ -366,6 +404,7 @@ const SecuritySettingsPage = () => {
         memo: memoInput.trim(),
       },
     ]);
+    setPage(Math.ceil((entries.length + 1) / PAGE_SIZE));
     resetFields(mode === "myip");
   };
 
@@ -373,7 +412,11 @@ const SecuritySettingsPage = () => {
     const target = entries.find((entry) => entry.id === id);
     if (!target) return;
     if (window.confirm(`"${target.value}" 항목을 삭제하시겠습니까?`)) {
+      const nextLen = entries.length - 1;
       setEntries((prev) => prev.filter((entry) => entry.id !== id));
+      setPage((prev) =>
+        Math.min(prev, Math.max(1, Math.ceil(nextLen / PAGE_SIZE)))
+      );
     }
   };
 
@@ -505,23 +548,60 @@ const SecuritySettingsPage = () => {
             {entries.length === 0 ? (
               <div className="sip-empty">등록된 허용 IP가 없습니다.</div>
             ) : (
-              <ul className="sip-list">
-                {entries.map((entry) => (
-                  <li key={entry.id} className="sip-item">
-                    <code className="sip-value">{entry.value}</code>
-                    {entry.memo && (
-                      <span className="sip-memo">{entry.memo}</span>
+              <>
+                <ul className="sip-list">
+                  {pageEntries.map((entry) => (
+                    <li key={entry.id} className="sip-item">
+                      <code className="sip-value">{entry.value}</code>
+                      {entry.memo && (
+                        <span className="sip-memo">{entry.memo}</span>
+                      )}
+                      <button
+                        type="button"
+                        className="sip-delete"
+                        onClick={() => handleDelete(entry.id)}
+                      >
+                        삭제
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                {totalPages > 1 && (
+                  <nav className="sip-pager" aria-label="허용 IP 페이지">
+                    <button
+                      type="button"
+                      disabled={currentPage === 1}
+                      aria-label="이전 페이지"
+                      onClick={() => setPage(currentPage - 1)}
+                    >
+                      ‹
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (num) => (
+                        <button
+                          key={num}
+                          type="button"
+                          className={num === currentPage ? "is-active" : ""}
+                          aria-current={
+                            num === currentPage ? "page" : undefined
+                          }
+                          onClick={() => setPage(num)}
+                        >
+                          {num}
+                        </button>
+                      )
                     )}
                     <button
                       type="button"
-                      className="sip-delete"
-                      onClick={() => handleDelete(entry.id)}
+                      disabled={currentPage === totalPages}
+                      aria-label="다음 페이지"
+                      onClick={() => setPage(currentPage + 1)}
                     >
-                      삭제
+                      ›
                     </button>
-                  </li>
-                ))}
-              </ul>
+                  </nav>
+                )}
+              </>
             )}
           </>
         )}

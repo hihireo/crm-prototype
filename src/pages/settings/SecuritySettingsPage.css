@@ -432,6 +432,42 @@
   color: #e11d48;
 }
 
+.sip-pager {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.sip-pager button {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sip-pager button:hover:not(:disabled) {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.sip-pager button.is-active {
+  background: #0f172a;
+  color: #fff;
+}
+
+.sip-pager button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
 @media (max-width: 768px) {
   .sip-composer {
     flex-direction: column;
