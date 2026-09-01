@@ -6,7 +6,9 @@ const EMPTY_OCTETS = ["", "", "", ""];
 const IPV4_OCTET = /^(?:0|[1-9]\d{0,2})$/;
 
 const parseIpv4 = (raw) => {
-  const parts = String(raw || "").trim().split(".");
+  const parts = String(raw || "")
+    .trim()
+    .split(".");
   if (parts.length !== 4 || !parts.every((part) => IPV4_OCTET.test(part))) {
     return null;
   }
@@ -109,14 +111,7 @@ const IpOctetInput = ({ value, onChange, disabled, onEnter }) => {
   );
 };
 
-const TypeMenu = ({
-  mode,
-  options,
-  myIp,
-  myIpStatus,
-  disabled,
-  onChange,
-}) => {
+const TypeMenu = ({ mode, options, myIp, myIpStatus, disabled, onChange }) => {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
   const current = options.find((option) => option.id === mode) || options[1];
@@ -197,6 +192,20 @@ const TypeMenu = ({
   );
 };
 
+const SipSwitch = ({ checked, onChange, label, disabled }) => (
+  <button
+    type="button"
+    role="switch"
+    aria-checked={checked}
+    aria-label={label}
+    disabled={disabled}
+    className={`sip-switch ${checked ? "is-on" : ""}`}
+    onClick={() => onChange(!checked)}
+  >
+    <span className="sip-switch-thumb" />
+  </button>
+);
+
 const SecuritySettingsPage = () => {
   const [entries, setEntries] = useState([
     {
@@ -218,6 +227,7 @@ const SecuritySettingsPage = () => {
       memo: "VPN 할당 구간",
     },
   ]);
+  const [restrictionOn, setRestrictionOn] = useState(true);
   const [mode, setMode] = useState("ip");
   const [ipOctets, setIpOctets] = useState([...EMPTY_OCTETS]);
   const [endOctets, setEndOctets] = useState([...EMPTY_OCTETS]);
@@ -229,7 +239,7 @@ const SecuritySettingsPage = () => {
 
   const isFull = entries.length >= MAX_ALLOW_IPS;
   const myIpRegistered = Boolean(
-    myIp && entries.some((entry) => entry.value === myIp)
+    myIp && entries.some((entry) => entry.value === myIp),
   );
   const fieldsLocked = isFull || mode === "myip";
 
@@ -314,7 +324,9 @@ const SecuritySettingsPage = () => {
 
     const end = octetsToIp(endOctets);
     if (end.error) {
-      return { error: end.error.startsWith("IP") ? `끝 ${end.error}` : end.error };
+      return {
+        error: end.error.startsWith("IP") ? `끝 ${end.error}` : end.error,
+      };
     }
     if (ipToInt(start.ip) > ipToInt(end.ip)) {
       return { error: "시작 IP가 끝 IP보다 클 수 없습니다." };
@@ -368,128 +380,150 @@ const SecuritySettingsPage = () => {
   return (
     <div className="settings-section sip-page">
       <h3>보안</h3>
-      <p className="sip-page-desc">
-        프로젝트 접속을 허용할 IP를 관리합니다. 목록이 비어 있으면 모든 IP에서
-        접속할 수 있습니다.
-      </p>
 
       <div className="sip-panel">
         <div className="sip-header">
           <div>
             <h4>접속 허용 IP</h4>
-            <p>형식을 고른 뒤 칸에 맞춰 등록합니다. 최대 {MAX_ALLOW_IPS}개.</p>
+            <p>
+              {restrictionOn
+                ? "관리자와 부관리자를 제외한 멤버는 등록된 IP에서만 접속이 가능합니다."
+                : "모든 IP에서 접속할 수 있습니다."}
+            </p>
           </div>
-          <span className="sip-count">
-            {entries.length}
-            <em>/{MAX_ALLOW_IPS}</em>
-          </span>
+          <div className="sip-header-meta">
+            {restrictionOn && (
+              <span className="sip-count">
+                {entries.length}
+                <em>/{MAX_ALLOW_IPS}</em>
+              </span>
+            )}
+            <div className="sip-restrict">
+              <span>{restrictionOn ? "사용" : "해제"}</span>
+              <SipSwitch
+                checked={restrictionOn}
+                onChange={setRestrictionOn}
+                label="IP 제한 사용"
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="sip-composer">
-          <TypeMenu
-            mode={mode}
-            options={MODE_OPTIONS}
-            myIp={myIp}
-            myIpStatus={myIpStatus}
-            disabled={isFull}
-            onChange={handleModeChange}
-          />
-          <div className="sip-fields">
-            {mode === "range" && <span className="sip-field-label">시작</span>}
-            <IpOctetInput
-              value={ipOctets}
-              onChange={(next) => {
-                setIpOctets(next);
-                if (error) setError("");
-              }}
-              disabled={fieldsLocked}
-              onEnter={handleAdd}
-            />
-            {mode === "cidr" && (
-              <>
-                <span className="sip-slash">/</span>
-                <input
-                  type="number"
-                  min="0"
-                  max="32"
-                  value={prefix}
-                  disabled={isFull}
-                  className="sip-prefix"
-                  aria-label="CIDR 프리픽스"
-                  onChange={(e) => {
-                    const next = e.target.value;
-                    if (next === "") {
-                      setPrefix("");
-                      return;
-                    }
-                    const num = Number(next);
-                    if (num >= 0 && num <= 32) setPrefix(String(num));
-                    if (error) setError("");
-                  }}
-                  onKeyPress={(e) => e.key === "Enter" && handleAdd()}
-                />
-              </>
-            )}
-            {mode === "range" && (
-              <>
-                <span className="sip-range-sep">~</span>
-                <span className="sip-field-label">끝</span>
+        {restrictionOn && (
+          <>
+            <div className="sip-composer">
+              <TypeMenu
+                mode={mode}
+                options={MODE_OPTIONS}
+                myIp={myIp}
+                myIpStatus={myIpStatus}
+                disabled={isFull}
+                onChange={handleModeChange}
+              />
+              <div className="sip-fields">
+                {mode === "range" && (
+                  <span className="sip-field-label">시작</span>
+                )}
                 <IpOctetInput
-                  value={endOctets}
+                  value={ipOctets}
                   onChange={(next) => {
-                    setEndOctets(next);
+                    setIpOctets(next);
                     if (error) setError("");
                   }}
-                  disabled={isFull}
+                  disabled={fieldsLocked}
                   onEnter={handleAdd}
                 />
-              </>
+                {mode === "cidr" && (
+                  <>
+                    <span className="sip-slash">/</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="32"
+                      value={prefix}
+                      disabled={isFull}
+                      className="sip-prefix"
+                      aria-label="CIDR 프리픽스"
+                      onChange={(e) => {
+                        const next = e.target.value;
+                        if (next === "") {
+                          setPrefix("");
+                          return;
+                        }
+                        const num = Number(next);
+                        if (num >= 0 && num <= 32) setPrefix(String(num));
+                        if (error) setError("");
+                      }}
+                      onKeyPress={(e) => e.key === "Enter" && handleAdd()}
+                    />
+                  </>
+                )}
+                {mode === "range" && (
+                  <>
+                    <span className="sip-range-sep">~</span>
+                    <span className="sip-field-label">끝</span>
+                    <IpOctetInput
+                      value={endOctets}
+                      onChange={(next) => {
+                        setEndOctets(next);
+                        if (error) setError("");
+                      }}
+                      disabled={isFull}
+                      onEnter={handleAdd}
+                    />
+                  </>
+                )}
+              </div>
+              <input
+                type="text"
+                value={memoInput}
+                onChange={(e) => setMemoInput(e.target.value)}
+                placeholder="메모"
+                className="sip-memo-input"
+                disabled={isFull}
+                onKeyPress={(e) => e.key === "Enter" && handleAdd()}
+              />
+              <button
+                type="button"
+                className="sip-add-btn"
+                onClick={handleAdd}
+                disabled={!canSubmit()}
+              >
+                추가
+              </button>
+            </div>
+            {error && <p className="sip-error">{error}</p>}
+            {mode === "myip" && myIpRegistered && !error && (
+              <p className="sip-hint">이미 목록에 있습니다.</p>
             )}
-          </div>
-          <input
-            type="text"
-            value={memoInput}
-            onChange={(e) => setMemoInput(e.target.value)}
-            placeholder="메모"
-            className="sip-memo-input"
-            disabled={isFull}
-            onKeyPress={(e) => e.key === "Enter" && handleAdd()}
-          />
-          <button
-            type="button"
-            className="sip-add-btn"
-            onClick={handleAdd}
-            disabled={!canSubmit()}
-          >
-            추가
-          </button>
-        </div>
-        {error && <p className="sip-error">{error}</p>}
-        {mode === "myip" && myIpRegistered && !error && (
-          <p className="sip-hint">이미 목록에 있습니다.</p>
-        )}
-        {isFull && (
-          <p className="sip-limit">최대 {MAX_ALLOW_IPS}개까지 등록할 수 있습니다.</p>
-        )}
+            {isFull && (
+              <p className="sip-limit">
+                최대 {MAX_ALLOW_IPS}개까지 등록할 수 있습니다.
+              </p>
+            )}
 
-        {entries.length === 0 ? (
-          <div className="sip-empty">등록된 허용 IP가 없습니다.</div>
-        ) : (
-          <ul className="sip-list">
-            {entries.map((entry) => (
-              <li key={entry.id} className="sip-item">
-                <code className="sip-value">{entry.value}</code>
-                {entry.memo && <span className="sip-memo">{entry.memo}</span>}
-                <button
-                  type="button"
-                  className="sip-delete"
-                  onClick={() => handleDelete(entry.id)}
-                >
-                  삭제
-                </button>
-              </li>
-            ))}
-          </ul>
+            {entries.length === 0 ? (
+              <div className="sip-empty">등록된 허용 IP가 없습니다.</div>
+            ) : (
+              <ul className="sip-list">
+                {entries.map((entry) => (
+                  <li key={entry.id} className="sip-item">
+                    <code className="sip-value">{entry.value}</code>
+                    {entry.memo && (
+                      <span className="sip-memo">{entry.memo}</span>
+                    )}
+                    <button
+                      type="button"
+                      className="sip-delete"
+                      onClick={() => handleDelete(entry.id)}
+                    >
+                      삭제
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
         )}
       </div>
     </div>

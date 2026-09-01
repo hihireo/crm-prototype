@@ -11,7 +11,7 @@
 
 .sip-header {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 16px;
@@ -44,6 +44,66 @@
   font-style: normal;
   font-weight: 500;
   color: #94a3b8;
+}
+
+.sip-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.sip-restrict {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: -0.02em;
+}
+
+.sip-switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #d4dae3;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+
+.sip-switch.is-on {
+  background: #0f172a;
+}
+
+.sip-switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.sip-switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.18);
+  transition: transform 0.2s ease;
+}
+
+.sip-switch.is-on .sip-switch-thumb {
+  transform: translateX(16px);
+}
+
+.sip-switch:focus-visible {
+  outline: 2px solid rgba(37, 99, 235, 0.45);
+  outline-offset: 2px;
 }
 
 .sip-composer {
