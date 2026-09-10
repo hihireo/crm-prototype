@@ -653,8 +653,8 @@ const PLAN_BY_OPTION = {
     kind: "repayment",
     title: "예상 변제 계획",
     amount: 45,
-    months: 84,
-    periodNote: "7년",
+    months: 60,
+    periodNote: "5년",
   },
   personalWorkout: {
     kind: "repayment",
@@ -709,6 +709,74 @@ const PLAN_BY_OPTION = {
 
 const getPlanProfile = (optionId) =>
   PLAN_BY_OPTION[optionId] || PLAN_BY_OPTION.rehabilitation;
+
+/** 개인회생·개인워크아웃: 변제율·기간 조정 한도 */
+const PLAN_MIX = {
+  rehabilitation: {
+    minMonths: 12,
+    maxMonths: 60,
+    minRate: 5,
+    maxRate: 100,
+  },
+  personalWorkout: {
+    minMonths: 36,
+    maxMonths: 120,
+    minRate: 5,
+    maxRate: 100,
+  },
+};
+
+const yearMonthsForMix = (spec) => {
+  const list = [];
+  for (let months = spec.minMonths; months <= spec.maxMonths; months += 12) {
+    list.push(months);
+  }
+  return list;
+};
+
+const snapYearMonths = (months, spec) => {
+  const years = yearMonthsForMix(spec);
+  return years.reduce((best, candidate) =>
+    Math.abs(candidate - months) < Math.abs(best - months) ? candidate : best,
+  );
+};
+
+const snapToList = (value, list) =>
+  list.reduce((best, candidate) =>
+    Math.abs(candidate - value) < Math.abs(best - value) ? candidate : best,
+  );
+
+const attachPointerDrag = (event, measureEl, onT) => {
+  event.preventDefault();
+  const update = (clientX) => {
+    const rect = measureEl.getBoundingClientRect();
+    const t = clamp((clientX - rect.left) / rect.width, 0, 1);
+    onT(t);
+  };
+  update(event.clientX);
+  const onMove = (ev) => update(ev.clientX);
+  const onUp = () => {
+    window.removeEventListener("pointermove", onMove);
+    window.removeEventListener("pointerup", onUp);
+    window.removeEventListener("pointercancel", onUp);
+  };
+  window.addEventListener("pointermove", onMove);
+  window.addEventListener("pointerup", onUp);
+  window.addEventListener("pointercancel", onUp);
+};
+
+const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+const round1 = (n) => Math.round(n * 10) / 10;
+const formatPlanPeriod = (months) => {
+  if (months % 12 === 0) return `${months / 12}년`;
+  const years = Math.floor(months / 12);
+  const rem = months % 12;
+  return years ? `${years}년 ${rem}개월` : `${rem}개월`;
+};
+const formatMonthly = (n) => {
+  const rounded = round1(n);
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+};
 
 /** 절차별 제도 참고자료 (슬라이드 순서) */
 const PROCEDURE_REFERENCES = [
@@ -834,7 +902,7 @@ const SCRIPTS = [
   },
   {
     phase: "핵심 설명",
-    text: "개인회생을 신청하시면 법원을 통해 채무 일부를 탕감받고, 나머지를 최대 7년에 걸쳐 분납하게 됩니다. 고객님의 경우 월 45만원씩 84개월 변제 계획이 가능합니다.",
+    text: "개인회생을 신청하시면 법원을 통해 채무 일부를 탕감받고, 나머지를 통상 3~5년에 걸쳐 분납하게 됩니다. 고객님의 경우 월 45만원씩 60개월 변제 계획이 가능합니다.",
   },
   {
     phase: "우려 해소",
@@ -860,7 +928,7 @@ const AI_ANSWERS = {
   "월 가용소득이 줄어들면 어떻게 되나요?":
     "현재 월 가용소득 45만원은 최소 변제 기준에 근접한 수준입니다. 만약 30만원 이하로 떨어지면 법원이 변제여력 없음으로 판단해 파산으로 전환해야 할 가능성이 높습니다. 소득 감소가 예상된다면 현시점에서 조속히 신청하는 것이 유리합니다.",
   "변제 기간을 단축할 수 있나요?":
-    "법원이 인가한 변제계획 기준(최대 84개월)보다 빨리 갚으면 조기 종결이 가능합니다. 단, 변제계획 변경 신청이 필요하며 법원 허가를 받아야 합니다. 고객의 소득이 향후 개선된다면 조기 변제를 적극 검토할 수 있습니다.",
+    "법원이 인가한 변제계획 기준(최대 60개월)보다 빨리 갚으면 조기 종결이 가능합니다. 단, 변제계획 변경 신청이 필요하며 법원 허가를 받아야 합니다. 고객의 소득이 향후 개선된다면 조기 변제를 적극 검토할 수 있습니다.",
   "신청 후 직장에 영향이 있나요?":
     "일반 사기업 직원의 경우 개인회생·파산은 원칙적으로 해고 사유가 되지 않습니다. 다만 금융기관·공무원·일부 자격증 보유 직종은 결격 사유가 될 수 있습니다. 자영업자인 김민수 고객은 사업자 폐업 없이도 신청 가능하나, 세금 체납이 있다면 사전 정리가 필요합니다.",
   "배우자 소득도 변제액에 포함되나요?":
@@ -869,7 +937,7 @@ const AI_ANSWERS = {
 
 const INITIAL_AI_MSG = {
   role: "ai",
-  text: `김민수 고객의 분석이 완료됐습니다. 총 채무 3.1억원, 월 가용소득 45만원 기준으로 **개인회생** 신청 가능성이 가장 높게 평가됐습니다 (78/100). 추가로 궁금하신 사항을 질문해 주세요.`,
+  text: `김민수 고객의 분석이 완료됐습니다. 총 채무 3.1억원, 월 가용소득 45만원, 연체 6개월 기준으로 채무초과 상태와 변제 가능 여부가 확인됐습니다. 절차별 성공 가능성은 아래에서 비교할 수 있습니다. 추가로 궁금하신 사항을 질문해 주세요.`,
 };
 
 const SMS_TEMPLATES = [
@@ -937,7 +1005,7 @@ const SMS_TEMPLATES = [
         />
       </svg>
     ),
-    message: `안녕하세요, 김민수 고객님.\n\n분석 결과를 공유드립니다.\n\n📊 개인회생 성공 가능성: 78/100 (양호)\n💡 추천 절차: 개인회생\n\n[주요 분석 내용]\n• 월 가용소득 45만원으로 변제 계획 수립 가능\n• 채무초과 요건 충족 (총 채무 3.1억, 자산 1,500만원)\n• 자영업 소득 증빙 서류 별도 준비 필요\n\n자세한 내용은 상담 시 설명드리겠습니다.\n\n감사합니다.`,
+    message: `안녕하세요, 김민수 고객님.\n\n분석 결과를 공유드립니다.\n\n[현황 요약]\n• 총 채무 3.1억원, 자산 1,500만원 → 채무초과 상태\n• 월 가용소득 45만원으로 변제 계획 수립 가능\n• 연체 6개월, 자영업 소득 증빙 서류 별도 준비 필요\n\n자세한 내용은 상담 시 설명드리겠습니다.\n\n감사합니다.`,
   },
   {
     id: "custom",
@@ -1524,80 +1592,6 @@ const STEP_SETTERS = {
   },
 };
 
-/* 링 게이지 컴포넌트 */
-const Ring = ({ score, size = 130, strokeWidth = 7 }) => {
-  const r = (size - strokeWidth * 2) / 2;
-  const circ = 2 * Math.PI * r;
-  const offset = circ * (1 - score / 100);
-  const c = size / 2;
-  /*
-   * 순서: 성공 가능성(상단) → 78(중앙 크게) → /100(하단)
-   * SVG text.y = baseline 기준, cap height ≈ fontSize×0.72
-   * 3줄 블록 전체 시각 중심이 c가 되도록 y 계산
-   *   yL = c - s×0.14   (레이블 baseline)
-   *   yS = c + s×0.09   (점수 baseline)
-   *   yD = c + s×0.20   (/100 baseline)
-   * 검증(s=150): top≈44.8, bottom≈106 → center≈75.4 ✓
-   */
-  const yL = c - size * 0.15;
-  const yS = c + size * 0.1;
-  const yD = c + size * 0.21;
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox={`0 0 ${size} ${size}`}
-      style={{ display: "block" }}
-    >
-      <circle
-        cx={c}
-        cy={c}
-        r={r}
-        fill="none"
-        stroke="#f0f0f0"
-        strokeWidth={strokeWidth}
-      />
-      <circle
-        cx={c}
-        cy={c}
-        r={r}
-        fill="none"
-        stroke="#111"
-        strokeWidth={strokeWidth}
-        strokeDasharray={circ}
-        strokeDashoffset={offset}
-        strokeLinecap="round"
-        transform={`rotate(-90 ${c} ${c})`}
-        style={{ transition: "stroke-dashoffset 1s ease" }}
-      />
-      <text
-        x={c}
-        y={yL}
-        textAnchor="middle"
-        fontSize={size * 0.085}
-        fill="#999"
-        letterSpacing="0.3"
-      >
-        성공 가능성
-      </text>
-      <text
-        x={c}
-        y={yS}
-        textAnchor="middle"
-        fontSize={size * 0.26}
-        fontWeight="800"
-        fill="#111"
-        letterSpacing="-1"
-      >
-        {score}
-      </text>
-      <text x={c} y={yD} textAnchor="middle" fontSize={size * 0.09} fill="#bbb">
-        /100
-      </text>
-    </svg>
-  );
-};
-
 const SampleDashboardPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -1710,6 +1704,9 @@ const SampleDashboardPage = () => {
   const [debtDraft, setDebtDraft] = useState(() =>
     summaryToDebtDraft(location.state?.debtSummary || DEFAULT_DEBT_SUMMARY),
   );
+  const [planMix, setPlanMix] = useState({});
+  const [planMixModalOpen, setPlanMixModalOpen] = useState(false);
+  const [planMixDraft, setPlanMixDraft] = useState(null);
 
   const openDebtModal = () => {
     setDebtDraft(summaryToDebtDraft(debtSummary));
@@ -2037,19 +2034,153 @@ const SampleDashboardPage = () => {
       : CLIENT.debtBreakdown;
 
   const planProfile = getPlanProfile(selectedOption);
+  const mixSpec = PLAN_MIX[selectedOption];
+  const mixYearOptions = mixSpec ? yearMonthsForMix(mixSpec) : [];
   const interestTotal = Math.max(
     0,
     Math.round(totalDebtWithInterest - totalDebtPrincipal),
   );
+
+  const defaultRatePct =
+    planProfile.kind === "repayment" && totalDebtPrincipal > 0
+      ? round1(
+          ((planProfile.amount * planProfile.months) / totalDebtPrincipal) *
+            100,
+        )
+      : null;
+  const mixRatePct = mixSpec
+    ? round1(
+        clamp(
+          planMix[selectedOption]?.ratePct ?? defaultRatePct ?? mixSpec.minRate,
+          mixSpec.minRate,
+          mixSpec.maxRate,
+        ),
+      )
+    : defaultRatePct;
+  const mixMonths = mixSpec
+    ? clamp(
+        planMix[selectedOption]?.months ?? planProfile.months,
+        mixSpec.minMonths,
+        mixSpec.maxMonths,
+      )
+    : planProfile.months;
+  const mixDirty = Boolean(planMix[selectedOption]);
+
+  const patchPlanMix = (patch) => {
+    if (!mixSpec) return;
+    setPlanMix((prev) => {
+      const prevMix = prev[selectedOption] || {};
+      return {
+        ...prev,
+        [selectedOption]: {
+          months: prevMix.months ?? planProfile.months,
+          ratePct: prevMix.ratePct ?? defaultRatePct ?? mixSpec.minRate,
+          ...patch,
+        },
+      };
+    });
+  };
+  const resetPlanMix = () => {
+    setPlanMix((prev) => {
+      const next = { ...prev };
+      delete next[selectedOption];
+      return next;
+    });
+  };
+
+  const patchPlanMixDraft = (patch) => {
+    setPlanMixDraft((prev) => (prev ? { ...prev, ...patch } : prev));
+  };
+
+  const openPlanMixModal = () => {
+    if (!mixSpec) return;
+    setPlanMixDraft({
+      months: snapYearMonths(mixMonths, mixSpec),
+      ratePct: mixRatePct,
+    });
+    setPlanMixModalOpen(true);
+  };
+
+  const closePlanMixModal = () => {
+    setPlanMixModalOpen(false);
+    setPlanMixDraft(null);
+  };
+
+  const resetPlanMixDraft = () => {
+    if (!mixSpec) return;
+    setPlanMixDraft({
+      months: planProfile.months,
+      ratePct: defaultRatePct ?? mixSpec.minRate,
+    });
+  };
+
+  const applyPlanMixDraft = () => {
+    if (!planMixDraft || !mixSpec) return;
+    const baselineRate = round1(defaultRatePct ?? mixSpec.minRate);
+    const isDefault =
+      planMixDraft.months === planProfile.months &&
+      round1(planMixDraft.ratePct) === baselineRate;
+    if (isDefault) {
+      resetPlanMix();
+    } else {
+      patchPlanMix({
+        months: planMixDraft.months,
+        ratePct: planMixDraft.ratePct,
+      });
+    }
+    closePlanMixModal();
+  };
+
+  const handleMixSplitPointerDown = (event) => {
+    if (!mixSpec) return;
+    const track =
+      event.currentTarget.querySelector(".sdp-plan-split-track") ||
+      event.currentTarget;
+    attachPointerDrag(event, track, (t) => {
+      const minT = mixSpec.minRate / 100;
+      const maxT = mixSpec.maxRate / 100;
+      patchPlanMixDraft({
+        ratePct: round1(clamp(t, minT, maxT) * 100),
+      });
+    });
+  };
+
+  const handleMixPeriodPointerDown = (event) => {
+    if (!mixSpec || mixYearOptions.length === 0) return;
+    const track =
+      event.currentTarget.querySelector(".sdp-plan-period-track") ||
+      event.currentTarget;
+    attachPointerDrag(event, track, (t) => {
+      const raw =
+        mixSpec.minMonths + t * (mixSpec.maxMonths - mixSpec.minMonths);
+      patchPlanMixDraft({ months: snapToList(raw, mixYearOptions) });
+    });
+  };
 
   let totalRepayment = 0;
   let exemptDebt = 0;
   let exemptDebtWithInterest = 0;
   let showExemptWithInterest = false;
   let remainDebt = 0;
+  let planMonthly = planProfile.amount;
+  let planMonths = planProfile.months;
 
   if (planProfile.kind === "repayment") {
-    totalRepayment = planProfile.amount * planProfile.months;
+    if (mixSpec && mixRatePct != null) {
+      if (mixDirty) {
+        planMonths = mixMonths;
+        totalRepayment = Math.round((totalDebtPrincipal * mixRatePct) / 100);
+        planMonthly = planMonths > 0 ? totalRepayment / planMonths : 0;
+      } else {
+        planMonths = planProfile.months;
+        planMonthly = planProfile.amount;
+        totalRepayment = planProfile.amount * planProfile.months;
+      }
+    } else {
+      totalRepayment = planProfile.amount * planProfile.months;
+      planMonthly = planProfile.amount;
+      planMonths = planProfile.months;
+    }
     remainDebt = totalRepayment;
     exemptDebt = Math.max(0, Math.round(totalDebtPrincipal - totalRepayment));
     exemptDebtWithInterest = Math.max(
@@ -2081,6 +2212,45 @@ const SampleDashboardPage = () => {
       totalDebtWithInterest > totalDebtPrincipal &&
       exemptDebtWithInterest > exemptDebt;
   }
+
+  const repaymentRatePct =
+    planProfile.kind === "repayment" && totalDebtPrincipal > 0
+      ? Math.round((totalRepayment / totalDebtPrincipal) * 1000) / 10
+      : null;
+
+  const mixOptionLabel =
+    OPTIONS.find((o) => o.id === selectedOption)?.label ?? "";
+  const draftRatePct = planMixDraft?.ratePct ?? mixRatePct ?? 0;
+  const draftMonths = planMixDraft?.months ?? mixMonths;
+  const draftTotal =
+    totalDebtPrincipal > 0
+      ? Math.round((totalDebtPrincipal * draftRatePct) / 100)
+      : 0;
+  const draftMonthly = draftMonths > 0 ? draftTotal / draftMonths : 0;
+  const draftIsBaseline =
+    Boolean(mixSpec) &&
+    draftMonths === planProfile.months &&
+    round1(draftRatePct) === round1(defaultRatePct ?? mixSpec.minRate);
+  const previewTotal = draftIsBaseline
+    ? planProfile.amount * planProfile.months
+    : draftTotal;
+  const previewMonthly = draftIsBaseline ? planProfile.amount : draftMonthly;
+  const previewExempt = Math.max(
+    0,
+    Math.round(totalDebtPrincipal - previewTotal),
+  );
+  const previewOverIncome = round1(previewMonthly) > CLIENT.disposableIncome;
+  const previewIncomeGap = round1(CLIENT.disposableIncome - previewMonthly);
+  const periodPct =
+    mixSpec && mixSpec.maxMonths !== mixSpec.minMonths
+      ? ((draftMonths - mixSpec.minMonths) /
+          (mixSpec.maxMonths - mixSpec.minMonths)) *
+        100
+      : 0;
+  const shortMonthly =
+    mixSpec && mixSpec.minMonths > 0 ? previewTotal / mixSpec.minMonths : 0;
+  const longMonthly =
+    mixSpec && mixSpec.maxMonths > 0 ? previewTotal / mixSpec.maxMonths : 0;
 
   const paidCount = installments.filter((it) => it.status === "paid").length;
   const canceledCount = installments.filter(
@@ -2115,6 +2285,17 @@ const SampleDashboardPage = () => {
   const hasPaidProgress = installments.some(
     (it) => it.status === "paid" || it.status === "refunded",
   );
+
+  const overdueText =
+    overduePeriodLabel(debtSummary?.overduePeriod) ||
+    `${parseOverdueMonths(debtSummary?.overduePeriod ?? CLIENT.overduePeriod)}개월`;
+  const debtAssetRatio =
+    CLIENT.totalAsset > 0
+      ? (totalDebtPrincipal / CLIENT.totalAsset).toFixed(1)
+      : "—";
+  const debtEok = (totalDebtPrincipal / 10000)
+    .toFixed(1)
+    .replace(/\.0$/, "");
 
   return (
     <div className="sdp-page">
@@ -2509,24 +2690,59 @@ const SampleDashboardPage = () => {
           </section>
         )}
 
-        {/* ① 히어로: 추천 옵션 + 큰 링 */}
-        <section className="sdp-hero">
-          <div className="sdp-hero-left">
-            <p className="sdp-hero-eyebrow">AI 분석 추천</p>
-            <h1 className="sdp-hero-h1">개인회생</h1>
-            <p className="sdp-hero-sub">
-              소득 대비 채무 비율과 월 가용 소득을 종합적으로 분석한 결과,
-              <br />
-              개인회생 신청이 가장 유리한 것으로 판단됩니다.
-            </p>
-            <div className="sdp-hero-tags">
-              <span className="sdp-tag">채무초과 상태</span>
-              <span className="sdp-tag">가용소득 충분</span>
-              <span className="sdp-tag">연체 6개월</span>
-            </div>
+        {/* ① 분석 브리핑 */}
+        <section className="sdp-briefing">
+          <div className="sdp-briefing-head">
+            <p className="sdp-briefing-eyebrow">분석 브리핑</p>
+            <span className="sdp-briefing-date">2026.06.28</span>
           </div>
-          <div className="sdp-hero-right">
-            <Ring score={78} size={150} strokeWidth={8} />
+          <p className="sdp-briefing-lead">
+            {CLIENT.name} 고객은 {CLIENT.job}자로, 총 채무 {debtEok}억원, 월
+            가용소득 {CLIENT.disposableIncome}만원, 연체 {overdueText}이
+            확인됩니다. 자산 {CLIENT.totalAsset.toLocaleString()}만원으로 채무가
+            자산의 약 {debtAssetRatio}배에 달해 채무초과 상태에 해당하며, 사채가
+            포함된 채권 구성과 자영업 소득 증빙이 이후 절차 판단의 핵심
+            변수입니다.
+          </p>
+          <div className="sdp-briefing-kpis">
+            <div className="sdp-briefing-kpi">
+              <span className="sdp-briefing-kpi-label">총 채무</span>
+              <p className="sdp-briefing-kpi-val">
+                {debtEok}
+                <em>억원</em>
+              </p>
+              <span className="sdp-briefing-kpi-hint">
+                원금 기준
+                {totalDebtWithInterest > totalDebtPrincipal
+                  ? ` · 이자 포함 ${(totalDebtWithInterest / 10000).toFixed(1)}억`
+                  : ""}
+              </span>
+            </div>
+            <div className="sdp-briefing-kpi">
+              <span className="sdp-briefing-kpi-label">총 자산</span>
+              <p className="sdp-briefing-kpi-val">
+                {CLIENT.totalAsset.toLocaleString()}
+                <em>만원</em>
+              </p>
+              <span className="sdp-briefing-kpi-hint">
+                채무 {debtAssetRatio}배 · 채무초과
+              </span>
+            </div>
+            <div className="sdp-briefing-kpi">
+              <span className="sdp-briefing-kpi-label">월 가용소득</span>
+              <p className="sdp-briefing-kpi-val">
+                {CLIENT.disposableIncome}
+                <em>만원</em>
+              </p>
+              <span className="sdp-briefing-kpi-hint">
+                소득 {CLIENT.monthlyIncome}만 · 지출 {CLIENT.monthlyExpenses}만
+              </span>
+            </div>
+            <div className="sdp-briefing-kpi">
+              <span className="sdp-briefing-kpi-label">연체 기간</span>
+              <p className="sdp-briefing-kpi-val">{overdueText}</p>
+              <span className="sdp-briefing-kpi-hint">지급불능 인정 검토</span>
+            </div>
           </div>
         </section>
 
@@ -2542,7 +2758,7 @@ const SampleDashboardPage = () => {
                 return (
                   <div
                     key={opt.id}
-                    className={`sdp-option-row ${opt.recommended ? "recommended" : ""} ${selectedOption === opt.id ? "selected" : ""}`}
+                    className={`sdp-option-row ${selectedOption === opt.id ? "selected" : ""}`}
                     onClick={() => setSelectedOption(opt.id)}
                     role="button"
                     tabIndex={0}
@@ -2552,9 +2768,6 @@ const SampleDashboardPage = () => {
                   >
                     <div className="sdp-option-name">
                       <span>{opt.label}</span>
-                      {opt.recommended && (
-                        <span className="sdp-option-tag">추천</span>
-                      )}
                     </div>
                     <div className="sdp-option-bar-wrap">
                       <div className="sdp-option-bar">
@@ -2577,16 +2790,13 @@ const SampleDashboardPage = () => {
 
               const summary = block.summary;
               const groupSelected = CREDIT_RECOVERY_IDS.has(selectedOption);
-              const groupRecommended = block.children.some(
-                (c) => c.recommended,
-              );
               return (
                 <div
                   key={block.id}
                   className={`sdp-option-group ${creditRecoveryOpen ? "open" : ""} ${groupSelected ? "has-selected" : ""}`}
                 >
                   <div
-                    className={`sdp-option-row sdp-option-group-header ${groupRecommended ? "recommended" : ""} ${groupSelected && !creditRecoveryOpen ? "selected" : ""}`}
+                    className={`sdp-option-row sdp-option-group-header ${groupSelected && !creditRecoveryOpen ? "selected" : ""}`}
                     onClick={() => setCreditRecoveryOpen((v) => !v)}
                     role="button"
                     tabIndex={0}
@@ -2599,9 +2809,6 @@ const SampleDashboardPage = () => {
                         {creditRecoveryOpen ? "▾" : "▸"}
                       </span>
                       <span>{block.label}</span>
-                      {groupRecommended && (
-                        <span className="sdp-option-tag">추천</span>
-                      )}
                       {!creditRecoveryOpen && groupSelected && (
                         <span className="sdp-option-sublabel">
                           {
@@ -2632,7 +2839,7 @@ const SampleDashboardPage = () => {
                       {block.children.map((opt) => (
                         <div
                           key={opt.id}
-                          className={`sdp-option-row sdp-option-child ${opt.recommended ? "recommended" : ""} ${selectedOption === opt.id ? "selected" : ""}`}
+                          className={`sdp-option-row sdp-option-child ${selectedOption === opt.id ? "selected" : ""}`}
                           onClick={() => setSelectedOption(opt.id)}
                           role="button"
                           tabIndex={0}
@@ -2642,9 +2849,6 @@ const SampleDashboardPage = () => {
                         >
                           <div className="sdp-option-name">
                             <span>{opt.label}</span>
-                            {opt.recommended && (
-                              <span className="sdp-option-tag">추천</span>
-                            )}
                           </div>
                           <div className="sdp-option-bar-wrap">
                             <div className="sdp-option-bar">
@@ -2894,30 +3098,87 @@ const SampleDashboardPage = () => {
 
           {/* ④ 예상 결과 (절차별) */}
           <section className="sdp-section">
-            <p className="sdp-section-label">{planProfile.title}</p>
+            {planProfile.kind === "repayment" && mixSpec ? (
+              <div className="sdp-debt-section-head">
+                <p className="sdp-section-label">{planProfile.title}</p>
+                <button
+                  type="button"
+                  className={`sdp-debt-detail-btn sdp-plan-mix-icon-btn ${mixDirty ? "is-adjusted" : ""}`}
+                  onClick={openPlanMixModal}
+                  aria-label={mixDirty ? "계획 조정됨" : "계획 조정"}
+                  title={mixDirty ? "계획 조정됨" : "계획 조정"}
+                >
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    aria-hidden
+                  >
+                    <path
+                      d="M2 5h12"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                      strokeLinecap="round"
+                    />
+                    <circle
+                      cx="6"
+                      cy="5"
+                      r="1.75"
+                      fill="#fff"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                    />
+                    <path
+                      d="M2 11h12"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                      strokeLinecap="round"
+                    />
+                    <circle
+                      cx="10.5"
+                      cy="11"
+                      r="1.75"
+                      fill="#fff"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                    />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <p className="sdp-section-label">{planProfile.title}</p>
+            )}
 
             {planProfile.kind === "repayment" && (
               <>
                 <div className="sdp-plan-kv">
                   <div className="sdp-kv">
                     <span>월 변제액</span>
-                    <strong>{planProfile.amount}만원</strong>
+                    <strong>{formatMonthly(planMonthly)}만원</strong>
                   </div>
                   <div className="sdp-kv">
                     <span>변제 기간</span>
                     <strong>
-                      {planProfile.months}개월 ({planProfile.periodNote})
+                      {planMonths}개월 ({formatPlanPeriod(planMonths)})
                     </strong>
                   </div>
                   <div className="sdp-kv">
                     <span>총 변제액</span>
                     <strong>{totalRepayment.toLocaleString()}만원</strong>
                   </div>
+                  {repaymentRatePct != null && (
+                    <div className="sdp-kv">
+                      <span>변제율</span>
+                      <strong>{repaymentRatePct.toFixed(1)}%</strong>
+                    </div>
+                  )}
                 </div>
                 {selectedOption === "rehabilitation" && (
                   <p className="sdp-plan-note">
                     개인회생은 법정 생계비(가구원 기준)를 반영한 가용소득으로 월
-                    변제액을 산정합니다. 위 추정 상환여력과 다를 수 있습니다.
+                    변제액을 산정합니다. 실제 변제액은 추정 상환여력과 다를 수
+                    있습니다.
                   </p>
                 )}
               </>
@@ -3023,7 +3284,7 @@ const SampleDashboardPage = () => {
         {/* ⑤ 상담 멘트 (외부 공유 시 숨김) */}
         {!isExternal && (
           <section className="sdp-section">
-            <p className="sdp-section-label">추천 상담 멘트</p>
+            <p className="sdp-section-label">상담 멘트</p>
             <div className="sdp-script-tabs">
               {SCRIPTS.map((s, i) => (
                 <button
@@ -3646,6 +3907,214 @@ const SampleDashboardPage = () => {
         </div>
       )}
 
+      {planMixModalOpen && mixSpec && planMixDraft && (
+        <div
+          className="sdp-review-modal-overlay"
+          onClick={closePlanMixModal}
+        >
+          <div
+            className="sdp-review-modal sdp-plan-adjust-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sdp-review-modal-head sdp-plan-adjust-head">
+              <div className="sdp-plan-adjust-head-copy">
+                <h2 className="sdp-review-modal-title">변제 계획 조정</h2>
+                <p>
+                  {mixOptionLabel} · 원금 {totalDebtPrincipal.toLocaleString()}
+                  만원
+                </p>
+              </div>
+              <button
+                type="button"
+                className="sdp-review-modal-close"
+                onClick={closePlanMixModal}
+                aria-label="닫기"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path
+                    d="M3 3l10 10M13 3L3 13"
+                    stroke="#666"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="sdp-review-modal-body sdp-plan-adjust-body">
+              <div className="sdp-plan-split">
+                <div className="sdp-plan-split-meta">
+                  <div className="sdp-plan-split-side">
+                    <span className="sdp-plan-split-k">변제</span>
+                    <strong className="sdp-plan-split-v">
+                      {previewTotal.toLocaleString()}만원
+                    </strong>
+                    <span className="sdp-plan-split-pct">
+                      {draftRatePct.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="sdp-plan-split-side sdp-plan-split-side--end">
+                    <span className="sdp-plan-split-k">면책</span>
+                    <strong className="sdp-plan-split-v">
+                      {previewExempt.toLocaleString()}만원
+                    </strong>
+                    <span className="sdp-plan-split-pct">
+                      {(100 - draftRatePct).toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+                <div
+                  className="sdp-plan-split-hit"
+                  onPointerDown={handleMixSplitPointerDown}
+                  onKeyDown={(e) => {
+                    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+                    e.preventDefault();
+                    const delta = e.key === "ArrowLeft" ? -0.5 : 0.5;
+                    patchPlanMixDraft({
+                      ratePct: round1(
+                        clamp(
+                          draftRatePct + delta,
+                          mixSpec.minRate,
+                          mixSpec.maxRate,
+                        ),
+                      ),
+                    });
+                  }}
+                  role="slider"
+                  tabIndex={0}
+                  aria-label="변제율"
+                  aria-valuemin={mixSpec.minRate}
+                  aria-valuemax={mixSpec.maxRate}
+                  aria-valuenow={draftRatePct}
+                  aria-valuetext={`${draftRatePct.toFixed(1)}%`}
+                >
+                  <div className="sdp-plan-split-track">
+                    <div
+                      className="sdp-plan-split-fill"
+                      style={{ width: `${draftRatePct}%` }}
+                    />
+                    <span
+                      className="sdp-plan-split-handle"
+                      style={{ left: `${draftRatePct}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="sdp-plan-period">
+                <div className="sdp-plan-mix-pair">
+                  <div className="sdp-plan-mix-stat">
+                    <span className="sdp-plan-mix-stat-k">월 변제액</span>
+                    <strong
+                      className={`sdp-plan-mix-stat-v ${
+                        previewOverIncome ? "is-warn" : ""
+                      }`}
+                    >
+                      {formatMonthly(previewMonthly)}만원
+                    </strong>
+                  </div>
+                  <div className="sdp-plan-mix-stat sdp-plan-mix-stat--end">
+                    <span className="sdp-plan-mix-stat-k">기간</span>
+                    <strong className="sdp-plan-mix-stat-v">
+                      {formatPlanPeriod(draftMonths)}
+                    </strong>
+                  </div>
+                </div>
+                <div className="sdp-plan-period-poles">
+                  <span>월 {formatMonthly(shortMonthly)}만</span>
+                  <span>월 {formatMonthly(longMonthly)}만</span>
+                </div>
+                <div
+                  className="sdp-plan-period-hit"
+                  onPointerDown={handleMixPeriodPointerDown}
+                  onKeyDown={(e) => {
+                    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+                    e.preventDefault();
+                    const current = snapToList(draftMonths, mixYearOptions);
+                    const from = mixYearOptions.indexOf(current);
+                    const next =
+                      mixYearOptions[
+                        clamp(
+                          from + (e.key === "ArrowLeft" ? -1 : 1),
+                          0,
+                          mixYearOptions.length - 1,
+                        )
+                      ];
+                    if (next) patchPlanMixDraft({ months: next });
+                  }}
+                  role="slider"
+                  tabIndex={0}
+                  aria-label="변제 기간"
+                  aria-valuemin={mixSpec.minMonths}
+                  aria-valuemax={mixSpec.maxMonths}
+                  aria-valuenow={draftMonths}
+                  aria-valuetext={`${formatPlanPeriod(draftMonths)}, 월 ${formatMonthly(previewMonthly)}만원`}
+                >
+                  <div className="sdp-plan-period-track">
+                    <span
+                      className="sdp-plan-period-handle"
+                      style={{ left: `${periodPct}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="sdp-plan-period-ticks">
+                  {mixYearOptions.map((months) => (
+                    <button
+                      key={months}
+                      type="button"
+                      className={`sdp-plan-period-tick ${
+                        draftMonths === months ? "is-on" : ""
+                      }`}
+                      onClick={() => patchPlanMixDraft({ months })}
+                      aria-label={`${months / 12}년`}
+                    >
+                      {months / 12}
+                    </button>
+                  ))}
+                </div>
+                {previewOverIncome ? (
+                  <p className="sdp-plan-adjust-warn">
+                    가용소득 {CLIENT.disposableIncome}만원 초과
+                  </p>
+                ) : (
+                  <p className="sdp-plan-adjust-hint">
+                    {previewIncomeGap === 0
+                      ? `가용소득 ${CLIENT.disposableIncome}만원과 같음`
+                      : `가용소득 대비 ${formatMonthly(previewIncomeGap)}만원 여유`}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="sdp-review-modal-footer sdp-plan-adjust-footer">
+              <button
+                type="button"
+                className="sdp-review-cancel-btn"
+                onClick={resetPlanMixDraft}
+              >
+                분석값으로
+              </button>
+              <div className="sdp-plan-adjust-footer-right">
+                <button
+                  type="button"
+                  className="sdp-review-cancel-btn"
+                  onClick={closePlanMixModal}
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  className="sdp-review-confirm-reject-btn"
+                  onClick={applyPlanMixDraft}
+                >
+                  적용하기
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 채무 자세히보기 / 수정 모달 */}
       {debtModalOpen && (
         <div className="sdp-debt-modal-overlay" onClick={closeDebtModal}>
@@ -3734,7 +4203,7 @@ const SampleDashboardPage = () => {
               수정된 채무를 어떻게 할까요?
             </p>
             <p className="sdp-debt-confirm-desc">
-              다시 분석하면 추천 절차·변제 계획이 갱신되고,
+              다시 분석하면 절차별 성공 가능성·변제 계획이 갱신되고,
               <br />
               값만 저장하면 채무 구성만 반영됩니다.
             </p>
@@ -4303,9 +4772,6 @@ const SampleDashboardPage = () => {
                           <span className="sdp-proc-select-item-name">
                             {opt.label}
                           </span>
-                          {opt.recommended && (
-                            <span className="sdp-proc-select-rec">추천</span>
-                          )}
                         </div>
                         <div className="sdp-proc-select-item-meta">
                           <span className="sdp-proc-select-score">
@@ -4325,9 +4791,6 @@ const SampleDashboardPage = () => {
                   const summary = block.summary;
                   const groupSelected =
                     CREDIT_RECOVERY_IDS.has(draftSelectedProc);
-                  const groupRecommended = block.children.some(
-                    (c) => c.recommended,
-                  );
                   return (
                     <div
                       key={block.id}
@@ -4335,7 +4798,7 @@ const SampleDashboardPage = () => {
                     >
                       <button
                         type="button"
-                        className={`sdp-proc-select-item sdp-proc-select-group-header ${groupRecommended ? "has-rec" : ""} ${groupSelected && !procSelectCreditOpen ? "selected" : ""}`}
+                        className={`sdp-proc-select-item sdp-proc-select-group-header ${groupSelected && !procSelectCreditOpen ? "selected" : ""}`}
                         onClick={() => setProcSelectCreditOpen((v) => !v)}
                       >
                         <div className="sdp-proc-select-item-main">
@@ -4345,9 +4808,6 @@ const SampleDashboardPage = () => {
                           <span className="sdp-proc-select-item-name">
                             {block.label}
                           </span>
-                          {groupRecommended && (
-                            <span className="sdp-proc-select-rec">추천</span>
-                          )}
                           {!procSelectCreditOpen && groupSelected && (
                             <span className="sdp-proc-select-sub">
                               {
@@ -4382,11 +4842,6 @@ const SampleDashboardPage = () => {
                               <span className="sdp-proc-select-item-name">
                                 {opt.label}
                               </span>
-                              {opt.recommended && (
-                                <span className="sdp-proc-select-rec">
-                                  추천
-                                </span>
-                              )}
                             </div>
                             <div className="sdp-proc-select-item-meta">
                               <span className="sdp-proc-select-score">

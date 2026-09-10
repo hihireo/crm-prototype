@@ -757,11 +757,9 @@
   gap: 10px;
   flex-shrink: 0;
 }
-.scl-asset-collateral .scl-debt-grid-wrap {
+.scl-asset-collateral .scl-debt-grid-wrap,
+.scl-asset-collateral .scl-debt-cards {
   margin: 0;
-}
-.scl-asset-collateral .scl-debt-grid.detail {
-  min-width: 1080px;
 }
 .scl-collateral-equity {
   display: flex;
@@ -901,7 +899,7 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
-/* Debt detail grid */
+/* Debt simple table */
 .scl-debt-grid-shell {
   position: relative;
 }
@@ -911,50 +909,219 @@
   border: 1px solid #ebebeb;
   border-radius: 10px;
   background: #fff;
-  margin: 0 -2px;
 }
-.scl-debt-grid-more {
-  position: absolute;
-  top: 1px;
-  right: -1px;
-  bottom: 1px;
-  width: 56px;
+
+/* Debt cards */
+.scl-debt-cards {
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 8px;
-  border-radius: 0 10px 10px 0;
-  background: linear-gradient(to right, rgba(255, 255, 255, 0), #fff 58%);
-  pointer-events: none;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  background: #f3f3f4;
+  border-radius: 12px;
 }
-.scl-debt-grid-more-btn {
-  pointer-events: auto;
-  width: 26px;
-  height: 26px;
+.scl-debt-card {
+  position: relative;
+  border: 1px solid #e4e4e4;
+  border-radius: 10px;
+  background: #fff;
+  padding: 12px 36px 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.045);
+}
+.scl-debt-card .scl-debt-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #e5e5e5;
-  border-radius: 50%;
+  padding: 0;
+  font-size: 16px;
+}
+.scl-debt-card-row {
+  display: grid;
+  gap: 6px 8px;
+  align-items: end;
+  min-width: 0;
+}
+.scl-debt-card-row--main {
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.8fr) minmax(0, 1.4fr) minmax(0, 0.7fr) minmax(0, 1.3fr) minmax(0, 0.65fr) minmax(0, 1fr);
+}
+.scl-debt-card--no-col .scl-debt-card-row--main {
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.6fr) minmax(0, 0.7fr) minmax(0, 1.3fr) minmax(0, 0.65fr) minmax(0, 1fr);
+}
+.scl-debt-card-row--money {
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.55fr) minmax(0, 1.05fr) minmax(0, 1.05fr) minmax(0, 1.15fr);
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #efefef;
+}
+.scl-debt-card-row--simple {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr) minmax(0, 1.7fr) minmax(0, 0.75fr) minmax(0, 1.45fr);
+}
+.scl-debt-card--no-col .scl-debt-card-row--simple {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.9fr) minmax(0, 0.75fr) minmax(0, 1.45fr);
+}
+.scl-debt-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.scl-debt-cell-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #888;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.2;
+}
+.scl-debt-cell .scl-grid-input {
+  height: 30px;
+  border-color: #eee;
   background: #fff;
-  color: #333;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  animation: scl-debt-more-nudge 1.8s ease-in-out infinite;
+  padding: 4px 7px;
+  font-size: 12px;
+  border-radius: 6px;
 }
-.scl-debt-grid-more-btn:hover {
-  background: #111;
+.scl-debt-cell.is-linked .scl-grid-collateral-locked {
+  height: 30px;
+  padding: 0 8px;
+}
+.scl-debt-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.scl-debt-pair-labels,
+.scl-debt-pair-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.85fr);
+  min-width: 0;
+}
+.scl-debt-pair-labels .scl-debt-cell-label:last-child {
+  padding-left: 10px;
+}
+.scl-debt-pair-shell {
+  height: 30px;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  background: #fff;
+  overflow: hidden;
+  align-items: stretch;
+}
+.scl-debt-pair-shell:focus-within {
   border-color: #111;
-  color: #fff;
-  animation: none;
 }
-@keyframes scl-debt-more-nudge {
-  0%,
-  100% {
-    transform: translateX(0);
+.scl-debt-pair-shell .scl-grid-input {
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.scl-debt-pair-shell .scl-grid-input:hover,
+.scl-debt-pair-shell .scl-grid-input:focus {
+  border: none;
+  background: transparent;
+}
+.scl-debt-pair-shell input[type="date"] {
+  min-width: 0;
+  font-size: 12px;
+  padding: 0 8px;
+}
+.scl-debt-suffix {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  height: 100%;
+  padding-right: 8px;
+  border-left: 1px solid #eee;
+}
+.scl-debt-pair-shell:focus-within .scl-debt-suffix {
+  border-left-color: #e5e5e5;
+}
+.scl-debt-suffix .scl-grid-input {
+  flex: 1;
+  min-width: 0;
+  padding-right: 4px;
+}
+.scl-debt-suffix span {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: #aaa;
+  letter-spacing: -0.02em;
+}
+.scl-debt-control {
+  position: relative;
+  min-width: 0;
+}
+.scl-debt-control .scl-grid-input {
+  width: 100%;
+  padding-right: 26px;
+}
+.scl-debt-revert {
+  position: absolute;
+  right: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: #ccc;
+  cursor: pointer;
+  padding: 0;
+}
+.scl-debt-revert:hover:not(:disabled) {
+  background: #f0f0f0;
+  color: #333;
+}
+.scl-debt-revert:disabled {
+  opacity: 0.28;
+  cursor: default;
+}
+.scl-debt-cell.is-overridden .scl-grid-input {
+  border-color: #ccc;
+  background: #fafafa;
+}
+.scl-debt-cell.is-overridden .scl-debt-revert {
+  color: #555;
+}
+.scl-debt-add-btn--block {
+  border: 1px dashed #d2d2d2;
+  border-radius: 10px;
+  text-align: center;
+  background: transparent;
+  padding: 11px;
+}
+@media (max-width: 860px) {
+  .scl-debt-card {
+    padding: 8px 28px 8px 10px;
   }
-  50% {
-    transform: translateX(3px);
+  .scl-debt-card-row--main,
+  .scl-debt-card--no-col .scl-debt-card-row--main,
+  .scl-debt-card-row--money,
+  .scl-debt-card-row--simple,
+  .scl-debt-card--no-col .scl-debt-card-row--simple {
+    grid-template-columns: 1fr 1fr;
+  }
+  .scl-debt-pair {
+    grid-column: 1 / -1;
   }
 }
 .scl-debt-max-overdue {
@@ -1010,15 +1177,11 @@
 
 .scl-debt-grid {
   width: 100%;
-  min-width: 1400px;
+  min-width: 0;
   border-collapse: collapse;
   table-layout: fixed;
 }
 
-/* 간편 모드는 컬럼이 5개뿐이라 가로 스크롤 없이 들어간다 */
-.scl-debt-grid.simple {
-  min-width: 0;
-}
 .scl-debt-grid.simple .col-type {
   width: 18%;
 }
@@ -1113,11 +1276,7 @@
   color: #111;
   padding: 10px 8px;
 }
-.scl-debt-grid .col-type {
-  width: 7%;
-}
 .scl-debt-grid .col-secured {
-  width: 9%;
   min-width: 88px;
 }
 
@@ -1145,38 +1304,16 @@
   letter-spacing: -0.02em;
   white-space: nowrap;
 }
-.scl-debt-grid .col-lender {
-  width: 8%;
-}
-.scl-debt-grid .col-method {
-  width: 8%;
-}
-.scl-debt-grid .col-overdue {
-  width: 7%;
-}
-.scl-debt-grid .col-date {
-  width: 10%;
-  min-width: 132px;
-}
-.scl-debt-grid .col-num {
-  width: 10%;
-}
-.scl-debt-grid .col-rate {
-  width: 6%;
-}
-.scl-debt-grid .col-calc {
-  width: 7%;
-}
 .scl-debt-grid .col-act {
   width: 36px;
   text-align: center;
 }
 
-.scl-debt-grid td:nth-child(6) .scl-grid-input,
-.scl-debt-grid td:nth-child(7) .scl-grid-input {
-  min-width: 124px;
+.scl-debt-cell input[type="date"] {
+  min-width: 0;
   font-size: 12px;
-  padding: 7px 6px;
+  padding-left: 6px;
+  padding-right: 4px;
 }
 
 .scl-debt-summary {

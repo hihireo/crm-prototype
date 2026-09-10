@@ -1,23 +1,248 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React from "react";
 import {
   DEBT_TYPE_OPTIONS,
   REPAY_METHOD_OPTIONS,
   assetKindMeta,
-  calcDebtItem,
   debtTotalsOf,
   formatComma,
   formatWon,
   isSecured,
+  manualPatchIfDifferent,
+  maturityFromRemainingMonths,
   parseComma,
+  resolveDebtCalc,
 } from "./debtModel";
+
+const PRINCIPAL_HINT =
+  "오늘 기준 남은 원금(잔액)을 입력하세요. 계산 기간은 오늘~만기일로 적용됩니다.";
+
+const Field = ({ label, hint, className, children }) => (
+  <label className={`scl-debt-cell ${className || ""}`}>
+    <span className="scl-debt-cell-label">
+      {label}
+      {hint && (
+        <span
+          className="scl-th-hint"
+          aria-hidden="true"
+          data-tooltip={hint}
+        >
+          ?
+        </span>
+      )}
+    </span>
+    {children}
+  </label>
+);
+
+const RevertIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
+    <path
+      d="M3.2 4.2A4 4 0 1 1 2 7"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+    />
+    <path
+      d="M3.2 1.8v2.6H5.7"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const TypeSelect = ({ debt, onUpdate }) => (
+  <select
+    className="scl-grid-input scl-grid-select"
+    value={debt.debtType || "은행대출"}
+    onChange={(e) => onUpdate(debt.id, { debtType: e.target.value })}
+  >
+    {DEBT_TYPE_OPTIONS.map((t) => (
+      <option key={t} value={t}>
+        {t}
+      </option>
+    ))}
+  </select>
+);
+
+const SecuredControl = ({ debt, onUpdate }) => {
+  const asset = assetKindMeta(debt.collateralAssetId);
+  if (asset) {
+    return (
+      <span className="scl-grid-collateral-locked">
+        <span aria-hidden>{asset.icon}</span>
+        담보
+      </span>
+    );
+  }
+  return (
+    <select
+      className="scl-grid-input scl-grid-select"
+      value={isSecured(debt) ? "담보" : "무담보"}
+      onChange={(e) =>
+        onUpdate(debt.id, { secured: e.target.value === "담보" })
+      }
+    >
+      <option value="무담보">무담보</option>
+      <option value="담보">담보</option>
+    </select>
+  );
+};
+
+const LenderInput = ({ debt, onUpdate }) => (
+  <input
+    className="scl-grid-input"
+    value={debt.lender}
+    onChange={(e) => onUpdate(debt.id, { lender: e.target.value })}
+    placeholder="예: 국민은행"
+  />
+);
+
+const MethodSelect = ({ debt, onUpdate }) => (
+  <select
+    className="scl-grid-input scl-grid-select"
+    value={debt.repayMethod || "원리금균등"}
+    onChange={(e) => onUpdate(debt.id, { repayMethod: e.target.value })}
+  >
+    {REPAY_METHOD_OPTIONS.map((m) => (
+      <option key={m} value={m}>
+        {m}
+      </option>
+    ))}
+  </select>
+);
+
+const OverdueInput = ({ debt, onUpdate }) => (
+  <input
+    className="scl-grid-input scl-grid-num"
+    type="number"
+    min="0"
+    inputMode="numeric"
+    value={debt.overduePeriod ?? "0"}
+    onChange={(e) =>
+      onUpdate(debt.id, {
+        overduePeriod: e.target.value.replace(/[^\d]/g, ""),
+      })
+    }
+  />
+);
+
+const DATE_FIELD_LABEL = {
+  loanDate: "대출일",
+  maturityDate: "만기일",
+};
+
+const DateInput = ({ debt, onUpdate, field }) => (
+  <input
+    className="scl-grid-input"
+    type="date"
+    value={debt[field]}
+    aria-label={DATE_FIELD_LABEL[field]}
+    onChange={(e) => onUpdate(debt.id, { [field]: e.target.value })}
+  />
+);
+
+const PrincipalInput = ({ debt, onUpdate }) => (
+  <input
+    className="scl-grid-input scl-grid-num"
+    type="text"
+    inputMode="numeric"
+    value={formatComma(debt.principal)}
+    onChange={(e) =>
+      onUpdate(debt.id, { principal: parseComma(e.target.value) })
+    }
+    placeholder="예: 50,000,000"
+  />
+);
+
+const RateInput = ({ debt, onUpdate }) => (
+  <input
+    className="scl-grid-input scl-grid-num"
+    type="number"
+    step="0.1"
+    value={debt.rate}
+    onChange={(e) => onUpdate(debt.id, { rate: e.target.value })}
+    placeholder="예: 15"
+  />
+);
+
+const RemainingInput = ({ debt, onUpdate, months }) => (
+  <div className="scl-debt-suffix">
+    <input
+      className="scl-grid-input scl-grid-num"
+      type="number"
+      min="1"
+      inputMode="numeric"
+      value={months ?? ""}
+      onChange={(e) =>
+        onUpdate(debt.id, {
+          maturityDate: maturityFromRemainingMonths(
+            e.target.value,
+            debt.maturityDate,
+          ),
+        })
+      }
+      placeholder="—"
+      aria-label="남은기간(개월)"
+    />
+    <span>개월</span>
+  </div>
+);
+
+const EditableCalc = ({
+  label,
+  value,
+  calculated,
+  overridden,
+  onChange,
+  onRevert,
+}) => (
+  <div className={`scl-debt-cell${overridden ? " is-overridden" : ""}`}>
+    <span className="scl-debt-cell-label">{label}</span>
+    <div className="scl-debt-control">
+      <input
+        className="scl-grid-input scl-grid-num"
+        type="text"
+        inputMode="numeric"
+        value={value != null ? formatComma(value) : ""}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={calculated != null ? formatComma(calculated) : "—"}
+        aria-label={label}
+      />
+      <button
+        type="button"
+        className="scl-debt-revert"
+        onClick={onRevert}
+        disabled={!overridden}
+        title="계산값으로 되돌리기"
+        aria-label={`${label} 계산값으로 되돌리기`}
+      >
+        <RevertIcon />
+      </button>
+    </div>
+  </div>
+);
+
+const RemoveBtn = ({ onClick }) => (
+  <button
+    type="button"
+    className="scl-debt-remove"
+    onClick={onClick}
+    title="삭제"
+  >
+    ×
+  </button>
+);
 
 /**
  * 채무 입력 그리드 (간편/상세 공용).
  *
- * 간편과 상세는 같은 행 배열을 쓰고 보이는 컬럼만 다르다. 덕분에 모드를 바꿔도
- * 입력값이 그대로 유지된다.
- *  - 간편: 채무종류 · 담보 · 채권처 · 연체 · 금액
- *  - 상세: + 상환방식 · 대출일 · 만기일 · 금리 · 계산 결과 4컬럼
+ * 간편과 상세는 같은 행 배열을 쓰고 보이는 필드만 다르다. 모드를 바꿔도
+ * 입력값은 그대로 유지된다.
+ *  - 간편: 카드 1행 (채무종류 · 담보 · 채권처 · 연체 · 금액)
+ *  - 상세: 카드 2행. 만기일↔남은기간은 서로 연동되고,
+ *    월불입·잔여이자·잔여상환액은 계산값 위에 직접 수정도 가능하다.
  *
  * 자산 단계에서 연결된 담보 채무(collateralAssetId)는 목록 맨 위에 고정한다.
  * 담보 컬럼 값은 그대로 '담보'이고, 행 배경·작은 아이콘으로만 구분한다.
@@ -33,282 +258,163 @@ const DebtGrid = ({
   addLabel = "+ 행 추가",
 }) => {
   const detail = mode === "detail";
-  const colCount =
-    (detail ? 12 : 4) + (showCollateral ? 1 : 0) + (onRemove ? 1 : 0);
-  const wrapRef = useRef(null);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-
-  useLayoutEffect(() => {
-    const el = wrapRef.current;
-    if (!el) return undefined;
-
-    const update = () => {
-      setCanScrollRight(el.scrollWidth - el.scrollLeft - el.clientWidth > 2);
-    };
-
-    update();
-    el.addEventListener("scroll", update, { passive: true });
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => {
-      el.removeEventListener("scroll", update);
-      ro.disconnect();
-    };
-  }, [detail, rows.length]);
 
   return (
-    <div className="scl-debt-grid-shell">
-    <div className="scl-debt-grid-wrap" ref={wrapRef}>
-      <table className={`scl-debt-grid ${detail ? "detail" : "simple"}`}>
-        <thead>
-          <tr>
-            <th className="col-type">채무종류</th>
-            {showCollateral && <th className="col-secured">담보</th>}
-            <th className="col-lender">채권처</th>
-            {detail && <th className="col-method">상환방식</th>}
-            <th className="col-overdue">연체(개월)</th>
-            {detail && <th className="col-date">대출일</th>}
-            {detail && <th className="col-date">만기일</th>}
-            <th className="col-num">
-              현재 잔액(원)
-              <span
-                className="scl-th-hint"
-                aria-hidden="true"
-                data-tooltip="오늘 기준 남은 원금(잔액)을 입력하세요. 계산 기간은 오늘~만기일로 적용됩니다."
-              >?</span>
-            </th>
-            {detail && <th className="col-rate">금리(%)</th>}
-            {detail && <th className="col-calc">남은기간</th>}
-            {detail && <th className="col-calc">월불입</th>}
-            {detail && <th className="col-calc">잔여이자</th>}
-            {detail && <th className="col-calc">잔여상환액</th>}
-            {onRemove && <th className="col-act" />}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((debt) => {
-            const calc = detail ? calcDebtItem(debt) : null;
-            const asset = assetKindMeta(debt.collateralAssetId);
-            return (
-              <tr
-                key={debt.id}
-                className={asset ? "scl-debt-row-linked" : ""}
-                title={asset ? `${asset.label} 담보` : undefined}
-              >
-                <td>
-                  <select
-                    className="scl-grid-input scl-grid-select"
-                    value={debt.debtType || "은행대출"}
-                    onChange={(e) =>
-                      onUpdate(debt.id, { debtType: e.target.value })
-                    }
+    <div className="scl-debt-cards">
+      {rows.map((debt) => {
+        const resolved = detail ? resolveDebtCalc(debt) : null;
+        const asset = assetKindMeta(debt.collateralAssetId);
+        const canRemove = onRemove && rows.length > minRows;
+        const identity = (
+          <>
+            <Field label="채무종류">
+              <TypeSelect debt={debt} onUpdate={onUpdate} />
+            </Field>
+            {showCollateral && (
+              <Field label="담보" className={asset ? "is-linked" : ""}>
+                <SecuredControl debt={debt} onUpdate={onUpdate} />
+              </Field>
+            )}
+            <Field label="채권처" className="scl-debt-cell--grow">
+              <LenderInput debt={debt} onUpdate={onUpdate} />
+            </Field>
+            <Field label="연체(개월)">
+              <OverdueInput debt={debt} onUpdate={onUpdate} />
+            </Field>
+            <Field
+              label="현재 잔액(원)"
+              hint={PRINCIPAL_HINT}
+              className="scl-debt-cell--grow"
+            >
+              <PrincipalInput debt={debt} onUpdate={onUpdate} />
+            </Field>
+          </>
+        );
+        return (
+          <article
+            key={debt.id}
+            className={`scl-debt-card${
+              showCollateral ? "" : " scl-debt-card--no-col"
+            }${detail ? "" : " scl-debt-card--simple"}`}
+            title={asset ? `${asset.label} 담보` : undefined}
+          >
+            {canRemove && <RemoveBtn onClick={() => onRemove(debt.id)} />}
+
+            {detail ? (
+              <>
+                <div className="scl-debt-card-row scl-debt-card-row--main">
+                  {identity}
+                  <Field label="금리(%)">
+                    <RateInput debt={debt} onUpdate={onUpdate} />
+                  </Field>
+                  <Field label="상환방식">
+                    <MethodSelect debt={debt} onUpdate={onUpdate} />
+                  </Field>
+                </div>
+
+                <div className="scl-debt-card-row scl-debt-card-row--money">
+                  <Field label="대출일">
+                    <DateInput
+                      debt={debt}
+                      onUpdate={onUpdate}
+                      field="loanDate"
+                    />
+                  </Field>
+
+                  <div
+                    className="scl-debt-pair"
+                    role="group"
+                    aria-label="만기일과 남은기간"
                   >
-                    {DEBT_TYPE_OPTIONS.map((t) => (
-                      <option key={t} value={t}>
-                        {t}
-                      </option>
-                    ))}
-                  </select>
-                </td>
+                    <div className="scl-debt-pair-labels">
+                      <span className="scl-debt-cell-label">만기일</span>
+                      <span className="scl-debt-cell-label">남은기간</span>
+                    </div>
+                    <div className="scl-debt-pair-shell">
+                      <DateInput
+                        debt={debt}
+                        onUpdate={onUpdate}
+                        field="maturityDate"
+                      />
+                      <RemainingInput
+                        debt={debt}
+                        onUpdate={onUpdate}
+                        months={resolved.months}
+                      />
+                    </div>
+                  </div>
 
-                {showCollateral && (
-                  <td className={`col-secured${asset ? " is-linked" : ""}`}>
-                    {asset ? (
-                      <span className="scl-grid-collateral-locked">
-                        <span aria-hidden>{asset.icon}</span>
-                        담보
-                      </span>
-                    ) : (
-                      <select
-                        className="scl-grid-input scl-grid-select"
-                        value={isSecured(debt) ? "담보" : "무담보"}
-                        onChange={(e) =>
-                          onUpdate(debt.id, {
-                            secured: e.target.value === "담보",
-                          })
-                        }
-                      >
-                        <option value="무담보">무담보</option>
-                        <option value="담보">담보</option>
-                      </select>
-                    )}
-                  </td>
-                )}
-
-                <td>
-                  <input
-                    className="scl-grid-input"
-                    value={debt.lender}
-                    onChange={(e) =>
-                      onUpdate(debt.id, { lender: e.target.value })
+                  <EditableCalc
+                    label="월불입"
+                    value={resolved.monthly}
+                    calculated={resolved.calc?.monthly}
+                    overridden={resolved.overridden.monthly}
+                    onChange={(raw) =>
+                      onUpdate(
+                        debt.id,
+                        manualPatchIfDifferent(
+                          "monthlyManual",
+                          raw,
+                          resolved.calc?.monthly,
+                        ),
+                      )
                     }
-                    placeholder="예: 국민은행"
+                    onRevert={() => onUpdate(debt.id, { monthlyManual: "" })}
                   />
-                </td>
-
-                {detail && (
-                  <td>
-                    <select
-                      className="scl-grid-input scl-grid-select"
-                      value={debt.repayMethod || "원리금균등"}
-                      onChange={(e) =>
-                        onUpdate(debt.id, { repayMethod: e.target.value })
-                      }
-                    >
-                      {REPAY_METHOD_OPTIONS.map((m) => (
-                        <option key={m} value={m}>
-                          {m}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                )}
-
-                <td>
-                  <input
-                    className="scl-grid-input scl-grid-num"
-                    type="number"
-                    min="0"
-                    inputMode="numeric"
-                    value={debt.overduePeriod ?? "0"}
-                    onChange={(e) =>
-                      onUpdate(debt.id, {
-                        overduePeriod: e.target.value.replace(/[^\d]/g, ""),
-                      })
+                  <EditableCalc
+                    label="잔여이자"
+                    value={resolved.totalInterest}
+                    calculated={resolved.calc?.totalInterest}
+                    overridden={resolved.overridden.interest}
+                    onChange={(raw) =>
+                      onUpdate(
+                        debt.id,
+                        manualPatchIfDifferent(
+                          "interestManual",
+                          raw,
+                          resolved.calc?.totalInterest,
+                        ),
+                      )
                     }
+                    onRevert={() => onUpdate(debt.id, { interestManual: "" })}
                   />
-                </td>
-
-                {detail && (
-                  <td>
-                    <input
-                      className="scl-grid-input"
-                      type="date"
-                      value={debt.loanDate}
-                      onChange={(e) =>
-                        onUpdate(debt.id, { loanDate: e.target.value })
-                      }
-                    />
-                  </td>
-                )}
-                {detail && (
-                  <td>
-                    <input
-                      className="scl-grid-input"
-                      type="date"
-                      value={debt.maturityDate}
-                      onChange={(e) =>
-                        onUpdate(debt.id, { maturityDate: e.target.value })
-                      }
-                    />
-                  </td>
-                )}
-
-                <td>
-                  <input
-                    className="scl-grid-input scl-grid-num"
-                    type="text"
-                    inputMode="numeric"
-                    value={formatComma(debt.principal)}
-                    onChange={(e) =>
-                      onUpdate(debt.id, {
-                        principal: parseComma(e.target.value),
-                      })
+                  <EditableCalc
+                    label="잔여상환액"
+                    value={resolved.totalRepay}
+                    calculated={resolved.calc?.totalRepay}
+                    overridden={resolved.overridden.repay}
+                    onChange={(raw) =>
+                      onUpdate(
+                        debt.id,
+                        manualPatchIfDifferent(
+                          "repayManual",
+                          raw,
+                          resolved.calc?.totalRepay,
+                        ),
+                      )
                     }
-                    placeholder="예: 50,000,000"
+                    onRevert={() => onUpdate(debt.id, { repayManual: "" })}
                   />
-                </td>
+                </div>
+              </>
+            ) : (
+              <div className="scl-debt-card-row scl-debt-card-row--simple">
+                {identity}
+              </div>
+            )}
+          </article>
+        );
+      })}
 
-                {detail && (
-                  <td>
-                    <input
-                      className="scl-grid-input scl-grid-num"
-                      type="number"
-                      step="0.1"
-                      value={debt.rate}
-                      onChange={(e) =>
-                        onUpdate(debt.id, { rate: e.target.value })
-                      }
-                      placeholder="예: 15"
-                    />
-                  </td>
-                )}
-                {detail && (
-                  <td className="scl-grid-calc">
-                    {calc ? `${calc.months}개월 남음` : "—"}
-                  </td>
-                )}
-                {detail && (
-                  <td className="scl-grid-calc">
-                    {calc ? formatWon(calc.monthly) : "—"}
-                  </td>
-                )}
-                {detail && (
-                  <td className="scl-grid-calc">
-                    {calc ? formatWon(calc.totalInterest) : "—"}
-                  </td>
-                )}
-                {detail && (
-                  <td className="scl-grid-calc">
-                    {calc ? formatWon(calc.totalRepay) : "—"}
-                  </td>
-                )}
-
-                {onRemove && (
-                  <td className="col-act">
-                    {rows.length > minRows && (
-                      <button
-                        type="button"
-                        className="scl-debt-remove"
-                        onClick={() => onRemove(debt.id)}
-                        title="삭제"
-                      >
-                        ×
-                      </button>
-                    )}
-                  </td>
-                )}
-              </tr>
-            );
-          })}
-          {onAdd && (
-            <tr className="scl-debt-add-row">
-              <td colSpan={colCount}>
-                <button
-                  type="button"
-                  className="scl-debt-add-btn"
-                  onClick={onAdd}
-                >
-                  {addLabel}
-                </button>
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-    {detail && canScrollRight && (
-      <div className="scl-debt-grid-more">
+      {onAdd && (
         <button
           type="button"
-          className="scl-debt-grid-more-btn"
-          aria-label="오른쪽으로 더 보기"
-          onClick={() =>
-            wrapRef.current?.scrollBy({ left: 240, behavior: "smooth" })
-          }
+          className="scl-debt-add-btn scl-debt-add-btn--block"
+          onClick={onAdd}
         >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path
-              d="M5 2.5L9.5 7 5 11.5"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          {addLabel}
         </button>
-      </div>
-    )}
+      )}
     </div>
   );
 };

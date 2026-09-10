@@ -146,11 +146,25 @@ export const getMaxOverdueMonths = (debts) =>
 
 /* ── 상환 계산 ─────────────────────────────────────────────── */
 
+const pad2 = (n) => String(n).padStart(2, "0");
+
+export const formatISODate = (d) =>
+  `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+
+export const todayISO = () => formatISODate(new Date());
+
+export const addMonthsISO = (isoDate, months) => {
+  const d = new Date(`${isoDate}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return "";
+  d.setMonth(d.getMonth() + Number(months));
+  return formatISODate(d);
+};
+
 /** 대출일~만기일 개월 수 (최소 1) */
 export const monthsBetween = (startStr, endStr) => {
   if (!startStr || !endStr) return null;
-  const start = new Date(startStr);
-  const end = new Date(endStr);
+  const start = new Date(`${startStr}T00:00:00`);
+  const end = new Date(`${endStr}T00:00:00`);
   if (
     Number.isNaN(start.getTime()) ||
     Number.isNaN(end.getTime()) ||
@@ -161,6 +175,38 @@ export const monthsBetween = (startStr, endStr) => {
     (end.getFullYear() - start.getFullYear()) * 12 +
     (end.getMonth() - start.getMonth());
   return Math.max(1, months);
+};
+
+/** 오늘~만기일 남은 개월. 만기일이 없거나 지나면 null */
+export const remainingMonthsOf = (maturityDate) =>
+  monthsBetween(todayISO(), maturityDate);
+
+/**
+ * 남은기간(개월) → 만기일.
+ * 기존 만기일이 있으면 날짜(일)를 유지한 채 개월만 옮긴다.
+ */
+export const maturityFromRemainingMonths = (months, currentMaturity) => {
+  const n = parseInt(String(months ?? "").replace(/[^\d]/g, ""), 10);
+  if (!n || n < 1) return "";
+  const today = todayISO();
+  if (currentMaturity) {
+    const current = monthsBetween(today, currentMaturity);
+    if (current != null) return addMonthsISO(currentMaturity, n - current);
+  }
+  return addMonthsISO(today, n);
+};
+
+const manualWon = (value) => {
+  if (value == null || value === "") return null;
+  const n = parseInt(String(value).replace(/[^\d]/g, ""), 10);
+  return Number.isNaN(n) ? null : n;
+};
+
+const isManualOverride = (manual, calculated) => {
+  const m = manualWon(manual);
+  if (m == null) return false;
+  if (calculated == null) return true;
+  return m !== calculated;
 };
 
 /**
@@ -222,8 +268,7 @@ export const calcRepayment = (principalWon, annualRatePct, n, method) => {
  */
 export const calcDebtItem = (debt) => {
   if (!debt.maturityDate) return null;
-  const today = new Date().toISOString().slice(0, 10);
-  const n = monthsBetween(today, debt.maturityDate);
+  const n = remainingMonthsOf(debt.maturityDate);
   if (n == null) return null;
   return calcRepayment(
     debt.principal,
@@ -231,6 +276,39 @@ export const calcDebtItem = (debt) => {
     n,
     debt.repayMethod || "원리금균등",
   );
+};
+
+/**
+ * 계산값 + 직접 수정값.
+ * monthlyManual / interestManual / repayManual 이 있으면 그 값을 쓰고,
+ * 비어 있으면 공식 계산값을 쓴다.
+ */
+export const resolveDebtCalc = (debt) => {
+  const calc = calcDebtItem(debt);
+  const monthly = manualWon(debt.monthlyManual) ?? calc?.monthly ?? null;
+  const totalInterest =
+    manualWon(debt.interestManual) ?? calc?.totalInterest ?? null;
+  const totalRepay = manualWon(debt.repayManual) ?? calc?.totalRepay ?? null;
+  return {
+    months: calc?.months ?? remainingMonthsOf(debt.maturityDate),
+    monthly,
+    totalInterest,
+    totalRepay,
+    calc,
+    overridden: {
+      monthly: isManualOverride(debt.monthlyManual, calc?.monthly),
+      interest: isManualOverride(debt.interestManual, calc?.totalInterest),
+      repay: isManualOverride(debt.repayManual, calc?.totalRepay),
+    },
+  };
+};
+
+/** 입력값이 계산값과 같으면 오버라이드를 지운다 */
+export const manualPatchIfDifferent = (key, raw, calculated) => {
+  const parsed = parseComma(raw);
+  if (!parsed) return { [key]: "" };
+  if (calculated != null && Number(parsed) === calculated) return { [key]: "" };
+  return { [key]: parsed };
 };
 
 /* ── 채무 행 ───────────────────────────────────────────────── */
@@ -253,6 +331,9 @@ export const emptyDebt = (overrides = {}) => ({
   rate: "",
   repayMethod: "원리금균등",
   overduePeriod: "0",
+  monthlyManual: "",
+  interestManual: "",
+  repayManual: "",
   ...overrides,
 });
 
@@ -286,7 +367,7 @@ export const ensureRows = (rows) =>
 export const buildDebtSummaryFromRows = (rows) => {
   const items = (rows || []).map((row, idx) => {
     const principalWon = parseInt(row.principalWon ?? row.principal) || 0;
-    const calc = calcDebtItem({ ...row, principal: principalWon });
+    const resolved = resolveDebtCalc({ ...row, principal: principalWon });
     const amount = wonToMan(principalWon);
     return {
       id: row.id || `d${idx}`,
@@ -299,15 +380,20 @@ export const buildDebtSummaryFromRows = (rows) => {
       lender: row.lender || "",
       amount,
       principalWon,
-      totalRepay: calc ? wonToMan(calc.totalRepay) : amount,
-      totalInterest: calc ? wonToMan(calc.totalInterest) : 0,
-      monthly: calc ? wonToMan(calc.monthly) : null,
-      months: calc?.months ?? null,
+      totalRepay:
+        resolved.totalRepay != null ? wonToMan(resolved.totalRepay) : amount,
+      totalInterest:
+        resolved.totalInterest != null ? wonToMan(resolved.totalInterest) : 0,
+      monthly: resolved.monthly != null ? wonToMan(resolved.monthly) : null,
+      months: resolved.months ?? null,
       rate: row.rate ?? "",
       repayMethod: row.repayMethod || "원리금균등",
       overduePeriod: String(parseOverdueMonths(row.overduePeriod)),
       loanDate: row.loanDate || "",
       maturityDate: row.maturityDate || "",
+      monthlyManual: row.monthlyManual || "",
+      interestManual: row.interestManual || "",
+      repayManual: row.repayManual || "",
     };
   });
 
@@ -352,13 +438,19 @@ export const summaryItemsToRows = (items) => {
       rate: item.rate ?? "",
       repayMethod: item.repayMethod || "원리금균등",
       overduePeriod: String(parseOverdueMonths(item.overduePeriod)),
+      monthlyManual: item.monthlyManual || "",
+      interestManual: item.interestManual || "",
+      repayManual: item.repayManual || "",
     }),
   );
 };
 
 /** 담보/무담보 합산 (원 단위) — 그리드 하단 요약용 */
 export const debtTotalsOf = (rows) => {
-  const calcs = (rows || []).map((debt) => ({ debt, calc: calcDebtItem(debt) }));
+  const calcs = (rows || []).map((debt) => ({
+    debt,
+    calc: resolveDebtCalc(debt),
+  }));
   const pick = (predicate, field) =>
     calcs.reduce((sum, { debt, calc }) => {
       if (!predicate(debt)) return sum;
