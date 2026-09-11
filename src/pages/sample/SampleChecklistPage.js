@@ -3,6 +3,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "./SampleChecklistPage.css";
 import DebtGrid, { DebtModeToggle, DebtTotals } from "./DebtGrid";
 import CustomerInfoModal from "../../components/CustomerInfoModal";
+import PlanMixEditor, {
+  DEFAULT_PLAN_MONTHS,
+  PLAN_MIX,
+} from "./PlanMixEditor";
 import {
   ASSET_KINDS,
   assetKindMeta,
@@ -119,20 +123,108 @@ const AmountQuickInput = ({ value, onChange, presets, placeholder = "0" }) => {
 
 const INCOME_PRESETS = [100, 150, 200, 250, 300, 400, 500];
 
-/** 분석에서 제외할 채무를 고르는 확인 모달 */
-const ExcludeDebtsModal = ({
+const HOPE_PROCEDURES = [
+  { id: "rehabilitation", label: "개인회생" },
+  { id: "rapidDebtAdj", label: "신속채무조정" },
+  { id: "preWorkout", label: "프리워크아웃" },
+  { id: "personalWorkout", label: "개인워크아웃" },
+  { id: "newStartFund", label: "새출발기금" },
+  { id: "bankruptcy", label: "파산" },
+];
+
+const RATE_PROCEDURE_IDS = new Set([
+  "rehabilitation",
+  "personalWorkout",
+  "newStartFund",
+]);
+
+const ANALYZE_STEP_COPY = {
+  debts: {
+    title: "채무 현황 선택",
+    sub: "체크를 해제하면 채무내역은 남아있지만 분석 대상에서 제외됩니다.",
+  },
+  procedure: {
+    title: "희망 절차 선택",
+    sub: "고객이 희망하는 채무조정 절차를 선택해 주세요.",
+  },
+  rate: {
+    title: "희망 변제율 설정",
+    sub: "선택한 절차의 예상 변제 계획에 반영됩니다.",
+  },
+};
+
+/** 분석 전 채무·희망 절차·변제율을 고르는 단계 모달 */
+const AnalyzeSetupModal = ({
   debts,
   excludedIds,
   onToggle,
   onClose,
   onConfirm,
+  step,
+  onStepChange,
+  preferredProcedure,
+  onPreferredProcedure,
+  desiredRatePct,
+  onDesiredRatePct,
+  desiredMonths,
+  onDesiredMonths,
+  disposableIncome,
 }) => {
   const included = debts.filter((d) => !excludedIds.has(d.id));
   const excludedWon = sumPrincipalWon(
     debts.filter((d) => excludedIds.has(d.id)),
   );
   const includedWon = sumPrincipalWon(included);
-  const canAnalyze = included.length > 0;
+  const includedUnsecured = included.filter((d) => !isSecured(d));
+  const planPrincipalMan = wonToMan(
+    sumPrincipalWon(
+      includedUnsecured.length > 0 ? includedUnsecured : included,
+    ),
+  );
+  const hasSecuredSplit =
+    includedUnsecured.length > 0 &&
+    includedUnsecured.length < included.length;
+  const canProceedDebts = included.length > 0 || debts.length === 0;
+  const needsRate = RATE_PROCEDURE_IDS.has(preferredProcedure);
+  const steps = [
+    { id: "debts", label: "채무현황" },
+    { id: "procedure", label: "희망 절차" },
+    ...(needsRate ? [{ id: "rate", label: "희망 변제율" }] : []),
+  ];
+  const resolvedStep = step === "rate" && !needsRate ? "procedure" : step;
+  const stepIndex = Math.max(
+    0,
+    steps.findIndex((s) => s.id === resolvedStep),
+  );
+  const isLast = stepIndex === steps.length - 1;
+  const meta = ANALYZE_STEP_COPY[resolvedStep] || ANALYZE_STEP_COPY.debts;
+  const canPrimary =
+    resolvedStep === "debts"
+      ? canProceedDebts
+      : resolvedStep === "procedure"
+        ? Boolean(preferredProcedure)
+        : true;
+  const canSkip =
+    resolvedStep === "procedure" || resolvedStep === "rate";
+  const selectedProc = HOPE_PROCEDURES.find(
+    (p) => p.id === preferredProcedure,
+  );
+
+  const handlePrimary = () => {
+    if (!canPrimary) return;
+    if (isLast) onConfirm();
+    else onStepChange(steps[stepIndex + 1].id);
+  };
+
+  const handleSkip = () => {
+    if (!canSkip) return;
+    onConfirm({ skipRate: true });
+  };
+
+  const handleBack = () => {
+    if (stepIndex <= 0) onClose();
+    else onStepChange(steps[stepIndex - 1].id);
+  };
 
   return (
     <div className="scl-exclude-overlay" onClick={onClose}>
@@ -146,10 +238,14 @@ const ExcludeDebtsModal = ({
         <div className="scl-exclude-head">
           <div>
             <p id="scl-exclude-title" className="scl-exclude-title">
-              채무 현황 선택
+              {meta.title}
             </p>
             <p className="scl-exclude-sub">
-              체크를 해제하면 채무내역은 남아있지만 분석 대상에서 제외됩니다.
+              {resolvedStep === "rate"
+                ? `${selectedProc?.label || ""} · ${planPrincipalMan.toLocaleString()}만원${
+                    hasSecuredSplit ? " (무담보 채무 기준)" : ""
+                  }`
+                : meta.sub}
             </p>
           </div>
           <button
@@ -170,100 +266,146 @@ const ExcludeDebtsModal = ({
         </div>
 
         <div className="scl-exclude-body">
-          {debts.length === 0 ? (
-            <p className="scl-exclude-empty">입력된 채무 내역이 없습니다.</p>
-          ) : (
-            <ul className="scl-exclude-list">
-              {debts.map((debt) => {
-                const isIncluded = !excludedIds.has(debt.id);
-                const asset = assetKindMeta(debt.collateralAssetId);
-                const label = debt.lender
-                  ? `${debt.lender}${debt.debtType ? ` (${debt.debtType})` : ""}`
-                  : debt.debtType || "미입력";
+          {resolvedStep === "debts" &&
+            (debts.length === 0 ? (
+              <p className="scl-exclude-empty">입력된 채무 내역이 없습니다.</p>
+            ) : (
+              <ul className="scl-exclude-list">
+                {debts.map((debt) => {
+                  const isIncluded = !excludedIds.has(debt.id);
+                  const asset = assetKindMeta(debt.collateralAssetId);
+                  const label = debt.lender
+                    ? `${debt.lender}${debt.debtType ? ` (${debt.debtType})` : ""}`
+                    : debt.debtType || "미입력";
+                  return (
+                    <li key={debt.id}>
+                      <button
+                        type="button"
+                        className={`scl-exclude-row ${isIncluded ? "" : "is-excluded"}`}
+                        onClick={() => onToggle(debt.id)}
+                        aria-pressed={isIncluded}
+                      >
+                        <span
+                          className={`scl-exclude-check ${isIncluded ? "on" : ""}`}
+                          aria-hidden="true"
+                        >
+                          {isIncluded && (
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 12 12"
+                              fill="none"
+                            >
+                              <path
+                                d="M2.5 6.2L5 8.7 9.5 3.5"
+                                stroke="#fff"
+                                strokeWidth="1.8"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          )}
+                        </span>
+                        <span className="scl-exclude-row-main">
+                          <span className="scl-exclude-row-name">{label}</span>
+                          <span className="scl-exclude-row-meta">
+                            {asset ? (
+                              <span>
+                                {asset.icon} {asset.label} 담보
+                              </span>
+                            ) : isSecured(debt) ? (
+                              <span>담보</span>
+                            ) : (
+                              <span>무담보</span>
+                            )}
+                            {debt.overduePeriod &&
+                              Number(debt.overduePeriod) > 0 && (
+                                <span>연체 {debt.overduePeriod}개월</span>
+                              )}
+                          </span>
+                        </span>
+                        <span className="scl-exclude-row-amt">
+                          {formatWon(debt.principal)}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            ))}
+
+          {resolvedStep === "procedure" && (
+            <ul className="scl-hope-list">
+              {HOPE_PROCEDURES.map((proc) => {
+                const selected = preferredProcedure === proc.id;
                 return (
-                  <li key={debt.id}>
+                  <li key={proc.id}>
                     <button
                       type="button"
-                      className={`scl-exclude-row ${isIncluded ? "" : "is-excluded"}`}
-                      onClick={() => onToggle(debt.id)}
-                      aria-pressed={isIncluded}
+                      className={`scl-hope-item ${selected ? "on" : ""}`}
+                      onClick={() => onPreferredProcedure(proc.id)}
+                      aria-pressed={selected}
                     >
-                      <span
-                        className={`scl-exclude-check ${isIncluded ? "on" : ""}`}
-                        aria-hidden="true"
-                      >
-                        {isIncluded && (
-                          <svg
-                            width="12"
-                            height="12"
-                            viewBox="0 0 12 12"
-                            fill="none"
-                          >
-                            <path
-                              d="M2.5 6.2L5 8.7 9.5 3.5"
-                              stroke="#fff"
-                              strokeWidth="1.8"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        )}
-                      </span>
-                      <span className="scl-exclude-row-main">
-                        <span className="scl-exclude-row-name">{label}</span>
-                        <span className="scl-exclude-row-meta">
-                          {asset ? (
-                            <span>
-                              {asset.icon} {asset.label} 담보
-                            </span>
-                          ) : isSecured(debt) ? (
-                            <span>담보</span>
-                          ) : (
-                            <span>무담보</span>
-                          )}
-                          {debt.overduePeriod &&
-                            Number(debt.overduePeriod) > 0 && (
-                              <span>연체 {debt.overduePeriod}개월</span>
-                            )}
-                        </span>
-                      </span>
-                      <span className="scl-exclude-row-amt">
-                        {formatWon(debt.principal)}
-                      </span>
+                      {proc.label}
                     </button>
                   </li>
                 );
               })}
             </ul>
           )}
+
+          {resolvedStep === "rate" && (
+            <PlanMixEditor
+              mixSpec={PLAN_MIX[preferredProcedure]}
+              planPrincipal={planPrincipalMan}
+              ratePct={desiredRatePct}
+              months={desiredMonths}
+              disposableIncome={disposableIncome}
+              onChange={(next) => {
+                if (next.ratePct != null) onDesiredRatePct(next.ratePct);
+                if (next.months != null) onDesiredMonths(next.months);
+              }}
+            />
+          )}
         </div>
 
         <div className="scl-exclude-footer">
-          <div className="scl-exclude-summary">
-            <span>
-              분석 대상 {included.length}건 · {formatWon(includedWon)}
-            </span>
-            {excludedIds.size > 0 && (
-              <span className="scl-exclude-summary-off">
-                제외 {excludedIds.size}건 · {formatWon(excludedWon)}
+          {resolvedStep === "debts" && (
+            <div className="scl-exclude-summary">
+              <span>
+                분석 대상 {included.length}건 · {formatWon(includedWon)}
               </span>
-            )}
-          </div>
+              {excludedIds.size > 0 && (
+                <span className="scl-exclude-summary-off">
+                  제외 {excludedIds.size}건 · {formatWon(excludedWon)}
+                </span>
+              )}
+            </div>
+          )}
+          {canSkip && (
+            <button
+              type="button"
+              className="scl-exclude-btn-skip"
+              onClick={handleSkip}
+            >
+              건너뛰기
+            </button>
+          )}
           <div className="scl-exclude-actions">
             <button
               type="button"
               className="scl-exclude-btn-ghost"
-              onClick={onClose}
+              onClick={handleBack}
             >
-              취소
+              {stepIndex <= 0 ? "취소" : "이전"}
             </button>
             <button
               type="button"
               className="scl-exclude-btn-primary"
-              onClick={onConfirm}
-              disabled={!canAnalyze && debts.length > 0}
+              onClick={handlePrimary}
+              disabled={!canPrimary}
             >
-              분석하기
+              {isLast ? "분석하기" : "다음"}
             </button>
           </div>
         </div>
@@ -541,8 +683,12 @@ const SampleChecklistPage = () => {
   const [analyzing, setAnalyzing] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
-  const [showExcludeModal, setShowExcludeModal] = useState(false);
+  const [showAnalyzeModal, setShowAnalyzeModal] = useState(false);
+  const [analyzeStep, setAnalyzeStep] = useState("debts");
   const [excludedDebtIds, setExcludedDebtIds] = useState(() => new Set());
+  const [preferredProcedure, setPreferredProcedure] = useState("");
+  const [desiredRatePct, setDesiredRatePct] = useState(30);
+  const [desiredMonths, setDesiredMonths] = useState(60);
 
   const set = (field) => (val) => setForm((p) => ({ ...p, [field]: val }));
   const setInput = (field) => (e) =>
@@ -644,9 +790,53 @@ const SampleChecklistPage = () => {
     (d) => d.lender || (parseInt(d.principal) || 0) > 0,
   );
 
-  const openExcludeModal = () => {
+  const openAnalyzeModal = () => {
     setExcludedDebtIds(new Set());
-    setShowExcludeModal(true);
+    setAnalyzeStep("debts");
+    setPreferredProcedure("");
+    setDesiredRatePct(30);
+    setDesiredMonths(60);
+    setShowAnalyzeModal(true);
+  };
+
+  const closeAnalyzeModal = () => setShowAnalyzeModal(false);
+
+  const handlePreferredProcedure = (id) => {
+    setPreferredProcedure(id);
+    if (RATE_PROCEDURE_IDS.has(id)) {
+      setDesiredMonths(DEFAULT_PLAN_MONTHS[id] || 60);
+    }
+    if (!RATE_PROCEDURE_IDS.has(id) && analyzeStep === "rate") {
+      setAnalyzeStep("procedure");
+    }
+  };
+
+  const handleSave = () => {
+    navigate("/checklist", {
+      state: {
+        savedDraft: {
+          id: Date.now(),
+          name: form.name || "이름 미입력",
+          age: parseInt(form.ageGroup, 10) || 0,
+          gender: form.gender || "",
+          job: form.employmentType || "",
+          region: form.region || "",
+          totalDebt: totalDebt || 0,
+          income: parseInt(form.monthlyIncome, 10) || 0,
+          disposable: repaymentCapacity,
+          recommended: "미분석",
+          score: 0,
+          stageStatus: "상담중",
+          date: "2026-06-29",
+          salesRep: {
+            name: "데모 상담사",
+            branch: "강남영업점",
+            thumb: "/images/thumb_sample1.png",
+          },
+          payment: { configured: false },
+        },
+      },
+    });
   };
 
   const toggleExcludedDebt = (id) =>
@@ -657,18 +847,27 @@ const SampleChecklistPage = () => {
       return next;
     });
 
-  const goToResult = (summary = debtSummary) => {
-    setShowExcludeModal(false);
+  const goToResult = (summary = debtSummary, { skipRate = false } = {}) => {
+    setShowAnalyzeModal(false);
     setAnalyzing(true);
+    const extras = {};
+    if (preferredProcedure) extras.preferredOption = preferredProcedure;
+    if (!skipRate && RATE_PROCEDURE_IDS.has(preferredProcedure)) {
+      extras.desiredRatePct = desiredRatePct;
+      extras.desiredMonths = desiredMonths;
+    }
     setTimeout(
-      () => navigate("/checklist/result", { state: { debtSummary: summary } }),
+      () =>
+        navigate("/checklist/result", {
+          state: { debtSummary: summary, ...extras },
+        }),
       2000,
     );
   };
 
-  const confirmAnalyze = () => {
+  const confirmAnalyze = ({ skipRate = false } = {}) => {
     const rows = form.debts.filter((d) => !excludedDebtIds.has(d.id));
-    goToResult(buildDebtSummaryFromRows(rows));
+    goToResult(buildDebtSummaryFromRows(rows), { skipRate });
   };
 
   const handleNext = () => {
@@ -685,6 +884,9 @@ const SampleChecklistPage = () => {
   const currentIdx = SECTIONS.findIndex((s) => s.id === activeSection);
   const currentSection = SECTIONS[currentIdx];
   const isLast = currentIdx === SECTIONS.length - 1;
+  const preferredProcLabel = HOPE_PROCEDURES.find(
+    (p) => p.id === preferredProcedure,
+  )?.label;
 
   if (analyzing) {
     return (
@@ -708,9 +910,9 @@ const SampleChecklistPage = () => {
           </div> */}
           <p className="scl-analyzing-title">분석 중</p>
           <p className="scl-analyzing-sub">
-            수집된 정보를 바탕으로
-            <br />
-            개인회생·파산·새출발기금 가능성을 분석하고 있습니다.
+            {preferredProcLabel
+              ? `${preferredProcLabel} 희망 조건을 반영해 분석하고 있습니다.`
+              : "수집된 정보를 바탕으로 개인회생·파산·새출발기금 가능성을 분석하고 있습니다."}
           </p>
           <div className="scl-analyzing-dots">
             <span />
@@ -1429,35 +1631,44 @@ const SampleChecklistPage = () => {
                     </svg>
                   </button>
                 </div>
-                <button
-                  type="button"
-                  className="scl-nav-analyze"
-                  onClick={openExcludeModal}
-                >
-                  <svg
-                    width="13"
-                    height="13"
-                    viewBox="0 0 14 14"
-                    fill="none"
-                    aria-hidden="true"
+                <div className="scl-nav-actions">
+                  <button
+                    type="button"
+                    className="scl-nav-save"
+                    onClick={handleSave}
                   >
-                    <path
-                      d="M7 0C7.2 2.8 8.2 4.8 10.5 6C8.2 7.2 7.2 9.2 7 12C6.8 9.2 5.8 7.2 3.5 6C5.8 4.8 6.8 2.8 7 0Z"
-                      fill="currentColor"
-                    />
-                    <path
-                      d="M12 4C12.1 5.2 12.6 6 13.5 6.5C12.6 7 12.1 7.8 12 9C11.9 7.8 11.4 7 10.5 6.5C11.4 6 11.9 5.2 12 4Z"
-                      fill="currentColor"
-                      opacity="0.7"
-                    />
-                    <path
-                      d="M2.5 1C2.55 1.9 2.9 2.5 3.5 2.8C2.9 3.1 2.55 3.7 2.5 4.5C2.45 3.7 2.1 3.1 1.5 2.8C2.1 2.5 2.45 1.9 2.5 1Z"
-                      fill="currentColor"
-                      opacity="0.5"
-                    />
-                  </svg>
-                  분석하기
-                </button>
+                    저장하기
+                  </button>
+                  <button
+                    type="button"
+                    className="scl-nav-analyze"
+                    onClick={openAnalyzeModal}
+                  >
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 14 14"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M7 0C7.2 2.8 8.2 4.8 10.5 6C8.2 7.2 7.2 9.2 7 12C6.8 9.2 5.8 7.2 3.5 6C5.8 4.8 6.8 2.8 7 0Z"
+                        fill="currentColor"
+                      />
+                      <path
+                        d="M12 4C12.1 5.2 12.6 6 13.5 6.5C12.6 7 12.1 7.8 12 9C11.9 7.8 11.4 7 10.5 6.5C11.4 6 11.9 5.2 12 4Z"
+                        fill="currentColor"
+                        opacity="0.7"
+                      />
+                      <path
+                        d="M2.5 1C2.55 1.9 2.9 2.5 3.5 2.8C2.9 3.1 2.55 3.7 2.5 4.5C2.45 3.7 2.1 3.1 1.5 2.8C2.1 2.5 2.45 1.9 2.5 1Z"
+                        fill="currentColor"
+                        opacity="0.5"
+                      />
+                    </svg>
+                    분석하기
+                  </button>
+                </div>
               </div>
             </div>
           </main>
@@ -1470,13 +1681,22 @@ const SampleChecklistPage = () => {
           onClose={() => setShowCustomerModal(false)}
         />
       )}
-      {showExcludeModal && (
-        <ExcludeDebtsModal
+      {showAnalyzeModal && (
+        <AnalyzeSetupModal
           debts={enteredDebts}
           excludedIds={excludedDebtIds}
           onToggle={toggleExcludedDebt}
-          onClose={() => setShowExcludeModal(false)}
+          onClose={closeAnalyzeModal}
           onConfirm={confirmAnalyze}
+          step={analyzeStep}
+          onStepChange={setAnalyzeStep}
+          preferredProcedure={preferredProcedure}
+          onPreferredProcedure={handlePreferredProcedure}
+          desiredRatePct={desiredRatePct}
+          onDesiredRatePct={setDesiredRatePct}
+          desiredMonths={desiredMonths}
+          onDesiredMonths={setDesiredMonths}
+          disposableIncome={repaymentCapacity}
         />
       )}
     </>

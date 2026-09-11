@@ -14,7 +14,7 @@ import {
 } from "./debtModel";
 
 const PRINCIPAL_HINT =
-  "오늘 기준 남은 원금(잔액)을 입력하세요. 계산 기간은 오늘~만기일로 적용됩니다.";
+  "오늘 기준 남은 원금(잔액)을 입력하세요. 남은기간이 있으면 월불입을 계산하고, 없으면 잔여이자는 0원·잔여상환액은 잔액입니다.";
 
 const Field = ({ label, hint, className, children }) => (
   <label className={`scl-debt-cell ${className || ""}`}>

@@ -22,6 +22,7 @@ const CLIENT = {
   totalDebtWithInterest: 39737,
   totalInterest: 8737,
   totalAsset: 1500,
+  assets: [{ label: "주택", amount: 1500 }],
   monthlyIncome: 220,
   monthlyExpenses: 175,
   disposableIncome: 45,
@@ -710,7 +711,7 @@ const PLAN_BY_OPTION = {
 const getPlanProfile = (optionId) =>
   PLAN_BY_OPTION[optionId] || PLAN_BY_OPTION.rehabilitation;
 
-/** 개인회생·개인워크아웃: 변제율·기간 조정 한도 */
+/** 개인회생·개인워크아웃·새출발기금: 변제율·기간 조정 한도 */
 const PLAN_MIX = {
   rehabilitation: {
     minMonths: 12,
@@ -719,7 +720,13 @@ const PLAN_MIX = {
     maxRate: 100,
   },
   personalWorkout: {
-    minMonths: 36,
+    minMonths: 12,
+    maxMonths: 120,
+    minRate: 5,
+    maxRate: 100,
+  },
+  newStartFund: {
+    minMonths: 12,
     maxMonths: 120,
     minRate: 5,
     maxRate: 100,
@@ -776,6 +783,203 @@ const formatPlanPeriod = (months) => {
 const formatMonthly = (n) => {
   const rounded = round1(n);
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+};
+
+const parseMixNumber = (raw) => {
+  const cleaned = String(raw ?? "").replace(/[^\d.]/g, "");
+  if (!cleaned || cleaned === ".") return null;
+  const n = Number(cleaned);
+  return Number.isFinite(n) ? n : null;
+};
+
+const easeOutCubic = (t) => 1 - (1 - t) ** 3;
+
+const formatCountValue = (n, decimals) => {
+  if (decimals > 0) return n.toFixed(decimals);
+  return Math.round(n).toLocaleString("ko-KR");
+};
+
+const useCountUp = (target, { active = false, duration = 1050, delay = 0 } = {}) => {
+  const [value, setValue] = useState(0);
+  const targetRef = useRef(target);
+  targetRef.current = target;
+
+  useEffect(() => {
+    if (!active) return undefined;
+    const to = targetRef.current;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      setValue(to);
+      return undefined;
+    }
+    let raf = 0;
+    let start = 0;
+    const timeout = window.setTimeout(() => {
+      const tick = (now) => {
+        if (!start) start = now;
+        const t = Math.min(1, (now - start) / duration);
+        setValue(to * easeOutCubic(t));
+        if (t < 1) raf = window.requestAnimationFrame(tick);
+        else setValue(to);
+      };
+      raf = window.requestAnimationFrame(tick);
+    }, delay);
+    return () => {
+      window.clearTimeout(timeout);
+      window.cancelAnimationFrame(raf);
+    };
+  }, [active, duration, delay, target]);
+
+  return value;
+};
+
+const useInViewOnce = (ref) => {
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    if (active) return undefined;
+    const el = ref.current;
+    if (!el) return undefined;
+    const visible = () => {
+      const rect = el.getBoundingClientRect();
+      return rect.top < window.innerHeight && rect.bottom > 0;
+    };
+    if (visible()) {
+      setActive(true);
+      return undefined;
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setActive(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.08 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [active, ref]);
+  return active;
+};
+
+const BriefingMetric = ({
+  label,
+  value,
+  decimals = 0,
+  suffix,
+  delay = 0,
+  active,
+}) => {
+  const counted = useCountUp(value, { active, delay });
+  const shown = formatCountValue(counted, decimals);
+  const finalLabel = `${formatCountValue(value, decimals)}${suffix || ""}`;
+  return (
+    <div className="sdp-briefing-kpi">
+      <span className="sdp-briefing-kpi-label">{label}</span>
+      <p className="sdp-briefing-kpi-val" aria-label={finalLabel}>
+        <span aria-hidden="true">{shown}</span>
+        {suffix ? <em>{suffix}</em> : null}
+      </p>
+    </div>
+  );
+};
+
+const OptionMeter = ({ score, active, delay = 0 }) => {
+  const counted = useCountUp(score, { active, delay, duration: 950 });
+  const [fillOn, setFillOn] = useState(false);
+
+  useEffect(() => {
+    if (!active) {
+      setFillOn(false);
+      return undefined;
+    }
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      setFillOn(true);
+      return undefined;
+    }
+    let raf = 0;
+    const timeout = window.setTimeout(() => {
+      raf = window.requestAnimationFrame(() => setFillOn(true));
+    }, delay);
+    return () => {
+      window.clearTimeout(timeout);
+      window.cancelAnimationFrame(raf);
+    };
+  }, [active, delay]);
+
+  return (
+    <>
+      <div className="sdp-option-bar-wrap">
+        <div className="sdp-option-bar">
+          <div
+            className="sdp-option-fill"
+            style={{ width: `${fillOn ? score : 0}%` }}
+          />
+        </div>
+      </div>
+      <div className="sdp-option-score">
+        <strong aria-label={`${score}`}>{Math.round(counted)}</strong>
+        <span>/100</span>
+      </div>
+    </>
+  );
+};
+
+const MixNumberInput = ({
+  ariaLabel,
+  display,
+  editing,
+  suffix,
+  className,
+  warn,
+  onStart,
+  onChange,
+  onCommit,
+  onCancel,
+}) => {
+  const skipCommitRef = useRef(false);
+  const shown = editing != null ? editing : display;
+  return (
+    <span className={`sdp-plan-num ${className || ""}`}>
+      <input
+        aria-label={ariaLabel}
+        className={`sdp-plan-num-input ${warn ? "is-warn" : ""}`}
+        value={shown}
+        onFocus={(event) => {
+          if (editing == null) onStart();
+          const target = event.currentTarget;
+          requestAnimationFrame(() => target.select());
+        }}
+        onChange={(event) => onChange(event.target.value)}
+        onBlur={(event) => {
+          if (skipCommitRef.current) {
+            skipCommitRef.current = false;
+            return;
+          }
+          onCommit(event.currentTarget.value);
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            skipCommitRef.current = true;
+            onCommit(event.currentTarget.value);
+            event.currentTarget.blur();
+          } else if (event.key === "Escape") {
+            event.preventDefault();
+            skipCommitRef.current = true;
+            onCancel();
+            event.currentTarget.blur();
+          }
+        }}
+        inputMode="decimal"
+        autoComplete="off"
+        spellCheck={false}
+        size={Math.max(1, String(shown).length)}
+      />
+      {suffix ? <span className="sdp-plan-num-suffix">{suffix}</span> : null}
+    </span>
+  );
 };
 
 /** 절차별 제도 참고자료 (슬라이드 순서) */
@@ -1600,9 +1804,15 @@ const SampleDashboardPage = () => {
   const [activeScript, setActiveScript] = useState(0);
   const [smsModal, setSmsModal] = useState(null); // null | SMS_TEMPLATES item
   const [smsText, setSmsText] = useState("");
-  const [selectedOption, setSelectedOption] = useState("rehabilitation");
-  const [creditRecoveryOpen, setCreditRecoveryOpen] = useState(() =>
-    CREDIT_RECOVERY_CHILDREN.some((o) => o.recommended),
+  const incomingPreferred = location.state?.preferredOption;
+  const incomingRatePct = location.state?.desiredRatePct;
+  const [selectedOption, setSelectedOption] = useState(
+    incomingPreferred || "rehabilitation",
+  );
+  const [creditRecoveryOpen, setCreditRecoveryOpen] = useState(
+    () =>
+      CREDIT_RECOVERY_IDS.has(incomingPreferred) ||
+      CREDIT_RECOVERY_CHILDREN.some((o) => o.recommended),
   );
   const [procSelectCreditOpen, setProcSelectCreditOpen] = useState(false);
 
@@ -1645,6 +1855,10 @@ const SampleDashboardPage = () => {
   const [chatInput, setChatInput] = useState("");
   const [isAiTyping, setIsAiTyping] = useState(false);
   const chatEndRef = useRef(null);
+  const briefingRef = useRef(null);
+  const kpiPlay = useInViewOnce(briefingRef);
+  const optionsRef = useRef(null);
+  const optionsPlay = useInViewOnce(optionsRef);
 
   const [transmissionNotes, setTransmissionNotes] = useState(() =>
     loadTransmissionNotes(isExternal),
@@ -1704,9 +1918,27 @@ const SampleDashboardPage = () => {
   const [debtDraft, setDebtDraft] = useState(() =>
     summaryToDebtDraft(location.state?.debtSummary || DEFAULT_DEBT_SUMMARY),
   );
-  const [planMix, setPlanMix] = useState({});
+  const [planMix, setPlanMix] = useState(() => {
+    if (
+      incomingPreferred &&
+      incomingRatePct != null &&
+      PLAN_MIX[incomingPreferred]
+    ) {
+      return {
+        [incomingPreferred]: {
+          months:
+            Number(location.state?.desiredMonths) ||
+            PLAN_BY_OPTION[incomingPreferred]?.months ||
+            60,
+          ratePct: Number(incomingRatePct),
+        },
+      };
+    }
+    return {};
+  });
   const [planMixModalOpen, setPlanMixModalOpen] = useState(false);
   const [planMixDraft, setPlanMixDraft] = useState(null);
+  const [mixFieldEdit, setMixFieldEdit] = useState(null);
 
   const openDebtModal = () => {
     setDebtDraft(summaryToDebtDraft(debtSummary));
@@ -2024,6 +2256,14 @@ const SampleDashboardPage = () => {
   };
 
   const totalDebtPrincipal = debtSummary?.totalDebt ?? CLIENT.totalDebt;
+  const securedDebtPrincipal = debtSummary?.securedDebt ?? 0;
+  const unsecuredDebtPrincipal = debtSummary?.unsecuredDebt ?? 0;
+  const planPrincipal =
+    unsecuredDebtPrincipal > 0 ? unsecuredDebtPrincipal : totalDebtPrincipal;
+  const unsecuredItems = (debtSummary?.items || []).filter((i) => !i.secured);
+  const planPrincipalWithInterest = unsecuredItems.length
+    ? unsecuredItems.reduce((s, i) => s + (i.totalRepay || i.amount || 0), 0)
+    : planPrincipal;
   const totalDebtWithInterest =
     debtSummary?.totalDebtWithInterest ??
     CLIENT.totalDebtWithInterest ??
@@ -2042,10 +2282,9 @@ const SampleDashboardPage = () => {
   );
 
   const defaultRatePct =
-    planProfile.kind === "repayment" && totalDebtPrincipal > 0
+    planProfile.kind === "repayment" && planPrincipal > 0
       ? round1(
-          ((planProfile.amount * planProfile.months) / totalDebtPrincipal) *
-            100,
+          ((planProfile.amount * planProfile.months) / planPrincipal) * 100,
         )
       : null;
   const mixRatePct = mixSpec
@@ -2094,6 +2333,7 @@ const SampleDashboardPage = () => {
 
   const openPlanMixModal = () => {
     if (!mixSpec) return;
+    setMixFieldEdit(null);
     setPlanMixDraft({
       months: snapYearMonths(mixMonths, mixSpec),
       ratePct: mixRatePct,
@@ -2104,10 +2344,12 @@ const SampleDashboardPage = () => {
   const closePlanMixModal = () => {
     setPlanMixModalOpen(false);
     setPlanMixDraft(null);
+    setMixFieldEdit(null);
   };
 
   const resetPlanMixDraft = () => {
     if (!mixSpec) return;
+    setMixFieldEdit(null);
     setPlanMixDraft({
       months: planProfile.months,
       ratePct: defaultRatePct ?? mixSpec.minRate,
@@ -2133,6 +2375,7 @@ const SampleDashboardPage = () => {
 
   const handleMixSplitPointerDown = (event) => {
     if (!mixSpec) return;
+    setMixFieldEdit(null);
     const track =
       event.currentTarget.querySelector(".sdp-plan-split-track") ||
       event.currentTarget;
@@ -2147,6 +2390,7 @@ const SampleDashboardPage = () => {
 
   const handleMixPeriodPointerDown = (event) => {
     if (!mixSpec || mixYearOptions.length === 0) return;
+    setMixFieldEdit(null);
     const track =
       event.currentTarget.querySelector(".sdp-plan-period-track") ||
       event.currentTarget;
@@ -2169,7 +2413,7 @@ const SampleDashboardPage = () => {
     if (mixSpec && mixRatePct != null) {
       if (mixDirty) {
         planMonths = mixMonths;
-        totalRepayment = Math.round((totalDebtPrincipal * mixRatePct) / 100);
+        totalRepayment = Math.round((planPrincipal * mixRatePct) / 100);
         planMonthly = planMonths > 0 ? totalRepayment / planMonths : 0;
       } else {
         planMonths = planProfile.months;
@@ -2182,13 +2426,13 @@ const SampleDashboardPage = () => {
       planMonths = planProfile.months;
     }
     remainDebt = totalRepayment;
-    exemptDebt = Math.max(0, Math.round(totalDebtPrincipal - totalRepayment));
+    exemptDebt = Math.max(0, Math.round(planPrincipal - totalRepayment));
     exemptDebtWithInterest = Math.max(
       0,
-      Math.round(totalDebtWithInterest - totalRepayment),
+      Math.round(planPrincipalWithInterest - totalRepayment),
     );
     showExemptWithInterest =
-      totalDebtWithInterest > totalDebtPrincipal &&
+      planPrincipalWithInterest > planPrincipal &&
       exemptDebtWithInterest > exemptDebt;
   } else if (planProfile.kind === "adjustment") {
     remainDebt = Math.round(
@@ -2214,8 +2458,8 @@ const SampleDashboardPage = () => {
   }
 
   const repaymentRatePct =
-    planProfile.kind === "repayment" && totalDebtPrincipal > 0
-      ? Math.round((totalRepayment / totalDebtPrincipal) * 1000) / 10
+    planProfile.kind === "repayment" && planPrincipal > 0
+      ? Math.round((totalRepayment / planPrincipal) * 1000) / 10
       : null;
 
   const mixOptionLabel =
@@ -2223,8 +2467,8 @@ const SampleDashboardPage = () => {
   const draftRatePct = planMixDraft?.ratePct ?? mixRatePct ?? 0;
   const draftMonths = planMixDraft?.months ?? mixMonths;
   const draftTotal =
-    totalDebtPrincipal > 0
-      ? Math.round((totalDebtPrincipal * draftRatePct) / 100)
+    planPrincipal > 0
+      ? Math.round((planPrincipal * draftRatePct) / 100)
       : 0;
   const draftMonthly = draftMonths > 0 ? draftTotal / draftMonths : 0;
   const draftIsBaseline =
@@ -2237,7 +2481,7 @@ const SampleDashboardPage = () => {
   const previewMonthly = draftIsBaseline ? planProfile.amount : draftMonthly;
   const previewExempt = Math.max(
     0,
-    Math.round(totalDebtPrincipal - previewTotal),
+    Math.round(planPrincipal - previewTotal),
   );
   const previewOverIncome = round1(previewMonthly) > CLIENT.disposableIncome;
   const previewIncomeGap = round1(CLIENT.disposableIncome - previewMonthly);
@@ -2251,6 +2495,44 @@ const SampleDashboardPage = () => {
     mixSpec && mixSpec.minMonths > 0 ? previewTotal / mixSpec.minMonths : 0;
   const longMonthly =
     mixSpec && mixSpec.maxMonths > 0 ? previewTotal / mixSpec.maxMonths : 0;
+
+  const cancelMixFieldEdit = () => setMixFieldEdit(null);
+  const commitMixRate = (raw) => {
+    setMixFieldEdit(null);
+    if (!mixSpec) return;
+    const n = parseMixNumber(raw);
+    if (n == null) return;
+    patchPlanMixDraft({
+      ratePct: round1(clamp(n, mixSpec.minRate, mixSpec.maxRate)),
+    });
+  };
+  const commitMixAmount = (raw) => {
+    setMixFieldEdit(null);
+    if (!mixSpec || planPrincipal <= 0) return;
+    const n = parseMixNumber(raw);
+    if (n == null) return;
+    const minAmt = Math.round((planPrincipal * mixSpec.minRate) / 100);
+    const maxAmt = Math.round((planPrincipal * mixSpec.maxRate) / 100);
+    const amount = clamp(Math.round(n), minAmt, maxAmt);
+    patchPlanMixDraft({
+      ratePct: round1(
+        clamp(
+          (amount / planPrincipal) * 100,
+          mixSpec.minRate,
+          mixSpec.maxRate,
+        ),
+      ),
+    });
+  };
+  const commitMixMonthly = (raw) => {
+    setMixFieldEdit(null);
+    if (!mixSpec || mixYearOptions.length === 0 || previewTotal <= 0) return;
+    const n = parseMixNumber(raw);
+    if (n == null || n <= 0) return;
+    patchPlanMixDraft({
+      months: snapToList(previewTotal / n, mixYearOptions),
+    });
+  };
 
   const paidCount = installments.filter((it) => it.status === "paid").length;
   const canceledCount = installments.filter(
@@ -2293,9 +2575,15 @@ const SampleDashboardPage = () => {
     CLIENT.totalAsset > 0
       ? (totalDebtPrincipal / CLIENT.totalAsset).toFixed(1)
       : "—";
-  const debtEok = (totalDebtPrincipal / 10000)
-    .toFixed(1)
-    .replace(/\.0$/, "");
+  const overdueMonths = parseOverdueMonths(
+    debtSummary?.overduePeriod ?? CLIENT.overduePeriod,
+  );
+  const debtEokValue = totalDebtPrincipal / 10000;
+  const debtEok = debtEokValue.toFixed(1).replace(/\.0$/, "");
+  const assetRows = (CLIENT.assets || []).filter((a) => (a.amount || 0) > 0);
+  const assetTotal = assetRows.reduce((s, a) => s + a.amount, 0) || CLIENT.totalAsset;
+  const showSecuredSplit =
+    securedDebtPrincipal > 0 || unsecuredDebtPrincipal > 0;
 
   return (
     <div className="sdp-page">
@@ -2652,10 +2940,10 @@ const SampleDashboardPage = () => {
                 </span>
               </header>
               <ul className="sdp-transmission-thread">
-                {transmissionNotes.map((note) => (
+                {transmissionNotes.map((note, index) => (
                   <li
                     key={note.id}
-                    className={`sdp-transmission-entry sdp-transmission-entry--${note.type}`}
+                    className={`sdp-transmission-entry sdp-transmission-entry--${note.type}${index === 0 ? " is-latest" : ""}`}
                   >
                     <div className="sdp-transmission-entry-marker">
                       <span className="sdp-transmission-dot" />
@@ -2691,57 +2979,50 @@ const SampleDashboardPage = () => {
         )}
 
         {/* ① 분석 브리핑 */}
-        <section className="sdp-briefing">
+        <section className="sdp-briefing" ref={briefingRef}>
           <div className="sdp-briefing-head">
             <p className="sdp-briefing-eyebrow">분석 브리핑</p>
             <span className="sdp-briefing-date">2026.06.28</span>
           </div>
-          <p className="sdp-briefing-lead">
-            {CLIENT.name} 고객은 {CLIENT.job}자로, 총 채무 {debtEok}억원, 월
-            가용소득 {CLIENT.disposableIncome}만원, 연체 {overdueText}이
-            확인됩니다. 자산 {CLIENT.totalAsset.toLocaleString()}만원으로 채무가
-            자산의 약 {debtAssetRatio}배에 달해 채무초과 상태에 해당하며, 사채가
-            포함된 채권 구성과 자영업 소득 증빙이 이후 절차 판단의 핵심
-            변수입니다.
-          </p>
-          <div className="sdp-briefing-kpis">
-            <div className="sdp-briefing-kpi">
-              <span className="sdp-briefing-kpi-label">총 채무</span>
-              <p className="sdp-briefing-kpi-val">
-                {debtEok}
-                <em>억원</em>
-              </p>
-              <span className="sdp-briefing-kpi-hint">
-                원금 기준
-                {totalDebtWithInterest > totalDebtPrincipal
-                  ? ` · 이자 포함 ${(totalDebtWithInterest / 10000).toFixed(1)}억`
-                  : ""}
-              </span>
-            </div>
-            <div className="sdp-briefing-kpi">
-              <span className="sdp-briefing-kpi-label">총 자산</span>
-              <p className="sdp-briefing-kpi-val">
-                {CLIENT.totalAsset.toLocaleString()}
-                <em>만원</em>
-              </p>
-              <span className="sdp-briefing-kpi-hint">
-                채무 {debtAssetRatio}배 · 채무초과
-              </span>
-            </div>
-            <div className="sdp-briefing-kpi">
-              <span className="sdp-briefing-kpi-label">월 가용소득</span>
-              <p className="sdp-briefing-kpi-val">
-                {CLIENT.disposableIncome}
-                <em>만원</em>
-              </p>
-              <span className="sdp-briefing-kpi-hint">
-                소득 {CLIENT.monthlyIncome}만 · 지출 {CLIENT.monthlyExpenses}만
-              </span>
-            </div>
-            <div className="sdp-briefing-kpi">
-              <span className="sdp-briefing-kpi-label">연체 기간</span>
-              <p className="sdp-briefing-kpi-val">{overdueText}</p>
-              <span className="sdp-briefing-kpi-hint">지급불능 인정 검토</span>
+          <div className="sdp-briefing-body">
+            <p className="sdp-briefing-lead">
+              {CLIENT.name} 고객은 {CLIENT.job}자로, 총 채무 {debtEok}억원, 월
+              가용소득 {CLIENT.disposableIncome}만원, 연체 {overdueText}이
+              확인됩니다. 자산 {CLIENT.totalAsset.toLocaleString()}만원으로 채무가
+              자산의 약 {debtAssetRatio}배에 달해 채무초과 상태에 해당하며, 사채가
+              포함된 채권 구성과 자영업 소득 증빙이 이후 절차 판단의 핵심
+              변수입니다.
+            </p>
+            <div className="sdp-briefing-kpis">
+              <BriefingMetric
+                label="총 채무"
+                value={debtEokValue}
+                decimals={1}
+                suffix="억원"
+                delay={0}
+                active={kpiPlay}
+              />
+              <BriefingMetric
+                label="총 자산"
+                value={CLIENT.totalAsset}
+                suffix="만원"
+                delay={90}
+                active={kpiPlay}
+              />
+              <BriefingMetric
+                label="월 가용소득"
+                value={CLIENT.disposableIncome}
+                suffix="만원"
+                delay={180}
+                active={kpiPlay}
+              />
+              <BriefingMetric
+                label="연체 기간"
+                value={overdueMonths}
+                suffix="개월"
+                delay={270}
+                active={kpiPlay}
+              />
             </div>
           </div>
         </section>
@@ -2751,8 +3032,8 @@ const SampleDashboardPage = () => {
           <p className="sdp-section-label">절차별 성공 가능성</p>
 
           {/* 바 비교 — 클릭으로 선택 (신용회복은 그룹 펼침) */}
-          <div className="sdp-options">
-            {OPTION_BLOCKS.map((block) => {
+          <div className="sdp-options" ref={optionsRef}>
+            {OPTION_BLOCKS.map((block, blockIdx) => {
               if (block.type === "option") {
                 const opt = block.option;
                 return (
@@ -2769,18 +3050,11 @@ const SampleDashboardPage = () => {
                     <div className="sdp-option-name">
                       <span>{opt.label}</span>
                     </div>
-                    <div className="sdp-option-bar-wrap">
-                      <div className="sdp-option-bar">
-                        <div
-                          className="sdp-option-fill"
-                          style={{ width: `${opt.score}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div className="sdp-option-score">
-                      <strong>{opt.score}</strong>
-                      <span>/100</span>
-                    </div>
+                    <OptionMeter
+                      score={opt.score}
+                      active={optionsPlay}
+                      delay={blockIdx * 90}
+                    />
                     <span className={`sdp-option-grade g-${opt.grade}`}>
                       {opt.grade}
                     </span>
@@ -2818,25 +3092,18 @@ const SampleDashboardPage = () => {
                         </span>
                       )}
                     </div>
-                    <div className="sdp-option-bar-wrap">
-                      <div className="sdp-option-bar">
-                        <div
-                          className="sdp-option-fill"
-                          style={{ width: `${summary.score}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div className="sdp-option-score">
-                      <strong>{summary.score}</strong>
-                      <span>/100</span>
-                    </div>
+                    <OptionMeter
+                      score={summary.score}
+                      active={optionsPlay}
+                      delay={blockIdx * 90}
+                    />
                     <span className={`sdp-option-grade g-${summary.grade}`}>
                       {summary.grade}
                     </span>
                   </div>
                   {creditRecoveryOpen && (
                     <div className="sdp-option-group-children">
-                      {block.children.map((opt) => (
+                      {block.children.map((opt, childIdx) => (
                         <div
                           key={opt.id}
                           className={`sdp-option-row sdp-option-child ${selectedOption === opt.id ? "selected" : ""}`}
@@ -2850,18 +3117,11 @@ const SampleDashboardPage = () => {
                           <div className="sdp-option-name">
                             <span>{opt.label}</span>
                           </div>
-                          <div className="sdp-option-bar-wrap">
-                            <div className="sdp-option-bar">
-                              <div
-                                className="sdp-option-fill"
-                                style={{ width: `${opt.score}%` }}
-                              />
-                            </div>
-                          </div>
-                          <div className="sdp-option-score">
-                            <strong>{opt.score}</strong>
-                            <span>/100</span>
-                          </div>
+                          <OptionMeter
+                            score={opt.score}
+                            active={optionsPlay}
+                            delay={blockIdx * 90 + (childIdx + 1) * 70}
+                          />
                           <span className={`sdp-option-grade g-${opt.grade}`}>
                             {opt.grade}
                           </span>
@@ -3006,95 +3266,128 @@ const SampleDashboardPage = () => {
         </section>
 
         <div className="sdp-cols2">
-          {/* ③ 재무 현황 */}
-          <section className="sdp-section">
-            <p className="sdp-section-label">재무 현황</p>
-            <div className="sdp-stat-list">
-              <div className="sdp-stat">
-                <span className="sdp-stat-label">총 채무 (원금)</span>
-                <span className="sdp-stat-val">
-                  {totalDebtPrincipal.toLocaleString()}
-                  <em>만원</em>
-                </span>
+          <div className="sdp-cols2-stack">
+            {/* ③ 채무 현황 */}
+            <section className="sdp-section">
+              <div className="sdp-debt-section-head">
+                <p className="sdp-section-label">채무 현황</p>
+                <button
+                  type="button"
+                  className="sdp-debt-detail-btn"
+                  onClick={openDebtModal}
+                >
+                  자세히 보기
+                </button>
               </div>
-              {totalDebtWithInterest > totalDebtPrincipal && (
+              <div className="sdp-stat-list">
                 <div className="sdp-stat">
-                  <span className="sdp-stat-label">
-                    총 상환 예정 (이자 포함)
-                  </span>
+                  <span className="sdp-stat-label">총 채무 (원금)</span>
                   <span className="sdp-stat-val">
-                    {Math.round(totalDebtWithInterest).toLocaleString()}
+                    {totalDebtPrincipal.toLocaleString()}
                     <em>만원</em>
                   </span>
                 </div>
-              )}
-              <div className="sdp-stat">
-                <span className="sdp-stat-label">총 자산</span>
-                <span className="sdp-stat-val">
-                  {CLIENT.totalAsset.toLocaleString()}
-                  <em>만원</em>
-                </span>
-              </div>
-              <div className="sdp-stat">
-                <span className="sdp-stat-label">추정 상환여력</span>
-                <span className="sdp-stat-val">
-                  +{CLIENT.disposableIncome}
-                  <em>만원</em>
-                </span>
-              </div>
-              <div className="sdp-stat">
-                <span className="sdp-stat-label">연체 기간</span>
-                <span className="sdp-stat-val">
-                  {overduePeriodLabel(debtSummary?.overduePeriod) ? (
-                    overduePeriodLabel(debtSummary.overduePeriod)
-                  ) : (
-                    <>
-                      {parseOverdueMonths(
-                        debtSummary?.overduePeriod ?? CLIENT.overduePeriod,
-                      )}
-                      <em>개월</em>
-                    </>
-                  )}
-                </span>
-              </div>
-            </div>
-
-            <div className="sdp-divider" />
-
-            <div className="sdp-debt-section-head">
-              <p className="sdp-section-label">채무 구성</p>
-              <button
-                type="button"
-                className="sdp-debt-detail-btn"
-                onClick={openDebtModal}
-              >
-                자세히 보기
-              </button>
-            </div>
-            <div className="sdp-bars">
-              {debtBreakdown.map((d) => (
-                <div key={d.label} className="sdp-bar-row">
-                  <span className="sdp-bar-label">{d.label}</span>
-                  <div className="sdp-bar-track">
-                    <div
-                      className="sdp-bar-fill"
-                      style={{ width: `${d.pct}%` }}
-                    />
+                {totalDebtWithInterest > totalDebtPrincipal && (
+                  <div className="sdp-stat">
+                    <span className="sdp-stat-label">
+                      총 상환 예정 (이자 포함)
+                    </span>
+                    <span className="sdp-stat-val">
+                      {Math.round(totalDebtWithInterest).toLocaleString()}
+                      <em>만원</em>
+                    </span>
                   </div>
-                  <span className="sdp-bar-pct">{d.pct}%</span>
-                  <span className="sdp-bar-amt">
-                    {d.amount.toLocaleString()}만원
-                    {/* {d.totalRepay != null && d.totalRepay > d.amount && (
-                      <em className="sdp-bar-amt-sub">
-                        {" "}
-                        / 상환 {Math.round(d.totalRepay).toLocaleString()}
-                      </em>
-                    )} */}
+                )}
+                {showSecuredSplit && (
+                  <>
+                    <div className="sdp-stat">
+                      <span className="sdp-stat-label">담보</span>
+                      <span className="sdp-stat-val">
+                        {securedDebtPrincipal.toLocaleString()}
+                        <em>만원</em>
+                      </span>
+                    </div>
+                    <div className="sdp-stat">
+                      <span className="sdp-stat-label">무담보</span>
+                      <span className="sdp-stat-val">
+                        {unsecuredDebtPrincipal.toLocaleString()}
+                        <em>만원</em>
+                      </span>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="sdp-divider" />
+
+              <div className="sdp-bars">
+                {debtBreakdown.map((d) => (
+                  <div key={d.label} className="sdp-bar-row">
+                    <span className="sdp-bar-label">{d.label}</span>
+                    <div className="sdp-bar-track">
+                      <div
+                        className="sdp-bar-fill"
+                        style={{ width: `${d.pct}%` }}
+                      />
+                    </div>
+                    <span className="sdp-bar-pct">{d.pct}%</span>
+                    <span className="sdp-bar-amt">
+                      {d.amount.toLocaleString()}만원
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* ③-2 자산 현황 */}
+            <section className="sdp-section">
+              <p className="sdp-section-label">자산 현황</p>
+              <div className="sdp-stat-list">
+                <div className="sdp-stat">
+                  <span className="sdp-stat-label">총 자산</span>
+                  <span className="sdp-stat-val">
+                    {CLIENT.totalAsset.toLocaleString()}
+                    <em>만원</em>
                   </span>
                 </div>
-              ))}
-            </div>
-          </section>
+                <div className="sdp-stat">
+                  <span className="sdp-stat-label">월 가용소득</span>
+                  <span className="sdp-stat-val">
+                    {CLIENT.disposableIncome.toLocaleString()}
+                    <em>만원</em>
+                  </span>
+                </div>
+              </div>
+              {assetRows.length > 0 && (
+                <>
+                  <div className="sdp-divider" />
+                  <div className="sdp-bars">
+                    {assetRows.map((a) => {
+                      const pct =
+                        assetTotal > 0
+                          ? Math.round((a.amount / assetTotal) * 100)
+                          : 0;
+                      return (
+                        <div key={a.label} className="sdp-bar-row">
+                          <span className="sdp-bar-label">{a.label}</span>
+                          <div className="sdp-bar-track">
+                            <div
+                              className="sdp-bar-fill"
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          <span className="sdp-bar-pct">{pct}%</span>
+                          <span className="sdp-bar-amt">
+                            {a.amount.toLocaleString()}만원
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </section>
+          </div>
 
           {/* ④ 예상 결과 (절차별) */}
           <section className="sdp-section">
@@ -3169,7 +3462,14 @@ const SampleDashboardPage = () => {
                   </div>
                   {repaymentRatePct != null && (
                     <div className="sdp-kv">
-                      <span>변제율</span>
+                      <span>
+                        변제율
+                        {mixSpec &&
+                        unsecuredDebtPrincipal > 0 &&
+                        securedDebtPrincipal > 0
+                          ? " (무담보 채무 기준)"
+                          : ""}
+                      </span>
                       <strong>{repaymentRatePct.toFixed(1)}%</strong>
                     </div>
                   )}
@@ -3920,25 +4220,59 @@ const SampleDashboardPage = () => {
               <div className="sdp-plan-adjust-head-copy">
                 <h2 className="sdp-review-modal-title">변제 계획 조정</h2>
                 <p>
-                  {mixOptionLabel} · 원금 {totalDebtPrincipal.toLocaleString()}
-                  만원
+                  {mixOptionLabel} · {planPrincipal.toLocaleString()}만원
+                  {unsecuredDebtPrincipal > 0 && securedDebtPrincipal > 0
+                    ? " (무담보 채무 기준)"
+                    : ""}
                 </p>
               </div>
-              <button
-                type="button"
-                className="sdp-review-modal-close"
-                onClick={closePlanMixModal}
-                aria-label="닫기"
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path
-                    d="M3 3l10 10M13 3L3 13"
-                    stroke="#666"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
+              <div className="sdp-plan-adjust-head-actions">
+                {!draftIsBaseline && (
+                  <button
+                    type="button"
+                    className="sdp-plan-adjust-reset"
+                    onClick={resetPlanMixDraft}
+                  >
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      aria-hidden
+                    >
+                      <path
+                        d="M3.2 7.2a4.8 4.8 0 1 1 1.1 3.1"
+                        stroke="currentColor"
+                        strokeWidth="1.4"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M3.2 3.8v3.4H6.6"
+                        stroke="currentColor"
+                        strokeWidth="1.4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    되돌리기
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="sdp-review-modal-close"
+                  onClick={closePlanMixModal}
+                  aria-label="닫기"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M3 3l10 10M13 3L3 13"
+                      stroke="#666"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <div className="sdp-review-modal-body sdp-plan-adjust-body">
@@ -3946,12 +4280,48 @@ const SampleDashboardPage = () => {
                 <div className="sdp-plan-split-meta">
                   <div className="sdp-plan-split-side">
                     <span className="sdp-plan-split-k">변제</span>
-                    <strong className="sdp-plan-split-v">
-                      {previewTotal.toLocaleString()}만원
-                    </strong>
-                    <span className="sdp-plan-split-pct">
-                      {draftRatePct.toFixed(1)}%
-                    </span>
+                    <MixNumberInput
+                      ariaLabel="변제액"
+                      className="sdp-plan-num--amt"
+                      display={previewTotal.toLocaleString()}
+                      editing={
+                        mixFieldEdit?.kind === "amount"
+                          ? mixFieldEdit.value
+                          : null
+                      }
+                      suffix="만원"
+                      onStart={() =>
+                        setMixFieldEdit({
+                          kind: "amount",
+                          value: String(previewTotal),
+                        })
+                      }
+                      onChange={(value) =>
+                        setMixFieldEdit({ kind: "amount", value })
+                      }
+                      onCommit={commitMixAmount}
+                      onCancel={cancelMixFieldEdit}
+                    />
+                    <MixNumberInput
+                      ariaLabel="변제율"
+                      className="sdp-plan-num--pct"
+                      display={draftRatePct.toFixed(1)}
+                      editing={
+                        mixFieldEdit?.kind === "rate" ? mixFieldEdit.value : null
+                      }
+                      suffix="%"
+                      onStart={() =>
+                        setMixFieldEdit({
+                          kind: "rate",
+                          value: draftRatePct.toFixed(1),
+                        })
+                      }
+                      onChange={(value) =>
+                        setMixFieldEdit({ kind: "rate", value })
+                      }
+                      onCommit={commitMixRate}
+                      onCancel={cancelMixFieldEdit}
+                    />
                   </div>
                   <div className="sdp-plan-split-side sdp-plan-split-side--end">
                     <span className="sdp-plan-split-k">면책</span>
@@ -4005,13 +4375,29 @@ const SampleDashboardPage = () => {
                 <div className="sdp-plan-mix-pair">
                   <div className="sdp-plan-mix-stat">
                     <span className="sdp-plan-mix-stat-k">월 변제액</span>
-                    <strong
-                      className={`sdp-plan-mix-stat-v ${
-                        previewOverIncome ? "is-warn" : ""
-                      }`}
-                    >
-                      {formatMonthly(previewMonthly)}만원
-                    </strong>
+                    <MixNumberInput
+                      ariaLabel="월 변제액"
+                      className="sdp-plan-num--monthly"
+                      display={formatMonthly(previewMonthly)}
+                      editing={
+                        mixFieldEdit?.kind === "monthly"
+                          ? mixFieldEdit.value
+                          : null
+                      }
+                      suffix="만원"
+                      warn={previewOverIncome}
+                      onStart={() =>
+                        setMixFieldEdit({
+                          kind: "monthly",
+                          value: formatMonthly(previewMonthly),
+                        })
+                      }
+                      onChange={(value) =>
+                        setMixFieldEdit({ kind: "monthly", value })
+                      }
+                      onCommit={commitMixMonthly}
+                      onCancel={cancelMixFieldEdit}
+                    />
                   </div>
                   <div className="sdp-plan-mix-stat sdp-plan-mix-stat--end">
                     <span className="sdp-plan-mix-stat-k">기간</span>
@@ -4086,30 +4472,21 @@ const SampleDashboardPage = () => {
               </div>
             </div>
 
-            <div className="sdp-review-modal-footer sdp-plan-adjust-footer">
+            <div className="sdp-review-modal-footer">
               <button
                 type="button"
                 className="sdp-review-cancel-btn"
-                onClick={resetPlanMixDraft}
+                onClick={closePlanMixModal}
               >
-                분석값으로
+                취소
               </button>
-              <div className="sdp-plan-adjust-footer-right">
-                <button
-                  type="button"
-                  className="sdp-review-cancel-btn"
-                  onClick={closePlanMixModal}
-                >
-                  취소
-                </button>
-                <button
-                  type="button"
-                  className="sdp-review-confirm-reject-btn"
-                  onClick={applyPlanMixDraft}
-                >
-                  적용하기
-                </button>
-              </div>
+              <button
+                type="button"
+                className="sdp-review-confirm-reject-btn"
+                onClick={applyPlanMixDraft}
+              >
+                적용하기
+              </button>
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./ChecklistListPage.css";
 
 const STAGE_NAMES = {
@@ -568,6 +568,9 @@ const buildNewsSearchUrl = (query) =>
 
 const ChecklistListPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [clients, setClients] = useState(CLIENTS);
+  const [toast, setToast] = useState("");
   const [filter, setFilter] = useState("전체");
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("date");
@@ -585,6 +588,20 @@ const ChecklistListPage = () => {
   }, [newsOpen]);
 
   useEffect(() => {
+    const draft = location.state?.savedDraft;
+    if (!draft) return undefined;
+    setClients((prev) => [draft, ...prev.filter((c) => c.id !== draft.id)]);
+    setToast("저장되었습니다.");
+    navigate(".", { replace: true, state: {} });
+  }, [location.state, navigate]);
+
+  useEffect(() => {
+    if (!toast) return undefined;
+    const t = setTimeout(() => setToast(""), 2600);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  useEffect(() => {
     if (NEWS_ITEMS.length <= 1) return undefined;
     const id = setInterval(() => {
       setNewsIdx((i) => (i + 1) % NEWS_ITEMS.length);
@@ -592,24 +609,24 @@ const ChecklistListPage = () => {
     return () => clearInterval(id);
   }, []);
 
-  const totalCount = CLIENTS.length;
-  const thisMonth = CLIENTS.filter((c) => c.date.startsWith("2026-06")).length;
-  const monthPaymentTotal = CLIENTS.reduce(
+  const totalCount = clients.length;
+  const thisMonth = clients.filter((c) => c.date.startsWith("2026-06")).length;
+  const monthPaymentTotal = clients.reduce(
     (sum, c) =>
       sum + (c.payment.configured ? c.payment.monthPaidAmount || 0 : 0),
     0,
   );
-  const monthScheduledTotal = CLIENTS.reduce(
+  const monthScheduledTotal = clients.reduce(
     (sum, c) =>
       sum + (c.payment.configured ? c.payment.monthScheduledAmount || 0 : 0),
     0,
   );
-  const monthPaidCompleteCount = CLIENTS.reduce(
+  const monthPaidCompleteCount = clients.reduce(
     (sum, c) =>
       sum + (c.payment.configured ? c.payment.monthPaidCount || 0 : 0),
     0,
   );
-  const monthScheduledCount = CLIENTS.reduce(
+  const monthScheduledCount = clients.reduce(
     (sum, c) =>
       sum +
       (c.payment.configured && (c.payment.monthScheduledAmount || 0) > 0
@@ -623,10 +640,10 @@ const ChecklistListPage = () => {
       : 0;
   const statusDist = STAGE_STATUSES.map((status) => ({
     status,
-    cnt: CLIENTS.filter((c) => c.stageStatus === status).length,
+    cnt: clients.filter((c) => c.stageStatus === status).length,
   })).filter((s) => s.cnt > 0);
   const maxStatusCnt = Math.max(...statusDist.map((s) => s.cnt), 1);
-  const procDist = CLIENTS.reduce((acc, c) => {
+  const procDist = clients.reduce((acc, c) => {
     const key = CREDIT_RECOVERY_LABELS.includes(c.recommended)
       ? "신용회복"
       : c.recommended;
@@ -642,7 +659,7 @@ const ChecklistListPage = () => {
     }
   };
 
-  const sorted = [...CLIENTS]
+  const sorted = [...clients]
     .filter((c) => matchesProcFilter(c.recommended, filter))
     .filter(
       (c) =>
@@ -856,12 +873,18 @@ const ChecklistListPage = () => {
             <div className="cll-empty">검색 결과가 없습니다.</div>
           ) : (
             sorted.map((c) => {
-              const stageTotal = STAGE_NAMES[c.recommended].length;
+              const stageTotal = (STAGE_NAMES[c.recommended] || []).length;
               return (
                 <div
                   key={c.id}
                   className="cll-row"
-                  onClick={() => navigate("/checklist/result-external")}
+                  onClick={() =>
+                    navigate(
+                      c.recommended === "미분석"
+                        ? "/checklist/form"
+                        : "/checklist/result-external",
+                    )
+                  }
                 >
                   <div className="cll-cell-client">
                     <div>
@@ -1011,6 +1034,11 @@ const ChecklistListPage = () => {
         <div className="cll-news-drawer-foot"></div>
       </aside>
 
+      {toast && (
+        <div className="cll-toast" role="status">
+          {toast}
+        </div>
+      )}
     </div>
   );
 };

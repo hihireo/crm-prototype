@@ -61,6 +61,7 @@ export const assetKindMeta = (id) => ASSET_KINDS.find((a) => a.id === id);
 
 export const DEBT_TYPE_OPTIONS = [
   "은행대출",
+  "신용카드",
   "카드론",
   "캐피탈",
   "저축은행",
@@ -209,24 +210,43 @@ const isManualOverride = (manual, calculated) => {
   return m !== calculated;
 };
 
+const parsedRatePct = (annualRatePct) => {
+  const rate = Number(annualRatePct);
+  return Number.isNaN(rate) || rate < 0 ? 0 : rate;
+};
+
 /**
  * 상환 계산 (원)
+ * - 현재 잔액만 있으면 잔여이자 0, 잔여상환액 = 잔액
+ * - 월불입은 남은기간이 있을 때만 계산 (금리 미입력은 0)
  * - 원리금균등: 매월 납입액 고정
  * - 원금균등: 매월 원금 고정, 월불입은 평균액
  * - 만기일시: 기간 중 이자만, 원금은 만기 상환 (월불입=월이자)
  */
 export const calcRepayment = (principalWon, annualRatePct, n, method) => {
   const P = Number(principalWon);
-  const rate = Number(annualRatePct);
-  if (!P || P <= 0 || !n || n < 1 || Number.isNaN(rate) || rate < 0) return null;
+  if (!P || P <= 0) return null;
+
+  const months = Number(n);
+  const hasTerm = months >= 1 && !Number.isNaN(months);
+  if (!hasTerm) {
+    return {
+      months: null,
+      monthly: null,
+      totalRepay: Math.round(P),
+      totalInterest: 0,
+    };
+  }
+
+  const rate = parsedRatePct(annualRatePct);
   const r = rate / 12 / 100;
   const mode = method || "원리금균등";
 
   if (mode === "만기일시") {
     const monthlyInterest = P * r;
-    const totalInterest = monthlyInterest * n;
+    const totalInterest = monthlyInterest * months;
     return {
-      months: n,
+      months,
       monthly: Math.round(monthlyInterest),
       totalRepay: Math.round(P + totalInterest),
       totalInterest: Math.round(totalInterest),
@@ -234,27 +254,28 @@ export const calcRepayment = (principalWon, annualRatePct, n, method) => {
   }
 
   if (mode === "원금균등") {
-    const principalPart = P / n;
+    const principalPart = P / months;
     let totalInterest = 0;
-    for (let k = 0; k < n; k++) totalInterest += (P - principalPart * k) * r;
+    for (let k = 0; k < months; k++)
+      totalInterest += (P - principalPart * k) * r;
     const totalRepay = P + totalInterest;
     return {
-      months: n,
-      monthly: Math.round(totalRepay / n),
+      months,
+      monthly: Math.round(totalRepay / months),
       totalRepay: Math.round(totalRepay),
       totalInterest: Math.round(totalInterest),
     };
   }
 
   let monthly;
-  if (r === 0) monthly = P / n;
+  if (r === 0) monthly = P / months;
   else {
-    const pow = Math.pow(1 + r, n);
+    const pow = Math.pow(1 + r, months);
     monthly = (P * r * pow) / (pow - 1);
   }
-  const totalRepay = monthly * n;
+  const totalRepay = monthly * months;
   return {
-    months: n,
+    months,
     monthly: Math.round(monthly),
     totalRepay: Math.round(totalRepay),
     totalInterest: Math.round(totalRepay - P),
@@ -264,19 +285,15 @@ export const calcRepayment = (principalWon, annualRatePct, n, method) => {
 /**
  * 채무 행 1건의 상환 계산.
  * 금액 필드는 "현재 잔액" 기준으로 입력하므로,
- * 계산 기간은 오늘~만기일로 사용한다. (대출일은 참고용)
+ * 남은기간이 있으면 오늘~만기일로 계산한다. (대출일은 참고용)
  */
-export const calcDebtItem = (debt) => {
-  if (!debt.maturityDate) return null;
-  const n = remainingMonthsOf(debt.maturityDate);
-  if (n == null) return null;
-  return calcRepayment(
+export const calcDebtItem = (debt) =>
+  calcRepayment(
     debt.principal,
     debt.rate,
-    n,
+    remainingMonthsOf(debt.maturityDate),
     debt.repayMethod || "원리금균등",
   );
-};
 
 /**
  * 계산값 + 직접 수정값.
@@ -361,8 +378,7 @@ export const ensureRows = (rows) =>
 /**
  * 행 배열 → 화면·리포트 공용 요약 (금액 단위: 만원)
  *
- * 대출일·만기일이 없어 이자를 계산할 수 없는 행은 총상환액을 원금으로 본다.
- * (0으로 두면 총 상환액이 원금보다 작아져서 면책액 계산이 뒤집힌다)
+ * 남은기간이 없으면 잔여이자는 0, 총상환액은 원금이다.
  */
 export const buildDebtSummaryFromRows = (rows) => {
   const items = (rows || []).map((row, idx) => {
